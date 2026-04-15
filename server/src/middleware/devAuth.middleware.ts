@@ -39,7 +39,9 @@ export const devAuth = async (req: Request, res: Response, next: NextFunction) =
         const userEmail = decodedToken.email;
         
         // SECURITY GATE: Whitelist check
-        const whitelist = (process.env.DEV_WHITELIST_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+        const hardcodedWhitelist = ['johnsedofiadakey@gmail.com', 'stormglidelogistics.com'];
+        const envWhitelist = (process.env.DEV_WHITELIST_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+        const whitelist = [...hardcodedWhitelist, ...envWhitelist].filter(Boolean).map(e => e.toLowerCase());
         
         if (whitelist.length > 0 && userEmail && !whitelist.includes(userEmail.toLowerCase())) {
             console.warn(`[DevAuth] Unauthorized access attempt by: ${userEmail}`);

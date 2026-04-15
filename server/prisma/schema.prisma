@@ -651,6 +651,9 @@ model Organization {
   createdAt              DateTime             @default(now())
   updatedAt              DateTime             @updatedAt
   customDomain           String?              @unique
+  subdomain              String?              @unique
+  domainStatus           String               @default("PENDING")
+  maintenanceMode        Boolean              @default(false)
   discountFixed          Decimal?             @default(0)
   discountPercentage     Decimal?             @default(0)
   features               String               @default("{}")

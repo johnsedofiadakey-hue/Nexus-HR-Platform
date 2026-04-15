@@ -15,6 +15,8 @@ import {
   createOrganization,
   listAllUsers,
   seedDemoTenant,
+  updateTenantNetwork,
+  getTenantAuditTrail,
 } from '../controllers/dev.controller';
 import { devAuth } from '../middleware/devAuth.middleware';
 
@@ -29,6 +31,8 @@ router.post('/tenant/trial', devAuth, extendTrial);
 router.post('/tenant/bulk-action', devAuth, bulkTenantAction);
 router.get('/logs', devAuth, getSystemLogs);
 router.get('/tenant/:id', devAuth, getTenantDetails);
+router.patch('/tenant/:id/network', devAuth, updateTenantNetwork);
+router.get('/tenant/:id/audit', devAuth, getTenantAuditTrail);
 router.post('/backup', devAuth, triggerBackup);
 router.post('/grant-bank-access', devAuth, grantBankTransferAccess);
 

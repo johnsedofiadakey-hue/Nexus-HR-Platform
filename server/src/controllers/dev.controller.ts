@@ -28,6 +28,8 @@ export const getSystemStats = async (req: Request, res: Response) => {
       select: {
         id: true,
         name: true,
+        subdomain: true,
+        domainStatus: true,
         billingStatus: true,
         subscriptionPlan: true,
         trialStartDate: true,
@@ -272,6 +274,50 @@ export const getTenantDetails = async (req: Request, res: Response) => {
     res.json({ tenant, metrics, recentEvents, paymentHistory });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch tenant details' });
+  }
+};
+
+export const updateTenantNetwork = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { customDomain, subdomain, domainStatus } = req.body;
+    
+    const tenant = await prisma.organization.update({
+      where: { id },
+      data: {
+        ...(customDomain !== undefined ? { customDomain: customDomain || null } : {}),
+        ...(subdomain !== undefined ? { subdomain: subdomain || null } : {}),
+        ...(domainStatus !== undefined ? { domainStatus } : {})
+      }
+    });
+
+    const user = (req as any).user;
+    await logSystemAction({
+      action: 'UPDATE_TENANT_NETWORK',
+      details: `Updated routing for ${tenant.name}: Domain=${customDomain}, Subdomain=${subdomain}, Status=${domainStatus}`,
+      operatorId: user.id,
+      operatorEmail: user.email,
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent')
+    });
+
+    res.json({ success: true, tenant });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getTenantAuditTrail = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const logs = await prisma.systemLog.findMany({
+      where: { details: { contains: id } }, // Rough filter since organizationId isn't on systemLog yet
+      take: 50,
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(logs);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 };
 
