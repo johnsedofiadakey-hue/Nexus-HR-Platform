@@ -13,7 +13,12 @@ export const getSettings = async (req: Request, res: Response) => {
       const tenantDomain = req.headers['x-tenant-domain'] as string;
       if (tenantDomain && tenantDomain !== 'nexus-hr-platform.web.app' && tenantDomain !== 'localhost') {
         const orgMatch = await prisma.organization.findFirst({
-          where: { customDomain: tenantDomain }
+          where: {
+            OR: [
+              { customDomain: tenantDomain },
+              { subdomain: tenantDomain.split('.')[0] }
+            ]
+          }
         });
         if (orgMatch) {
           orgId = orgMatch.id;

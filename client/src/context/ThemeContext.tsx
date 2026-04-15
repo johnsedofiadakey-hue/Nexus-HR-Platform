@@ -369,11 +369,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const refreshSettings = useCallback(async () => {
     try {
-      // Identity-scoped initial paint
       const orgId = getOrgIdFromToken();
+      const hostname = window.location.hostname;
       const cached = localStorage.getItem(`nexus_branding_cache_${orgId}`);
       const savedTheme = (localStorage.getItem(`nexus_theme_preference_${orgId}`) || localStorage.getItem('nexus_theme_preference')) as ThemeName || theme;
       
+      // Early apply from cache to prevent flash
       if (cached) {
          try {
            const fullSettings = JSON.parse(cached);
@@ -382,24 +383,25 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
          } catch(e){}
       }
 
-      const res = await api.get('/settings', { params: { _t: Date.now() } });
-      const rawData = res.data;
-      const data = resolveBranding(rawData);
+      // Fetch fresh settings. The backend will use X-Tenant-Domain if no Bearer token is present.
+      const res = await api.get('/settings');
+      const data = resolveBranding(res.data);
 
-      console.log('[ThemeContext] Settings fetched successfully:', { 
-         hasLogo: !!data.logoUrl,
-         source: data.logoUrl === data.companyLogoUrl ? 'Company Profile' : data.logoUrl === data.logo ? 'Direct Blob' : 'Primary URL'
-      });
-      
-      setSettings(prev => mergeSettings(prev, data));
-      let targetTheme = (data.themePreset as ThemeName) || theme;
-      
-      setThemeState(targetTheme);
-      localStorage.setItem(`nexus_theme_preference_${orgId}`, targetTheme);
-      localStorage.setItem('nexus_theme_preference', targetTheme);
-      applyTheme(targetTheme, data);
+      if (data) {
+        setSettings(prev => mergeSettings(prev, data));
+        const targetTheme = (data.themePreset as ThemeName) || theme;
+        setThemeState(targetTheme);
+        
+        const effectiveOrgId = data.organizationId || orgId;
+        localStorage.setItem(`nexus_theme_preference_${effectiveOrgId}`, targetTheme);
+        localStorage.setItem('nexus_theme_preference', targetTheme);
+        applyTheme(targetTheme, data);
+
+        // Cache for next session
+        localStorage.setItem(`nexus_branding_cache_${effectiveOrgId}`, JSON.stringify(data));
+      }
     } catch (err) {
-      console.error('Failed to fetch settings', err);
+      console.warn('[ThemeContext] Unauthenticated or failed settings fetch, falling back to cached/default');
       const orgId = getOrgIdFromToken();
       const savedTheme = (localStorage.getItem(`nexus_theme_preference_${orgId}`) || localStorage.getItem('nexus_theme_preference')) as ThemeName || theme;
       applyTheme(savedTheme, null); 
