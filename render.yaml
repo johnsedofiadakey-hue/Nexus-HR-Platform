@@ -8,7 +8,7 @@ services:
   - type: web
     name: nexus-hr-platform-api
     env: node
-    plan: starter          # Use starter (not free) for persistent DB connections
+    plan: free             # Free tier for testing phase
     region: frankfurt      # or oregon / singapore — pick closest to your users
     buildCommand: >
       cd server &&
