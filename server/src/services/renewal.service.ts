@@ -42,7 +42,7 @@ export class RenewalService {
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
       if (alertThresholds.includes(diffDays)) {
-        const priority = diffDays <= 7 ? 'DANGER' : 'WARNING';
+        const priority = diffDays <= 7 ? 'ERROR' : 'WARNING';
         const message = `${label} is due for renewal in ${diffDays} day(s). Action required to prevent service disruption.`;
         
         console.log(`[RenewalService] Alert triggered for ${label}: ${diffDays} days remaining.`);
