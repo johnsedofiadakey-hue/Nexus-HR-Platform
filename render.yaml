@@ -9,7 +9,7 @@ services:
     name: nexus-hr-platform-api
     env: node
     plan: free             # Free tier for testing phase
-    region: frankfurt      # or oregon / singapore — pick closest to your users
+    region: oregon         # Changed to match database region
     buildCommand: >
       cd server &&
       npm install --no-audit --no-fund &&
