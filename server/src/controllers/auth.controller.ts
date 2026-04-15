@@ -104,8 +104,20 @@ export const login = async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'This account has been deactivated. Contact HR.' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
     const orgId = user.organizationId || 'default-tenant';
+    const tenantDomain = req.headers['x-tenant-domain'] as string;
+
+    if (tenantDomain && tenantDomain !== 'nexus-hr-platform.web.app' && tenantDomain !== 'localhost') {
+      const orgMatch = await prisma.organization.findFirst({
+        where: { customDomain: tenantDomain }
+      });
+      if (!orgMatch || orgMatch.id !== orgId) {
+         await safeLogSecurityEvent({ email: normalizedEmail, success: false, organizationId: orgId, reason: 'CROSS_TENANT_LOGIN_ATTEMPT', req });
+         return res.status(403).json({ error: 'This user account does not belong to this organization.' });
+      }
+    }
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isMatch) {
       await safeLogSecurityEvent({ email: normalizedEmail, success: false, organizationId: orgId, reason: 'BAD_PASSWORD', req });

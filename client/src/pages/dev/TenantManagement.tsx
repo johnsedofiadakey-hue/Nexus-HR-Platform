@@ -16,6 +16,7 @@ const isValidHex = (hex: string) => /^#[0-9A-Fa-f]{6}$/.test(hex);
 const emptyForm = {
     name: '',
     email: '',
+    customDomain: '',
     phone: '',
     address: '',
     city: '',
@@ -318,7 +319,7 @@ const TenantManagement = () => {
                                                 </div>
                                                 <div>
                                                     <p className="font-bold text-sm text-white group-hover:text-primary transition-colors">{org.name}</p>
-                                                    <p className="text-[10px] font-mono tracking-widest text-slate-500 mt-0.5">{org.email || 'No email'}</p>
+                                                    <p className="text-[10px] font-mono tracking-widest text-slate-500 mt-0.5">{org.customDomain || 'No custom domain'}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -411,6 +412,10 @@ const TenantManagement = () => {
                                         <div>
                                             <label className="block text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1 mb-3">Company Name *</label>
                                             <input type="text" className="nx-input" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1 mb-3">Custom Domain/Subdomain</label>
+                                            <input type="text" className="nx-input" placeholder="e.g. acme.nexus-hr.com" value={form.customDomain} onChange={e => setForm({ ...form, customDomain: e.target.value })} />
                                         </div>
                                         <div>
                                             <label className="block text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1 mb-3">Login/Contact Email</label>

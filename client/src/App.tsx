@@ -223,6 +223,8 @@ const AppContent = () => {
   const { settings } = useTheme();
   useTranslation(); // Still initialized for core translation loading if needed
 
+  const isCentralDomain = window.location.hostname === 'nexus-hr-platform.web.app' || window.location.hostname === 'nexus-hr-platform.firebaseapp.com';
+
   useEffect(() => {
     // Legacy Token Cleanup: Standardizing on nexus_* prefix
     const legacyKeys = ['app_auth_token', 'app_refresh_token', 'user_session'];
@@ -355,7 +357,7 @@ const AppContent = () => {
 
       <PageErrorBoundary>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={isCentralDomain ? <Suspense fallback={<PageLoader />}><DevLogin /></Suspense> : <Login />} />
           <Route path="/force-logout" element={<ForceLogout />} />
           <Route path="/dev-login" element={<Suspense fallback={<PageLoader />}><DevLogin /></Suspense>} />
           <Route path="/billing-lock" element={<BillingLock />} />
