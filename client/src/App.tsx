@@ -89,9 +89,13 @@ const ProtectedRoute = () => {
 
 const AdminGuard = () => {
   const devKey = localStorage.getItem('nexus_dev_key');
+  const firebaseToken = localStorage.getItem('nexus_dev_firebase_token');
+  const devMode = localStorage.getItem('nexus_dev_mode') === 'true';
 
-  // Must have unlocked the Vault (Master Key)
-  if (!devKey) return <Navigate to="/dev-login" replace />;
+  // Allow access if either the legacy master key or the whitelisted Google session is active
+  const hasAccess = devKey || (firebaseToken && devMode);
+
+  if (!hasAccess) return <Navigate to="/dev-login" replace />;
 
   return <Outlet />;
 };

@@ -137,10 +137,10 @@ api.interceptors.response.use(
         clearSession();
       if (window.location.pathname !== '/') {
           // Safeguard: Don't redirect to root if we are in the Shadow Zone (Central Portal)
-          const isShadowZone = window.location.pathname.includes('/dev-portal') || window.location.pathname.includes('/dev-login');
-          const hasDevKey = !!localStorage.getItem('nexus_dev_key');
+          const isShadowZone = window.location.pathname.includes('/dev-portal') || window.location.pathname.includes('/dev-login') || window.location.pathname.includes('/nexus-master-console');
+          const hasDevSession = !!localStorage.getItem('nexus_dev_key') || (!!localStorage.getItem('nexus_dev_firebase_token') && localStorage.getItem('nexus_dev_mode') === 'true');
           
-          if (isShadowZone) {
+          if (isShadowZone || hasDevSession) {
               console.warn('[API Interceptor] Error in Central Zone - Suppressing root redirect to preserve admin context.');
           } else {
               window.location.href = '/';
