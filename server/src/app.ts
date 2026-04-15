@@ -125,7 +125,7 @@ app.use(cors(corsOptions));
 // ─── SECURITY HEADERS ──────────────────────────────────────────────────────
 app.use(helmet({ 
   crossOriginResourcePolicy: { policy: 'cross-origin' },
-  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }
+  crossOriginOpenerPolicy: false
 }));
 app.use(xssSanitizer);
 app.use(generalLimiter);
