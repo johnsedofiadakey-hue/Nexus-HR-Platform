@@ -116,7 +116,11 @@ const corsOptions: cors.CorsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'x-dev-master-key', 'X-Tenant-Domain', 'X-Dev-Firebase-Token'],
+  allowedHeaders: [
+    'Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 
+    'x-dev-master-key', 'X-Tenant-Domain', 'X-Dev-Firebase-Token', 
+    'x-tenant-domain', 'x-dev-firebase-token'
+  ],
   optionsSuccessStatus: 200 
 };
 
