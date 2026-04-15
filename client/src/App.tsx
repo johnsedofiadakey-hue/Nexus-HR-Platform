@@ -92,8 +92,8 @@ const AdminGuard = () => {
   const firebaseToken = localStorage.getItem('nexus_dev_firebase_token');
   const devMode = localStorage.getItem('nexus_dev_mode') === 'true';
 
-  // Allow access if either the legacy master key or the whitelisted Google session is active
-  const hasAccess = devKey || (firebaseToken && devMode);
+  // Support both the new PIN override and the fallback Google Identity
+  const hasAccess = devKey === '564669' || (firebaseToken && devMode);
 
   if (!hasAccess) return <Navigate to="/dev-login" replace />;
 
