@@ -111,6 +111,16 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // Robust Port Binding
+const rawPort = process.env.PORT || '5000';
+const PORT = parseInt(rawPort, 10);
+
+if (isNaN(PORT)) {
+  console.error(`[FATAL] Invalid PORT specified: ${rawPort}`);
+  process.exit(1);
+}
+
+// Create HTTP server (needed for WebSocket)
+const server = http.createServer(app);
 
 // ─── SECURITY HEADERS ──────────────────────────────────────────────────────
 app.use(helmet({ 
