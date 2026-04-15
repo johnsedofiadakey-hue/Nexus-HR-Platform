@@ -36,21 +36,29 @@ export const devAuth = async (req: Request, res: Response, next: NextFunction) =
 
     try {
         const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+        const userEmail = decodedToken.email;
         
         // SECURITY GATE: Whitelist check
-        // You can add your specific email here to restrict access to ONLY YOU.
-        // For now, we allow any valid Google user from the Firebase project to satisfy the DEV role.
+        const whitelist = (process.env.DEV_WHITELIST_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+        
+        if (whitelist.length > 0 && userEmail && !whitelist.includes(userEmail.toLowerCase())) {
+            console.warn(`[DevAuth] Unauthorized access attempt by: ${userEmail}`);
+            return res.status(403).json({ 
+                error: 'Master Access Denied',
+                details: 'This Google account is not on the administrator whitelist.' 
+            });
+        }
         
         (req as any).user = {
             id: `fb-${decodedToken.uid}`,
-            email: decodedToken.email,
+            email: userEmail,
             role: 'DEV',
             name: decodedToken.name || 'Cloud Admin',
             organizationId: null,
             rank: 100
         };
 
-        console.log(`[DevAuth] Google Identity Verified: ${decodedToken.email}`);
+        console.log(`[DevAuth] Google Identity Verified: ${userEmail}`);
         return next();
     } catch (error: any) {
         console.error('[DevAuth] Firebase Token Verification FAILED:', error.message);
