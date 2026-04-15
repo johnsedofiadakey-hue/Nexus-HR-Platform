@@ -16,7 +16,9 @@ import {
   listAllUsers,
   seedDemoTenant,
   updateTenantNetwork,
+  updateTenantBilling,
   getTenantAuditTrail,
+  provisionClient,
 } from '../controllers/dev.controller';
 import { devAuth } from '../middleware/devAuth.middleware';
 
@@ -32,6 +34,7 @@ router.post('/tenant/bulk-action', devAuth, bulkTenantAction);
 router.get('/logs', devAuth, getSystemLogs);
 router.get('/tenant/:id', devAuth, getTenantDetails);
 router.patch('/tenant/:id/network', devAuth, updateTenantNetwork);
+router.patch('/tenant/:id/billing', devAuth, updateTenantBilling);
 router.get('/tenant/:id/audit', devAuth, getTenantAuditTrail);
 router.post('/backup', devAuth, triggerBackup);
 router.post('/grant-bank-access', devAuth, grantBankTransferAccess);
@@ -41,5 +44,6 @@ router.get('/organizations', devAuth, listOrganizations);
 router.post('/organizations', devAuth, createOrganization);
 router.get('/users', devAuth, listAllUsers);
 router.post('/tenant/seed-demo', devAuth, seedDemoTenant);
+router.post('/provision', devAuth, provisionClient);
 
 export default router;

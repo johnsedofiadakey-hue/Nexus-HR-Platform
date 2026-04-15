@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../prisma/client';
 import os from 'os';
+import bcrypt from 'bcryptjs';
 import { logSystemAction } from '../utils/system-logger';
 import { BackupService } from '../services/backup.service';
 import { DemoSeederService } from '../services/demo-seeder.service';
@@ -107,9 +108,9 @@ export const getApiUsageStats = async (req: Request, res: Response) => {
         select: { path: true, duration: true, organizationId: true }
       }),
       prisma.$queryRawUnsafe(`
-        SELECT strftime('%H:00', createdAt) as hour, COUNT(*) as count 
-        FROM ApiUsage 
-        WHERE createdAt >= datetime('now', '-1 day') 
+        SELECT TO_CHAR(createdAt, 'HH24:00') as hour, COUNT(*) as count 
+        FROM "ApiUsage" 
+        WHERE "createdAt" >= NOW() - INTERVAL '1 day' 
         GROUP BY hour 
         ORDER BY hour ASC
       `)
@@ -307,6 +308,40 @@ export const updateTenantNetwork = async (req: Request, res: Response) => {
   }
 };
 
+export const updateTenantBilling = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { subscriptionPlan, billingStatus, isSuspended, features } = req.body;
+
+    const org = await prisma.organization.findUnique({ where: { id } });
+    if (!org) return res.status(404).json({ error: 'Organization not found' });
+
+    const updatedOrg = await prisma.organization.update({
+      where: { id },
+      data: {
+        ...(subscriptionPlan !== undefined ? { subscriptionPlan } : {}),
+        ...(billingStatus !== undefined ? { billingStatus } : {}),
+        ...(isSuspended !== undefined ? { isSuspended } : {}),
+        ...(features !== undefined ? { features } : {}),
+      },
+    });
+
+    const user = (req as any).user;
+    await logSystemAction({
+      action: 'UPDATE_TENANT_BILLING',
+      details: `Billing updated for ${org.name}: plan=${subscriptionPlan}, status=${billingStatus}, suspended=${isSuspended}`,
+      operatorId: user?.id,
+      operatorEmail: user?.email,
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
+    res.json({ success: true, tenant: updatedOrg });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const getTenantAuditTrail = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -477,6 +512,101 @@ export const createOrganization = async (req: Request, res: Response) => {
 
     return res.status(201).json(org);
   } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// ── FULL CLIENT PROVISIONING (Org + MD User in one shot) ─────────────────────
+export const provisionClient = async (req: Request, res: Response) => {
+  try {
+    const {
+      // Org fields
+      companyName, subdomain, currency = 'GNF', country, phone,
+      // MD user fields
+      adminFullName, adminEmail, adminPassword,
+    } = req.body;
+
+    if (!companyName) return res.status(400).json({ error: 'Company name is required' });
+    if (!adminEmail) return res.status(400).json({ error: 'Admin email is required' });
+    if (!adminFullName) return res.status(400).json({ error: 'Admin full name is required' });
+
+    const normalizedEmail = adminEmail.toLowerCase().trim();
+
+    // Check if email is already taken
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existingUser) return res.status(400).json({ error: 'A user with that email already exists' });
+
+    // Check subdomain collision
+    if (subdomain) {
+      const existingOrg = await prisma.organization.findUnique({ where: { subdomain } });
+      if (existingOrg) return res.status(400).json({ error: `Subdomain "${subdomain}" is already taken` });
+    }
+
+    // Auto-generate a password if not supplied
+    const rawPassword = adminPassword || `Nexus@${Math.random().toString(36).slice(2, 8).toUpperCase()}1!`;
+    const passwordHash = await bcrypt.hash(rawPassword, 12);
+
+    // Atomic transaction: Org + SystemSettings + MD User
+    const result = await prisma.$transaction(async (tx) => {
+      const org = await tx.organization.create({
+        data: {
+          name: companyName,
+          email: normalizedEmail,
+          subdomain: subdomain || null,
+          currency,
+          country: country || null,
+          phone: phone || null,
+          billingStatus: 'FREE',
+          subscriptionPlan: 'FREE',
+          trialStartDate: new Date(),
+          trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      await tx.systemSettings.create({ data: { organizationId: org.id, trialDays: 14 } });
+
+      const user = await tx.user.create({
+        data: {
+          organizationId: org.id,
+          fullName: adminFullName,
+          email: normalizedEmail,
+          passwordHash,
+          role: 'MD',
+          jobTitle: 'Managing Director',
+          status: 'ACTIVE',
+          leaveBalance: null,
+          leaveAllowance: null,
+        },
+      });
+
+      return { org, user };
+    });
+
+    const operator = (req as any).user;
+    await logSystemAction({
+      action: 'PROVISION_CLIENT',
+      details: `Provisioned org "${companyName}" with MD user ${normalizedEmail}`,
+      operatorId: operator?.id,
+      operatorEmail: operator?.email,
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
+    return res.status(201).json({
+      success: true,
+      organization: {
+        id: result.org.id,
+        name: result.org.name,
+        subdomain: result.org.subdomain,
+      },
+      credentials: {
+        email: normalizedEmail,
+        password: rawPassword,
+        loginUrl: 'https://nexus-hr-platform.web.app/login',
+      },
+    });
+  } catch (err: any) {
+    console.error('[provisionClient] Error:', err.message);
     return res.status(500).json({ error: err.message });
   }
 };

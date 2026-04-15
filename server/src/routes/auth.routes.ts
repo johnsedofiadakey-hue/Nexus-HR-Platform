@@ -17,4 +17,6 @@ router.get('/me', authenticate, authController.getMe);
 router.post('/change-password', authenticate, validate(ChangePasswordSchema), authController.changePassword);
 router.post('/impersonate', authenticate, authController.impersonateTenant);
 
+router.post('/sandbox', authController.sandboxLogin);
+
 export default router;

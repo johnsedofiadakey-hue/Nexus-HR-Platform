@@ -510,3 +510,70 @@ export const impersonateTenant = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+/**
+ * SANDBOX AUTO-LOGIN (Zero-Click Demo)
+ * Issues a temporary simulation session for prospective clients.
+ */
+export const sandboxLogin = async (req: Request, res: Response) => {
+  try {
+    // 1. Establish Sandbox Context
+    // We use a fixed ID for the shared corporate simulation
+    const SANDBOX_ORG_ID = 'sandbox-org-001';
+    
+    // Check if sandbox exists, if not, fallback to default or error
+    let organization = await prisma.organization.findUnique({ where: { id: SANDBOX_ORG_ID } });
+    
+    if (!organization) {
+      // Create a minimal sandbox if it doesn't exist (First run)
+      organization = await prisma.organization.create({
+        data: {
+          id: SANDBOX_ORG_ID,
+          name: 'Stormglide Corporate Simulation',
+          subtitle: 'Nexus HR Sandbox',
+          city: 'Global',
+          country: 'Cloud',
+          themePreset: 'nexus-dark',
+          isAiEnabled: true,
+          billingStatus: 'ENTERPRISE',
+          primaryColor: '#00D2FF',
+          secondaryColor: '#004FF9'
+        }
+      });
+    }
+
+    // 2. Issue Token
+    // We simulate an 'MD' (Managing Director) session so they can see all HR features
+    const token = signAccessToken({
+      id: `sandbox-guest-${crypto.randomBytes(4).toString('hex')}`,
+      role: 'MD',
+      name: 'Sandbox Operator',
+      status: 'ACTIVE',
+      organizationId: SANDBOX_ORG_ID
+    });
+
+    const refreshToken = await issueRefreshToken('sandbox-guest-root', SANDBOX_ORG_ID, req);
+
+    return res.status(200).json({
+      token,
+      refreshToken,
+      user: {
+        id: 'sandbox-guest-root',
+        name: 'Sandbox Operator',
+        email: 'demo@stormglide.io',
+        role: 'MD',
+        jobTitle: 'Simulation Lead',
+        rank: getRoleRank('MD'),
+        organizationId: SANDBOX_ORG_ID,
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sandbox',
+      },
+      tokenMeta: {
+        accessExpiresIn: ACCESS_TOKEN_TTL,
+        refreshExpiresInHours: REFRESH_TOKEN_WINDOW_HOURS,
+      },
+    });
+  } catch (error: any) {
+    console.error('[Auth] Sandbox login failed:', error);
+    return res.status(500).json({ error: 'Simulation engine fail. Please try again soon.' });
+  }
+};

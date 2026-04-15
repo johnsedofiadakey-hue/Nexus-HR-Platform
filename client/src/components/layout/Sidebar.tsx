@@ -6,7 +6,7 @@ import {
   ShieldAlert, BarChart3,
   Clock, Wallet, GraduationCap,
   ClipboardList, PanelLeftClose, PanelLeftOpen,
-  X, Briefcase, Network, Megaphone
+  X, Briefcase, Network, Megaphone, BookOpen, AlertOctagon
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -239,12 +239,16 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, setIsCollapsed }: SidebarProps)
                 )}
               </NavGroup>
 
-              <NavGroup label={t('common.organization')} isCollapsed={isCollapsed}>
+                <NavGroup label={t('common.organization')} isCollapsed={isCollapsed}>
                 <NavItem to="/departments" icon={Briefcase} label={rank < 70 ? t('common.my_department') : t('departments.title')} isCollapsed={isCollapsed} />
                 {rank >= 70 && <NavItem to="/employees" icon={Users} label={t('common.employees')} isCollapsed={isCollapsed} />}
                 <NavItem to="/announcements" icon={Megaphone} label={t('common.announcements')} isCollapsed={isCollapsed} />
                 {rank >= 85 && <NavItem to="/org-chart" icon={Network} label={t('common.org_chart')} isCollapsed={isCollapsed} />}
                 {rank >= 85 && <NavItem to="/recruitment" icon={Briefcase} label={t('common.recruitment')} isCollapsed={isCollapsed} />}
+                {/* New modules */}
+                <NavItem to="/policies" icon={BookOpen} label="Policies" isCollapsed={isCollapsed} />
+                {rank >= 60 && <NavItem to="/disciplinary" icon={AlertOctagon} label="Disciplinary" isCollapsed={isCollapsed} />}
+                {rank >= 70 && <NavItem to="/probation" icon={Clock} label="Probation" isCollapsed={isCollapsed} />}
               </NavGroup>
 
               <NavGroup label={t('common.operations')} isCollapsed={isCollapsed}>

@@ -18,4 +18,8 @@ router.get('/all-tickets', authenticate, requireRole(85), supportController.getA
 router.patch('/tickets/:id/status', authenticate, requireRole(85), supportController.updateTicketStatus); // Alias for frontend
 router.patch('/tickets/:id', authenticate, requireRole(85), supportController.updateTicketStatus);
 
+// Lead Management (NOC & Public)
+router.post('/leads', supportController.createLead);
+router.get('/leads', authenticate, requireRole(90), supportController.getLeads);
+
 export default router;

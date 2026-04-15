@@ -158,3 +158,42 @@ export const updateTicketStatus = async (req: Request, res: Response) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+/**
+ * LEAD GENERATION (Public Landing Page)
+ */
+export const createLead = async (req: Request, res: Response) => {
+  try {
+    const { name, email, company, phone, subject, message } = req.body;
+
+    const lead = await prisma.lead.create({
+      data: {
+        name,
+        email,
+        company,
+        phone,
+        subject,
+        message,
+        status: 'NEW'
+      }
+    });
+
+    // Notify NOC Operators if possible
+    console.log(`[Lead] New Inquiry Captured: ${email} for ${company || 'Unknown'}`);
+
+    res.status(201).json({ success: true, leadId: lead.id });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const getLeads = async (req: Request, res: Response) => {
+  try {
+    const leads = await prisma.lead.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(leads);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};

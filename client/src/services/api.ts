@@ -137,7 +137,7 @@ api.interceptors.response.use(
         clearSession();
       if (window.location.pathname !== '/') {
           // Safeguard: Don't redirect to root if we are in the Shadow Zone (Central Portal)
-          const isShadowZone = window.location.pathname.includes('/dev-portal') || window.location.pathname.includes('/dev-login') || window.location.pathname.includes('/nexus-master-console');
+          const isShadowZone = window.location.pathname === '/' || window.location.pathname.includes('/dev-portal') || window.location.pathname.includes('/nexus-master-console');
           const hasDevSession = !!localStorage.getItem('nexus_dev_key') || (!!localStorage.getItem('nexus_dev_firebase_token') && localStorage.getItem('nexus_dev_mode') === 'true');
           
           if (isShadowZone || hasDevSession) {

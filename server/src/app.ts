@@ -61,6 +61,7 @@ import recruitmentRoutes from './routes/recruitment.routes';
 import expenseRoutes from './routes/expense.routes';
 import supportRoutes from './routes/support.routes';
 import offboardingRoutes from './routes/offboarding.routes';
+import hrFeaturesRoutes from './routes/hrFeatures.routes';
 
 // Config already loaded at top level
 
@@ -286,6 +287,7 @@ app.use('/api/recruitment', recruitmentRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/offboarding', offboardingRoutes);
+app.use('/api/hr', hrFeaturesRoutes);
 
 // ─── DEBUG ROUTE ────────────────────────────────────────────────────────────
 (app as any).get('/api/debug-routes', (req: Request, res: Response) => {

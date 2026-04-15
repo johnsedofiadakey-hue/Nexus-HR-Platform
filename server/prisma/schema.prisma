@@ -343,6 +343,15 @@ model User {
   targetUpdates           TargetUpdate[]
   ticketComments          TicketComment[]
   trainingEnrollments     TrainingEnrollment[]    @relation("EmployeeTraining")
+  // Disciplinary
+  disciplinaryCases       DisciplinaryCase[]      @relation("EmployeeDisciplinary")
+  issuedDisciplinaryCases DisciplinaryCase[]      @relation("IssuedByDisciplinary")
+  // Policy Library
+  createdPolicies         PolicyDocument[]        @relation("PolicyCreatedBy")
+  policyAcknowledgments   PolicyAcknowledgment[]  @relation("PolicyAcknowledgedBy")
+  // Probation
+  probationRecord         ProbationRecord?        @relation("EmployeeProbation")
+  probationReviews        ProbationRecord[]       @relation("ProbationReviewer")
   departmentObj           Department?             @relation("DepartmentEmployees", fields: [departmentId], references: [id])
   organization            Organization?           @relation(fields: [organizationId], references: [id])
   subUnit                 SubUnit?                @relation("SubUnitEmployees", fields: [subUnitId], references: [id])
@@ -1584,3 +1593,114 @@ model TicketComment {
 
   @@index([organizationId, ticketId])
 }
+
+model Lead {
+  id             String   @id @default(uuid())
+  name           String
+  email          String
+  company        String?
+  phone          String?
+  subject        String?
+  message        String
+  status         String   @default("NEW")
+  organizationId String?  @default("stormglide-corp")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ── Disciplinary & Grievance ───────────────────────────────────────────────
+model DisciplinaryCase {
+  id             String    @id @default(uuid())
+  organizationId String?   @default("default-tenant")
+  employeeId     String
+  issuedById     String
+  type           String    // WARNING | FINAL_WARNING | SUSPENSION | DISMISSAL | GRIEVANCE
+  category       String    @default("CONDUCT")  // CONDUCT | PERFORMANCE | ATTENDANCE | POLICY | SAFETY | GRIEVANCE
+  reason         String
+  details        String?
+  evidence       String?   // file URL(s), comma-separated
+  status         String    @default("OPEN")  // OPEN | ACKNOWLEDGED | APPEALED | CLOSED
+  outcome        String?
+  hearingDate    DateTime?
+  resolvedAt     DateTime?
+  acknowledgedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  employee       User      @relation("EmployeeDisciplinary",  fields: [employeeId], references: [id], onDelete: Cascade)
+  issuedBy       User      @relation("IssuedByDisciplinary", fields: [issuedById], references: [id])
+
+  @@index([organizationId, employeeId])
+  @@index([organizationId, status])
+  @@index([organizationId, type])
+}
+
+// ── Policy & Handbook Library ──────────────────────────────────────────────
+model PolicyDocument {
+  id             String                  @id @default(uuid())
+  organizationId String?                 @default("default-tenant")
+  title          String
+  description    String?
+  content        String?                 // Rich text / markdown body
+  fileUrl        String?                 // Optional uploaded PDF
+  category       String                  @default("GENERAL") // GENERAL | HR | IT | SAFETY | FINANCE | CONDUCT
+  version        String                  @default("1.0")
+  status         String                  @default("DRAFT")  // DRAFT | PUBLISHED | ARCHIVED
+  isRequired     Boolean                 @default(true)     // Must employees acknowledge?
+  targetRoles    String?                 // JSON array of roles, null = all
+  publishedAt    DateTime?
+  createdById    String
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  createdBy      User                    @relation("PolicyCreatedBy", fields: [createdById], references: [id])
+  acknowledgments PolicyAcknowledgment[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, category])
+}
+
+model PolicyAcknowledgment {
+  id             String         @id @default(uuid())
+  organizationId String?        @default("default-tenant")
+  policyId       String
+  employeeId     String
+  acknowledgedAt DateTime       @default(now())
+  ipAddress      String?
+
+  policy         PolicyDocument @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  employee       User           @relation("PolicyAcknowledgedBy", fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([policyId, employeeId])
+  @@index([organizationId, policyId])
+  @@index([organizationId, employeeId])
+}
+
+// ── Probation Tracker ──────────────────────────────────────────────────────
+model ProbationRecord {
+  id             String   @id @default(uuid())
+  organizationId String?  @default("default-tenant")
+  employeeId     String   @unique   // One active probation per employee
+  startDate      DateTime
+  endDate        DateTime           // Probation end date — basis for reminders
+  period         Int      @default(90)    // days
+  status         String   @default("IN_PROGRESS") // IN_PROGRESS | PASSED | EXTENDED | FAILED
+  reviewDate     DateTime?          // Scheduled review meeting date
+  reviewedById   String?
+  outcome        String?            // Free text outcome
+  goals          String?            // JSON array of probation goals
+  notes          String?
+  alertSentAt    DateTime?          // Tracks when the near-end alert was sent
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  employee       User     @relation("EmployeeProbation",  fields: [employeeId], references: [id], onDelete: Cascade)
+  reviewedBy     User?    @relation("ProbationReviewer", fields: [reviewedById], references: [id])
+
+  @@index([organizationId, status])
+  @@index([organizationId, endDate])
+}
+

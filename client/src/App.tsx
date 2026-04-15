@@ -1,4 +1,5 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
+import StormglideHome from './pages/StormglideHome';
 import { motion } from 'framer-motion';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
@@ -74,6 +75,9 @@ const Recruitment = lazy(() => import('./pages/Recruitment'));
 const Expenses = lazy(() => import('./pages/Expenses'));
 const Support = lazy(() => import('./pages/Support'));
 const Offboarding = lazy(() => import('./pages/Offboarding'));
+const Disciplinary = lazy(() => import('./pages/Disciplinary'));
+const PolicyLibrary = lazy(() => import('./pages/PolicyLibrary'));
+const ProbationTracker = lazy(() => import('./pages/ProbationTracker'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-64 bg-[var(--bg-main)]">
@@ -95,7 +99,7 @@ const AdminGuard = () => {
   // Support both the new PIN override and the fallback Google Identity
   const hasAccess = devKey === '564669' || (firebaseToken && devMode);
 
-  if (!hasAccess) return <Navigate to="/dev-login" replace />;
+  if (!hasAccess) return <Navigate to="/" replace />;
 
   return <Outlet />;
 };
@@ -116,7 +120,7 @@ const Layout = () => {
   const handleExitImpersonation = () => {
     localStorage.removeItem('nexus_auth_token');
     localStorage.removeItem('nexus_user');
-    window.location.href = '/dev-login';
+    window.location.href = '/';
   };
 
   useEffect(() => {
@@ -361,9 +365,9 @@ const AppContent = () => {
 
       <PageErrorBoundary>
         <Routes>
-          <Route path="/" element={isCentralDomain ? <Suspense fallback={<PageLoader />}><DevLogin /></Suspense> : <Login />} />
+          <Route path="/" element={<StormglideHome />} />
+          <Route path="/vault" element={<Suspense fallback={<PageLoader />}><DevLogin /></Suspense>} />
           <Route path="/force-logout" element={<ForceLogout />} />
-          <Route path="/dev-login" element={<Suspense fallback={<PageLoader />}><DevLogin /></Suspense>} />
           <Route path="/billing-lock" element={<BillingLock />} />
 
           <Route element={<ProtectedRoute />}>
@@ -409,6 +413,10 @@ const AppContent = () => {
             <Route path="/recruitment" element={<RoleGuard minRank={85}><Recruitment /></RoleGuard>} />
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/support" element={<Support />} />
+            {/* New HR Modules */}
+            <Route path="/disciplinary" element={<RoleGuard minRank={50}><Disciplinary /></RoleGuard>} />
+            <Route path="/policies" element={<PolicyLibrary />} />
+            <Route path="/probation" element={<RoleGuard minRank={70}><ProbationTracker /></RoleGuard>} />
           </Route>
 
           {/* Nexus Master Console - Completely Isolated SaaS Logic */}
