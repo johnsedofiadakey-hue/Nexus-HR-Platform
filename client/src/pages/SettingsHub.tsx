@@ -17,8 +17,9 @@ import { usePersistentDraft } from '../hooks/usePersistentDraft';
 import { BrandingService } from '../services/branding.service';
 import { optimizeImage } from '../utils/image';
 import api from '../services/api';
+import { ApiIntegrations } from '../components/settings/ApiIntegrations';
 
-type SettingsTab = 'company' | 'leave' | 'branding' | 'localization' | 'security' | 'notifications' | 'billing' | 'data';
+type SettingsTab = 'company' | 'leave' | 'branding' | 'localization' | 'security' | 'notifications' | 'billing' | 'data' | 'integrations';
 
 const isValidHex = (hex: string) => /^#[0-9A-Fa-f]{6}$/.test(hex);
 
@@ -285,6 +286,7 @@ const SettingsHub = () => {
     { id: 'notifications', label: t('settings.notifications'), icon: Bell, description: t('settings.notifications_description', 'Email and system alert preferences.') },
     { id: 'billing', label: t('settings.billing'), icon: CreditCard, description: t('settings.billing_description', 'Subscription plans and payment history.') },
     { id: 'data', label: t('settings.data_management'), icon: Download, description: t('settings.data_description', 'Export history, backups, and data privacy.') },
+    { id: 'integrations', label: t('settings.integrations', 'API & Integrations'), icon: Sparkles, description: t('settings.integrations_desc', 'API Keys, Webhooks, and connected platforms.') },
   ];
 
   return (
@@ -1125,6 +1127,10 @@ const SettingsHub = () => {
                       </button>
                     </section>
                   </div>
+                )}
+
+                {activeTab === 'integrations' && (
+                   <ApiIntegrations />
                 )}
 
               </div>

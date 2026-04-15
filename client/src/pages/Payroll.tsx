@@ -146,6 +146,22 @@ const Payroll = () => {
   const downloadBankCSV = (runId: string) => window.open(`/api/payroll/${runId}/bank-export/csv?lang=${i18n.language}`, '_blank');
   const downloadPayslip = (runId: string, empId: string) => window.open(`/api/payroll/payslip/${runId}/${empId}/pdf?lang=${i18n.language}`, '_blank');
 
+  const handleExportFullCSV = async () => {
+    try {
+        const res = await api.get('/payroll/csv', { responseType: 'blob' });
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `Fiscal_Ledger_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (err) {
+        toast.error('Export failed');
+    }
+  };
+
   return (
     <div className="space-y-12 pb-32">
       {/* Header Area */}
@@ -158,14 +174,23 @@ const Payroll = () => {
           </p>
         </div>
         {isAdmin && (
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-4 px-10 h-16 bg-[var(--primary)] text-white rounded-2xl transition-all font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[var(--primary)]/30"
-            onClick={() => setShowCreate(true)}
-          >
-            <Plus size={18} /> {t('payroll.run_payroll')}
-          </motion.button>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={handleExportFullCSV}
+              className="p-4 rounded-2xl bg-[var(--bg-elevated)]/50 border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-emerald-500 hover:border-emerald-500/30 transition-all shadow-sm flex items-center gap-2"
+            >
+              <Download size={18} />
+              <div className="text-[10px] font-black uppercase">Export Full Ledger</div>
+            </button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-4 px-10 h-16 bg-[var(--primary)] text-white rounded-2xl transition-all font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[var(--primary)]/30"
+              onClick={() => setShowCreate(true)}
+            >
+              <Plus size={18} /> {t('payroll.run_payroll')}
+            </motion.button>
+          </div>
         )}
       </div>
 

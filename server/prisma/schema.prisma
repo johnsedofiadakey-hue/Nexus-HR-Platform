@@ -695,6 +695,8 @@ model Organization {
   securityEvents         LoginSecurityEvent[]
   settings               SystemSettings?
   users                  User[]
+  apiKeys                ApiKey[]
+  webhooks               WebhookSubscription[]
 }
 
 model SystemSettings {
@@ -1703,4 +1705,35 @@ model ProbationRecord {
   @@index([organizationId, status])
   @@index([organizationId, endDate])
 }
+
+// ── API & Integrations ───────────────────────────────────────────────────────
+model ApiKey {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  keyHash        String       @unique
+  lastUsedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model WebhookSubscription {
+  id             String       @id @default(uuid())
+  organizationId String
+  url            String
+  events         String       // Comma separated list of event types (e.g. EMPLOYEE_CREATED, LEAVE_APPROVED)
+  isActive       Boolean      @default(true)
+  secret         String?      // For payload signature verification
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from '../utils/toast';
-import { Clock, CheckCircle, LogIn, LogOut, Loader2, Calendar, Search, Activity, History } from 'lucide-react';
+import { Clock, CheckCircle, LogIn, LogOut, Loader2, Calendar, Search, Activity, History, Download } from 'lucide-react';
 import api from '../services/api';
 import { motion } from 'framer-motion';
 import { cn } from '../utils/cn';
@@ -57,6 +57,22 @@ const AttendanceDashboard = () => {
         new Date(l.date).toDateString() === new Date().toDateString() && l.employeeId === user.id
     );
 
+    const handleExportCSV = async () => {
+        try {
+            const res = await api.get('/attendance/csv', { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Attendance_Ledger_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            toast.error(t('attendance.error_export', 'Export failed'));
+        }
+    };
+
     const hasClockedIn = !!todayLog;
     const hasClockedOut = !!todayLog?.clockOut;
 
@@ -89,6 +105,11 @@ const AttendanceDashboard = () => {
                                 </button>
                             ))}
                         </div>
+                    )}
+                    {isAdmin && activeTab === 'all' && (
+                        <button onClick={handleExportCSV} className="p-3 rounded-xl bg-[var(--bg-elevated)]/50 border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-emerald-500 hover:border-emerald-500/30 transition-all shadow-sm" title={t('common.export_csv', 'Export CSV Ledger')}>
+                            <div className="text-[9px] font-black uppercase flex items-center gap-2"><Download size={14} /> CSV</div>
+                        </button>
                     )}
                 </div>
             </div>
