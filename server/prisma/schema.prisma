@@ -421,7 +421,7 @@ model EmployeeQuery {
 model Department {
   id             Int             @id @default(autoincrement())
   organizationId String?         @default("default-tenant")
-  name           String          @unique
+  name           String
   managerId      String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -433,6 +433,7 @@ model Department {
   targets        Target[]
   employees      User[]          @relation("DepartmentEmployees")
 
+  @@unique([name, organizationId])
   @@index([organizationId])
 }
 

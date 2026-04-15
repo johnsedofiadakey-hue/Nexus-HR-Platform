@@ -101,6 +101,16 @@ api.interceptors.request.use(
       (config.headers as any)['x-dev-master-key'] = devKey;
     }
 
+    // FIREBASE DEV MODE: Inject Google ID Token
+    const devMode = localStorage.getItem('nexus_dev_mode') === 'true';
+    if (devMode) {
+      const fbToken = localStorage.getItem('nexus_dev_firebase_token');
+      if (fbToken) {
+        config.headers = config.headers || {};
+        (config.headers as any)['X-Dev-Firebase-Token'] = fbToken;
+      }
+    }
+
     // Always inject the current domain so the backend can dynamically resolve the tenant
     config.headers = config.headers || {};
     (config.headers as any)['X-Tenant-Domain'] = window.location.hostname;

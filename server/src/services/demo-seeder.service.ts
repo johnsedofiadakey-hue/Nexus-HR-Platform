@@ -25,7 +25,7 @@ export class DemoSeederService {
 
     const createdDepts = await Promise.all(
       depts.map(d => prisma.department.create({
-        data: { ...d, organizationId }
+        data: { name: d.name, organizationId }
       }))
     );
 

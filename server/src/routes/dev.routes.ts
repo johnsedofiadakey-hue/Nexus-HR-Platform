@@ -16,26 +16,26 @@ import {
   listAllUsers,
   seedDemoTenant,
 } from '../controllers/dev.controller';
-import { shadowAuth } from '../middleware/shadowAuth.middleware';
+import { devAuth } from '../middleware/devAuth.middleware';
 
 const router = Router();
 
-router.get('/stats', shadowAuth, getSystemStats);
-router.get('/integrity', shadowAuth, checkIntegrity);
-router.get('/telemetry', shadowAuth, getSecurityTelemetry);
-router.get('/telemetry/api', shadowAuth, getApiUsageStats);
-router.post('/tenant/feature', shadowAuth, toggleTenantFeature);
-router.post('/tenant/trial', shadowAuth, extendTrial);
-router.post('/tenant/bulk-action', shadowAuth, bulkTenantAction);
-router.get('/logs', shadowAuth, getSystemLogs);
-router.get('/tenant/:id', shadowAuth, getTenantDetails);
-router.post('/backup', shadowAuth, triggerBackup);
-router.post('/grant-bank-access', shadowAuth, grantBankTransferAccess);
+router.get('/stats', devAuth, getSystemStats);
+router.get('/integrity', devAuth, checkIntegrity);
+router.get('/telemetry', devAuth, getSecurityTelemetry);
+router.get('/telemetry/api', devAuth, getApiUsageStats);
+router.post('/tenant/feature', devAuth, toggleTenantFeature);
+router.post('/tenant/trial', devAuth, extendTrial);
+router.post('/tenant/bulk-action', devAuth, bulkTenantAction);
+router.get('/logs', devAuth, getSystemLogs);
+router.get('/tenant/:id', devAuth, getTenantDetails);
+router.post('/backup', devAuth, triggerBackup);
+router.post('/grant-bank-access', devAuth, grantBankTransferAccess);
 
 // Tenant/Organization management
-router.get('/organizations', shadowAuth, listOrganizations);
-router.post('/organizations', shadowAuth, createOrganization);
-router.get('/users', shadowAuth, listAllUsers);
-router.post('/tenant/seed-demo', shadowAuth, seedDemoTenant);
+router.get('/organizations', devAuth, listOrganizations);
+router.post('/organizations', devAuth, createOrganization);
+router.get('/users', devAuth, listAllUsers);
+router.post('/tenant/seed-demo', devAuth, seedDemoTenant);
 
 export default router;
