@@ -22,7 +22,7 @@ export const exportEmployeesCSV = async (req: Request, res: Response) => {
         const orgId = getOrgId(req);
         const users = await prisma.user.findMany({
             where: { organizationId: orgId, isArchived: false },
-            include: { departmentObj: true, subUnit: true, manager: true }
+            include: { departmentObj: true, subUnit: true, supervisor: true }
         });
         
         const mapped = users.map(mapEmployee);
@@ -47,7 +47,7 @@ export const exportAttendanceCSV = async (req: Request, res: Response) => {
                 organizationId: orgId,
                 date: { gte: startDate }
             },
-            include: { user: true },
+            include: { employee: true },
             orderBy: { date: 'desc' }
         });
         
@@ -72,14 +72,14 @@ export const exportPayrollCSV = async (req: Request, res: Response) => {
                 organizationId: orgId,
                 ...(runId ? { id: runId as string } : {}) // Note: would need to filter by run.id normally, assuming quick query here
             },
-            include: { user: { include: { departmentObj: true } }, run: true },
+            include: { employee: { include: { departmentObj: true } }, run: true },
             orderBy: { createdAt: 'desc' }
         });
         
         // Manual map to fit schema fields (since Payroll schema above has `user`, not `employee`)
         const mapped = items.map(item => ({
              id: item.id,
-             employeeName: item.user?.fullName,
+             employeeName: item.employee?.fullName,
              month: item.run?.month,
              year: item.run?.year,
              netPay: item.netPay

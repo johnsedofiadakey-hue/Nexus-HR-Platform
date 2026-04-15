@@ -11,7 +11,7 @@ export const getEmployees = async (req: Request, res: Response) => {
         const orgId = getOrgId(req);
         const users = await prisma.user.findMany({
             where: { organizationId: orgId, isArchived: false },
-            include: { departmentObj: true, subUnit: true, manager: true }
+            include: { departmentObj: true, subUnit: true, supervisor: true }
         });
         return res.json(users.map(mapEmployee));
     } catch (e: any) {
@@ -29,7 +29,7 @@ export const getAttendance = async (req: Request, res: Response) => {
                 organizationId: orgId,
                 date: { gte: startDate }
             },
-            include: { user: true },
+            include: { employee: true },
             orderBy: { date: 'desc' },
             take: 1000 // Limit for API performance
         });
@@ -47,7 +47,7 @@ export const getPayroll = async (req: Request, res: Response) => {
         // A production env would handle specific runs or employee queries
         const items = await prisma.payrollItem.findMany({
             where: { organizationId: orgId },
-            include: { user: { include: { departmentObj: true } }, run: true },
+            include: { employee: { include: { departmentObj: true } }, run: true },
             orderBy: { createdAt: 'desc' },
             take: 100
         });
@@ -55,7 +55,7 @@ export const getPayroll = async (req: Request, res: Response) => {
         // Quick mapper for payroll items since data-mapper expects `payroll` structure
         const mapped = items.map(item => ({
             id: item.id,
-            employeeName: item.user?.fullName,
+            employeeName: item.employee?.fullName,
             month: item.run?.month,
             year: item.run?.year,
             netPay: item.netPay
@@ -71,7 +71,7 @@ export const getAppraisals = async (req: Request, res: Response) => {
     try {
         const orgId = getOrgId(req);
         const appraisals = await prisma.appraisalPacket.findMany({
-            where: { organizationId: orgId, isArchived: false },
+            where: { organizationId: orgId },
             include: { employee: { include: { departmentObj: true }}, cycle: true },
             orderBy: { createdAt: 'desc' },
             take: 100
