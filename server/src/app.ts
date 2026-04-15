@@ -104,27 +104,22 @@ const allowedOrigins = [
   'http://localhost:5173'
 ];
 
-const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    const normalizedOrigin = origin?.replace(/\/$/, '');
-    if (!normalizedOrigin || allowedOrigins.includes(normalizedOrigin) || allowedOrigins.some(ao => normalizedOrigin.startsWith(ao))) {
-      callback(null, true);
-    } else {
-      console.warn(`[CORS Block] Source: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 
-    'x-dev-master-key', 'X-Tenant-Domain', 'X-Dev-Firebase-Token', 
-    'x-tenant-domain', 'x-dev-firebase-token'
-  ],
-  optionsSuccessStatus: 200 
-};
+// ─── MANUAL CORS BRIDGE (Bypassing Library Abstractions) ───────────────────
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const origin = req.headers.origin;
+  if (origin && (allowedOrigins.includes(origin) || allowedOrigins.some(ao => origin.startsWith(ao)))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
 
-app.use(cors(corsOptions));
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, x-dev-master-key, x-tenant-domain, x-dev-firebase-token, X-Tenant-Domain, X-Dev-Firebase-Token');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
 // ─── SECURITY HEADERS ──────────────────────────────────────────────────────
 app.use(helmet({ 
