@@ -19,7 +19,7 @@ const initializeFirebase = () => {
         } else {
             console.warn('[FirebaseAdmin] No Service Account found. Falling back to default credentials...');
             admin.initializeApp({
-                projectId: process.env.VITE_FIREBASE_PROJECT_ID || 'nexus-hrm'
+                projectId: process.env.VITE_FIREBASE_PROJECT_ID || 'nexus-hr-platform'
             });
         }
         console.log('[FirebaseAdmin] Application initialized successfully.');
