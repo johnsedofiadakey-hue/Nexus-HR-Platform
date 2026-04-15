@@ -82,44 +82,35 @@ validateConfig();
 const app: Application = express();
 app.set('trust proxy', 1);
 
-// Robust Port Binding
-const rawPort = process.env.PORT || '5000';
-const PORT = parseInt(rawPort, 10);
-
-if (isNaN(PORT)) {
-  console.error(`[FATAL] Invalid PORT specified: ${rawPort}`);
-  process.exit(1);
-}
-
-// Create HTTP server (needed for WebSocket)
-const server = http.createServer(app);
-
-// ─── FORCE-FLOW CORS BRIDGE (Entry Point) ──────────────────────────────────
-const allowedOrigins = [
-  'https://mcbauchemieguinea.com',
-  'https://www.mcbauchemieguinea.com',
-  'https://nexus-hr-platform.web.app',
-  'https://nexus-hr-platform.firebaseapp.com',
-  'http://localhost:3000',
-  'http://localhost:5173'
-];
-
-// ─── MANUAL CORS BRIDGE (Bypassing Library Abstractions) ───────────────────
+// ─── NUCLEAR CORS BRIDGE (Top Priority) ────────────────────────────────────
 app.use((req: Request, res: Response, next: NextFunction) => {
   const origin = req.headers.origin;
-  if (origin && (allowedOrigins.includes(origin) || allowedOrigins.some(ao => origin.startsWith(ao)))) {
+  const allowed = [
+    'https://nexus-hr-platform.web.app',
+    'https://nexus-hr-platform.firebaseapp.com',
+    'https://mcbauchemieguinea.com',
+    'https://www.mcbauchemieguinea.com',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ];
+
+  if (origin && (allowed.includes(origin) || allowed.some(a => origin.startsWith(a)))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
+  } else if (!origin) {
+    // Allow non-browser requests (Postman, etc)
   }
 
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, x-dev-master-key, x-tenant-domain, x-dev-firebase-token, X-Tenant-Domain, X-Dev-Firebase-Token');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, x-dev-master-key, x-tenant-domain, x-dev-firebase-token, X-Tenant-Domain, X-Dev-Firebase-Token, X-Dev-Master-Key');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
   next();
 });
+
+// Robust Port Binding
 
 // ─── SECURITY HEADERS ──────────────────────────────────────────────────────
 app.use(helmet({ 
