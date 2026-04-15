@@ -125,7 +125,7 @@ async function setup() {
   let firstDeptId: number | null = null;
   for (const dept of depts) {
     const d = await prisma.department.upsert({
-      where: { name: dept.name },
+      where: { name_organizationId: { name: dept.name, organizationId: 'default-tenant' } },
       update: {},
       create: { name: dept.name, organizationId: 'default-tenant', managerId: dept.managerId },
     });
