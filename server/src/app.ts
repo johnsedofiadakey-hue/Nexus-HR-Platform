@@ -82,6 +82,11 @@ validateConfig();
 const app: Application = express();
 app.set('trust proxy', 1);
 
+// ─── INITIALIZE SERVER (Global Context) ────────────────────────────────────
+const rawPort = process.env.PORT || '5000';
+const PORT = parseInt(rawPort, 10);
+const server = http.createServer(app);
+
 // ─── NUCLEAR CORS BRIDGE (Top Priority) ────────────────────────────────────
 app.use((req: Request, res: Response, next: NextFunction) => {
   const origin = req.headers.origin;
@@ -96,8 +101,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   if (origin && (allowed.includes(origin) || allowed.some(a => origin.startsWith(a)))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-  } else if (!origin) {
-    // Allow non-browser requests (Postman, etc)
   }
 
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -110,17 +113,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Robust Port Binding
-const rawPort = process.env.PORT || '5000';
-const PORT = parseInt(rawPort, 10);
-
-if (isNaN(PORT)) {
-  console.error(`[FATAL] Invalid PORT specified: ${rawPort}`);
-  process.exit(1);
-}
-
-// Create HTTP server (needed for WebSocket)
-const server = http.createServer(app);
+// Robust Port Binding - Handled Above
 
 // ─── SECURITY HEADERS ──────────────────────────────────────────────────────
 app.use(helmet({ 
