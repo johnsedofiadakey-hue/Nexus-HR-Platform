@@ -157,10 +157,10 @@ const TenantManagement = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-4xl md:text-5xl font-black text-white font-display tracking-tight flex items-center gap-3">
-                        <Building2 size={36} className="text-primary" /> Tenant Management
+                        <Building2 size={36} className="text-primary" /> Client Management
                     </h1>
                     <p className="text-sm font-medium text-slate-500 mt-2">
-                        Control and monitor all SaaS client organizations
+                        View and manage all client organizations
                     </p>
                 </div>
                 <motion.button
@@ -169,7 +169,7 @@ const TenantManagement = () => {
                     className="bg-primary/20 text-primary border border-primary/30 flex items-center gap-3 px-8 py-4 rounded-2xl shadow-xl shadow-primary/20 font-black uppercase tracking-[0.2em] text-[10px]"
                     onClick={() => setShowCreate(true)}
                 >
-                    <Plus size={16} /> New Organization
+                    <Plus size={16} /> Add New Client
                 </motion.button>
             </div>
 
@@ -349,10 +349,10 @@ const TenantManagement = () => {
                                                     onClick={() => handleSeedDemo(org.id, org.name)}
                                                     disabled={seedingOrgId === org.id}
                                                     className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 transition-all disabled:opacity-50"
-                                                    title="Seed Professional Demo Data"
+                                                    title="Load Sample Data"
                                                 >
                                                     {seedingOrgId === org.id ? <Loader2 size={12} className="animate-spin" /> : <Database size={12} />}
-                                                    Seed
+                                                    Sample
                                                 </button>
                                                 <button
                                                     onClick={() => handleImpersonate(org.id)}
@@ -360,7 +360,7 @@ const TenantManagement = () => {
                                                     className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all disabled:opacity-50"
                                                 >
                                                     {impersonating === org.id ? <Loader2 size={12} className="animate-spin" /> : <Shield size={12} />}
-                                                    Impersonate
+                                                    Login As
                                                 </button>
                                                 <button className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
                                                     <ExternalLink size={14} />
@@ -397,8 +397,8 @@ const TenantManagement = () => {
                                 <div className="flex items-center gap-5">
                                     <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary"><Building2 size={24} /></div>
                                     <div>
-                                        <h2 className="text-2xl font-black text-white font-display tracking-tight uppercase">New Organization</h2>
-                                        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 mt-1">Tenant Onboarding</p>
+                                        <h2 className="text-2xl font-black text-white font-display tracking-tight uppercase">New Client</h2>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 mt-1">Add Client Details Below</p>
                                     </div>
                                 </div>
                                 <button onClick={() => setShowCreate(false)} className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-slate-500 hover:text-white"><X size={24} /></button>
@@ -489,7 +489,7 @@ const TenantManagement = () => {
                                     disabled={saving}
                                 >
                                     {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-                                    {saving ? 'Creating...' : 'Register Organization'}
+                                    {saving ? 'Creating...' : 'Create Client'}
                                 </motion.button>
                             </div>
                         </motion.div>
