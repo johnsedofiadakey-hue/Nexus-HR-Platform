@@ -513,6 +513,15 @@ const Leave = () => {
                                          {(leave.status === 'SUBMITTED' || leave.status === 'PENDING_RELIEVER') && (
                                              <button onClick={() => handleCancel(leave.id)} className="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline decoration-rose-500/30 underline-offset-8">{t('leave.decommission_btn')}</button>
                                          )}
+                                         {userRank >= 90 && (
+                                           <button 
+                                             onClick={() => handleDeleteLeave(leave.id)}
+                                             className="p-2 rounded-lg bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-rose-500/10"
+                                             title={t('leave.administrative_delete', 'Delete Record')}
+                                           >
+                                             <Trash2 size={14} />
+                                           </button>
+                                         )}
                                        </div>
                                      </td>
                                  </motion.tr>
@@ -596,6 +605,15 @@ const Leave = () => {
                                                </span>
                                             </div>
                                           )}
+                                         {userRank >= 90 && (
+                                           <button 
+                                             onClick={() => handleDeleteLeave(leave.id)}
+                                             className="p-2 rounded-lg bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-rose-500/10 ml-2"
+                                             title={t('leave.administrative_delete', 'Delete Record')}
+                                           >
+                                             <Trash2 size={14} />
+                                           </button>
+                                         )}
                                      </div>
                                   </td>
                                </motion.tr>

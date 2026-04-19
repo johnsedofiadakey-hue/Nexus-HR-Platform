@@ -93,7 +93,7 @@ const ManagerAppraisals: React.FC = () => {
              </button>
            )}
            <div className="relative flex-1 md:w-64">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
               <input 
                 type="text" 
                 placeholder="Search personnel..." 
@@ -131,32 +131,32 @@ const ManagerAppraisals: React.FC = () => {
 
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center border border-white/10 font-black text-[10px] text-white">
+                       <div className="w-10 h-10 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center border border-white/10 font-black text-[10px] text-white">
                            {packet?.employee?.fullName?.charAt(0) || '?'}
                        </div>
                        <div>
                           <h3 className="text-sm font-bold text-white leading-tight">{packet.employee.fullName}</h3>
-                          <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">{packet.employee.jobTitle}</p>
+                          <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest mt-1">{packet.employee.jobTitle}</p>
                        </div>
                     </div>
                   </div>
 
                   <div className="space-y-3 mb-6">
                      <div className="flex justify-between items-center bg-black/20 p-3 rounded-xl border border-white/5">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Active Stage</span>
-                         <span className="text-[10px] font-black text-primary-light uppercase tracking-widest">{(packet?.currentStage || 'OPEN').replace(/_/g, ' ')}</span>
+                        <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest">Active Stage</span>
+                         <span className="text-[10px] font-black text-[var(--primary-light)] uppercase tracking-widest">{(packet?.currentStage || 'OPEN').replace(/_/g, ' ')}</span>
                      </div>
-                     <p className="text-[10px] font-bold text-slate-400 px-1">{packet.cycle?.title}</p>
+                     <p className="text-[10px] font-bold text-[var(--text-secondary)] px-1">{packet.cycle?.title}</p>
                   </div>
 
                   <div className="pt-4 border-t border-white/5 flex justify-between items-center">
-                    <div className="flex items-center gap-2 text-slate-500">
+                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
                       <Clock size={12} />
                       <span className="text-[10px] font-bold uppercase tracking-widest">
                         Updated {format(new Date(packet.updatedAt), 'PP')}
                       </span>
                     </div>
-                    <div className="text-primary-light group-hover:translate-x-1 transition-transform">
+                    <div className="text-[var(--primary-light)] group-hover:translate-x-1 transition-transform">
                       <ChevronRight size={16} />
                     </div>
                   </div>

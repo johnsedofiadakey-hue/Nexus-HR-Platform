@@ -82,7 +82,7 @@ const Appraisals: React.FC = () => {
       {rank >= 90 && (
         <section className="space-y-6">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 border border-amber-500/20">
+             <div className="w-10 h-10 rounded-xl bg-[var(--warning)]/10 flex items-center justify-center text-[var(--warning)] border border-[var(--warning)]/20">
                 < Award size={20} />
              </div>
              <div>
@@ -101,28 +101,28 @@ const Appraisals: React.FC = () => {
                      initial={{ opacity: 0, scale: 0.95 }}
                      animate={{ opacity: 1, scale: 1 }}
                      onClick={() => navigate(`/reviews/packet/${packet.id}`)}
-                     className="nx-card p-6 cursor-pointer group hover:border-amber-500/30 bg-amber-500/5 border-amber-500/10 transition-all relative overflow-hidden"
+                     className="nx-card p-6 cursor-pointer group hover:border-[var(--warning)]/30 bg-[var(--warning)]/5 border-[var(--warning)]/10 transition-all relative overflow-hidden"
                    >
-                     <div className="absolute top-0 right-0 p-3 bg-amber-500 text-white text-[8px] font-black uppercase tracking-tighter rounded-bl-xl shadow-lg">FINAL VERDICT PENDING</div>
+                     <div className="absolute top-0 right-0 p-3 bg-[var(--warning)] text-white text-[8px] font-black uppercase tracking-tighter rounded-bl-xl shadow-lg">FINAL VERDICT PENDING</div>
                      
                      <div className="flex items-center gap-4 mb-6">
-                       <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-amber-200">
-                          {packet.employee?.avatarUrl ? (
-                            <img src={packet.employee.avatarUrl} className="w-full h-full object-cover rounded-xl" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center font-black text-amber-500">{packet.employee?.fullName?.[0]}</div>
-                          )}
-                       </div>
+                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-[var(--warning)]/20">
+                           {packet.employee?.avatarUrl ? (
+                             <img src={packet.employee.avatarUrl} className="w-full h-full object-cover rounded-xl" />
+                           ) : (
+                             <div className="w-full h-full flex items-center justify-center font-black text-[var(--warning)]">{packet.employee?.fullName?.[0]}</div>
+                           )}
+                        </div>
                        <div>
                           <p className="text-sm font-black text-[var(--text-primary)]">{packet.employee?.fullName}</p>
                           <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest">{packet.cycle?.title}</p>
                        </div>
                      </div>
 
-                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] group-hover:text-amber-600 transition-colors">
-                        <span>Open Final Review</span>
-                        <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                     </div>
+                      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] group-hover:text-[var(--warning)] transition-colors">
+                         <span>Open Final Review</span>
+                         <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                      </div>
                    </motion.div>
                  ))
                ) : !loadingFinal && (
@@ -162,11 +162,11 @@ const Appraisals: React.FC = () => {
                   <div className="w-12 h-12 rounded-xl bg-[var(--primary)]/10 flex items-center justify-center border border-[var(--primary)]/20 text-[var(--primary)]">
                     <ClipboardCheck size={24} />
                   </div>
-                  <span className={cn(
+                   <span className={cn(
                     "text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border",
                     packet.status === 'COMPLETED'
-                      ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                      : "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                      ? "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20"
+                      : "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20"
                   )}>
                     {packet.status}
                   </span>

@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '../utils/toast';
-import { Target, Clock, ShieldCheck, Users, Loader2, CheckCircle, Search, ChevronRight, Trash2 } from 'lucide-react';
+import { Target, Clock, ShieldCheck, Users, Loader2, CheckCircle, Search, ChevronRight, Trash2, Sparkles } from 'lucide-react';
 import api from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
 import PageHeader from '../components/common/PageHeader';
 import FlowSteps from '../components/common/FlowSteps';
 import EmptyState from '../components/common/EmptyState';
+import NexusAIInsight from '../components/layout/NexusAIInsight';
+import { useAI } from '../context/AIContext';
+import { getStoredUser } from '../utils/session';
 
 interface TeamAppraisal {
   id: string;
@@ -34,6 +37,24 @@ const FinalSignOff = () => {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAIOpen, setIsAIOpen] = useState(false);
+  const { setContextData } = useAI();
+  const user = getStoredUser();
+  const isStrategicEnabled = (user?.rank || 0) >= 85;
+
+  useEffect(() => {
+    if (selectedAppraisal) {
+      setContextData({
+        type: 'APPRAISAL_SIGN_OFF',
+        packetId: selectedAppraisal.id,
+        employeeName: selectedAppraisal.employee.fullName,
+        reviews: selectedAppraisal.reviews,
+        finalScore: selectedAppraisal.finalScore
+      });
+    } else {
+      setContextData(null);
+    }
+  }, [selectedAppraisal, setContextData]);
 
   useEffect(() => {
     fetchAwaitingSignOff();
@@ -237,8 +258,8 @@ const FinalSignOff = () => {
                   <div className="space-y-10 relative z-10">
                      {/* Summary Dashboard */}
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="p-8 rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10">
-                            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-6 flex items-center gap-2">
+                        <div className="p-8 rounded-[2rem] bg-[var(--primary)]/5 border border-[var(--primary)]/10">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--primary)] mb-6 flex items-center gap-2">
                                 <Users size={12} /> Review Summary
                             </h4>
                             <div className="space-y-6">
@@ -249,7 +270,7 @@ const FinalSignOff = () => {
                                             <span className="text-xs font-black text-white">{r.overallRating !== null ? `${r.overallRating}%` : '[Hidden]'}</span>
                                         </div>
                                         <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-indigo-500/30" style={{ width: `${r.overallRating || 0}%` }} />
+                                            <div className="h-full bg-[var(--primary)]/30" style={{ width: `${r.overallRating || 0}%` }} />
                                         </div>
                                         {r.summary && (
                                             <p className="text-[9px] text-slate-500 leading-relaxed font-medium pl-3 border-l border-white/10 tracking-tighter italic">
@@ -289,22 +310,39 @@ const FinalSignOff = () => {
                                 {processing ? 'FINISHING...' : 'PROVIDE FINAL APPROVAL'}
                             </motion.button>
 
-                            <button
-                                onClick={(e) => handlePrint(e, selectedAppraisal.id)}
-                                disabled={exporting}
-                                className="w-full py-4 rounded-[1.5rem] border border-white/10 hover:border-white/20 text-slate-500 hover:text-white flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-widest transition-all"
-                            >
-                                {exporting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
-                                Download Official Report
-                            </button>
-                        </div>
-                     </div>
+                             <div className="flex gap-4">
+                                <button
+                                    onClick={(e) => handlePrint(e, selectedAppraisal.id)}
+                                    disabled={exporting}
+                                    className="flex-1 py-4 rounded-[1.5rem] border border-white/10 hover:border-white/20 text-slate-500 hover:text-white flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-widest transition-all"
+                                >
+                                    {exporting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                    Download Official Report
+                                </button>
+                                
+                                {isStrategicEnabled && (
+                                    <button
+                                        onClick={() => setIsAIOpen(true)}
+                                        className="px-6 rounded-[1.5rem] bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 text-amber-500 hover:text-amber-400 hover:border-amber-500/50 transition-all flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-widest group shadow-[0_0_20px_rgba(245,158,11,0.1)]"
+                                    >
+                                        <Sparkles size={14} className="group-hover:scale-125 transition-transform" />
+                                        Strategic Intelligence
+                                    </button>
+                                )}
+                             </div>
+                         </div>
+                      </div>
                   </div>
                 </motion.div>
                )}
            </AnimatePresence>
         </div>
       </div>
+
+      <NexusAIInsight 
+        isOpen={isAIOpen} 
+        onClose={() => setIsAIOpen(false)} 
+      />
     </div>
   );
 };
