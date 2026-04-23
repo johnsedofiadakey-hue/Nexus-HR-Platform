@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { cn } from '../utils/cn';
 import { 
   Shield, Rocket, Users, Activity, BarChart3, Globe, Zap, 
   ChevronRight, ArrowUpRight, MessageSquare, Monitor, 

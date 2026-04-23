@@ -100,6 +100,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   const allowed = [
     'https://nexus-hr-platform.web.app',
     'https://nexus-hr-platform.firebaseapp.com',
+    'https://nexus-hr-platform-client.onrender.com', // Added Render Production
     'https://mcbauchemieguinea.com',
     'https://www.mcbauchemieguinea.com',
     'http://localhost:3000',

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Globe, Link2, ShieldCheck, Activity } from 'lucide-react';
+import { cn } from '../../../utils/cn';
 import api from '../../../services/api';
 import { toast } from '../../../utils/toast';
 import NocModule from './NocModule';
