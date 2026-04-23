@@ -19,14 +19,16 @@ import {
   updateTenantBilling,
   getTenantAuditTrail,
   provisionClient,
+  deleteOrganization,
 } from '../controllers/dev.controller';
-import { devAuth, verifyDevPin } from '../middleware/devAuth.middleware';
+import { devAuth, verifyDevPin, verifyGoogleIdentity } from '../middleware/devAuth.middleware';
 import { validate, DevPinSchema, ProvisionSchema, TenantFeatureToggleSchema, TrialExtensionSchema, BankAccessSchema } from '../middleware/validate.middleware';
 
 const router = Router();
 
-// ─── PUBLIC: PIN verification (no devAuth required) ──────────────────────
+// ─── PUBLIC: Access verification (no devAuth required) ───────────────────
 router.post('/verify-pin', validate(DevPinSchema), verifyDevPin);
+router.post('/verify-google', verifyGoogleIdentity);
 
 // ─── PROTECTED: All routes below require dev authentication ──────────────
 router.get('/stats', devAuth, getSystemStats);
@@ -50,5 +52,6 @@ router.post('/organizations', devAuth, createOrganization);
 router.get('/users', devAuth, listAllUsers);
 router.post('/tenant/seed-demo', devAuth, seedDemoTenant);
 router.post('/provision', devAuth, validate(ProvisionSchema), provisionClient);
+router.delete('/tenant/:id', devAuth, deleteOrganization);
 
 export default router;

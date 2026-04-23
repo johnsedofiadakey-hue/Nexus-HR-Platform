@@ -611,6 +611,35 @@ export const provisionClient = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteOrganization = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const org = await prisma.organization.findUnique({ where: { id } });
+    if (!org) return res.status(404).json({ error: 'Organization not found' });
+
+    // CAUTION: This is a nuclear option. 
+    // We should ideally use a transaction or rely on Cascade deletes in schema.
+    // Given the complexity of the schema, we'll do a hard delete of the organization 
+    // and rely on the database's foreign key constraints (or Prisma's cascade).
+    await prisma.organization.delete({ where: { id } });
+
+    const user = (req as any).user;
+    await logSystemAction({
+      action: 'HARD_DELETE_ORGANIZATION',
+      details: `Permanently deleted organization: ${org.name} (${id})`,
+      operatorId: user.id,
+      operatorEmail: user.email,
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent')
+    });
+
+    res.json({ success: true, message: `Organization ${org.name} has been permanently erased.` });
+  } catch (error: any) {
+    console.error('[deleteOrganization] Error:', error.message);
+    res.status(500).json({ error: 'Deletion failed. Some data might be locked or requires manual cleanup.' });
+  }
+};
+
 export const listAllUsers = async (req: Request, res: Response) => {
   try {
     const { organizationId, page = 1, limit = 50 } = req.query;

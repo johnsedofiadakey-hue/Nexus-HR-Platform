@@ -505,12 +505,33 @@ const AdminConsole = () => {
                                                         <Calendar size={14} className="text-slate-300" /> Joined Platform on {new Date(tenantDetails.tenant.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                                                     </p>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleImpersonate(tenantDetails.tenant.id)}
-                                                    className="flex items-center gap-3 px-8 py-4 bg-slate-900 hover:bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl shadow-slate-200"
-                                                >
-                                                    <ExternalLink size={16} /> Impersonate Proxy
-                                                </button>
+                                                <div className="flex gap-4">
+                                                    <button
+                                                        onClick={() => handleImpersonate(tenantDetails.tenant.id)}
+                                                        className="flex items-center gap-3 px-8 py-4 bg-slate-900 hover:bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl shadow-slate-200"
+                                                    >
+                                                        <ExternalLink size={16} /> Impersonate Proxy
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (window.confirm(`NUCLEAR OPTION: Are you sure you want to PERMANENTLY ERASE "${tenantDetails.tenant.name}"? All users, payroll data, and configuration will be destroyed.`)) {
+                                                                try {
+                                                                    await api.delete(`/dev/tenant/${tenantDetails.tenant.id}`);
+                                                                    toast.success('Organization erased from cluster');
+                                                                    setSelectedTenantId(null);
+                                                                    setTenantDetails(null);
+                                                                    fetchData();
+                                                                } catch (err: any) {
+                                                                    toast.error(err.response?.data?.error || 'Erasure failed');
+                                                                }
+                                                            }
+                                                        }}
+                                                        className="w-14 h-14 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-100 rounded-2xl flex items-center justify-center transition-all shadow-xl shadow-rose-200/20 group"
+                                                        title="Hard Delete"
+                                                    >
+                                                        <Ban size={20} className="group-hover:rotate-12 transition-transform" />
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             {/* Sub-tabs */}

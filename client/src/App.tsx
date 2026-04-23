@@ -22,6 +22,7 @@ import MobileNav from './components/layout/MobileNav';
 import NexusAIInsight from './components/layout/NexusAIInsight';
 import { getLogoUrl } from './utils/logo';
 import { getStoredUser, getRankFromRole } from './utils/session';
+import SandboxHUD from './components/layout/SandboxHUD';
 
 import Signup from './pages/Signup';
 
@@ -102,7 +103,7 @@ const AdminGuard = () => {
   // Server-issued dev JWT (from PIN verification) or Firebase Google Identity
   const hasAccess = !!devToken || (firebaseToken && devMode);
 
-  if (!hasAccess) return <Navigate to="/" replace />;
+  if (!hasAccess) return <Navigate to="/vault" replace />;
 
   return <Outlet />;
 };
@@ -227,6 +228,7 @@ const Layout = () => {
         isOpen={isAIOpen} 
         onClose={() => setIsAIOpen(false)} 
       />
+      <SandboxHUD />
     </div>
   );
 };

@@ -71,6 +71,51 @@ export const verifyDevPin = async (req: Request, res: Response) => {
 };
 
 /**
+ * Verify Google Identity for Dev Access
+ */
+export const verifyGoogleIdentity = async (req: Request, res: Response) => {
+  const { idToken } = req.body;
+  if (!idToken) return res.status(400).json({ error: 'Identity token required' });
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const userEmail = decodedToken.email;
+
+    if (!userEmail) return res.status(401).json({ error: 'No email found in identity token' });
+
+    // SECURITY GATE: Whitelist check
+    const hardcodedWhitelist = ['johnsedofiadakey@gmail.com', 'stormglidelogistics.com'];
+    const envWhitelist = (process.env.DEV_WHITELIST_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+    const whitelist = [...hardcodedWhitelist, ...envWhitelist].filter(Boolean).map(e => e.toLowerCase());
+
+    if (whitelist.length > 0 && !whitelist.includes(userEmail.toLowerCase())) {
+      console.warn(`[DevAuth] Unauthorized Google access attempt by: ${userEmail}`);
+      return res.status(403).json({
+        error: 'Master Access Denied',
+        details: 'This Google account is not on the administrator whitelist.',
+      });
+    }
+
+    // Issued dev JWT for whitelisted admin
+    const devToken = jwt.sign(
+      { id: `fb-${decodedToken.uid}`, email: userEmail, role: 'DEV', type: 'dev-console' },
+      JWT_SECRET,
+      { expiresIn: '4h' }
+    );
+
+    console.log(`[DevAuth] Google Identity Verified: ${userEmail}`);
+    return res.json({
+      token: devToken,
+      expiresIn: '4h',
+      message: 'Master console access granted via Google Identity',
+    });
+  } catch (error: any) {
+    console.error('[DevAuth] Google Token Verification FAILED:', error.message);
+    return res.status(401).json({ error: 'Identity verification failed', details: error.message });
+  }
+};
+
+/**
  * Dev Authentication Middleware
  * Verifies dev JWT (from PIN verification) OR Firebase Google Identity.
  */

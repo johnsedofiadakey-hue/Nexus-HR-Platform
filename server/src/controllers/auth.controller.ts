@@ -617,14 +617,18 @@ export const sandboxLogin = async (req: Request, res: Response) => {
           themePreset: 'nexus-dark',
           isAiEnabled: true,
           billingStatus: 'ENTERPRISE',
+          subscriptionPlan: 'ENTERPRISE',
           primaryColor: '#00D2FF',
           secondaryColor: '#004FF9'
         }
       });
+      
+      // Auto-Seed the fresh sandbox with professional data
+      const { DemoSeederService } = await import('../services/demo-seeder.service');
+      await DemoSeederService.seedTenantData(SANDBOX_ORG_ID);
     }
 
     // 2. Issue Token
-    // We simulate an 'MD' (Managing Director) session so they can see all HR features
     const token = signAccessToken({
       id: `sandbox-guest-${crypto.randomBytes(4).toString('hex')}`,
       role: 'MD',
@@ -638,6 +642,7 @@ export const sandboxLogin = async (req: Request, res: Response) => {
     return res.status(200).json({
       token,
       refreshToken,
+      isSandbox: true,
       user: {
         id: 'sandbox-guest-root',
         name: 'Sandbox Operator',
@@ -646,6 +651,7 @@ export const sandboxLogin = async (req: Request, res: Response) => {
         jobTitle: 'Simulation Lead',
         rank: getRoleRank('MD'),
         organizationId: SANDBOX_ORG_ID,
+        isSandbox: true,
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sandbox',
       },
       tokenMeta: {

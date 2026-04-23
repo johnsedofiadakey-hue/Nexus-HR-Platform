@@ -151,11 +151,45 @@ const DevLogin = () => {
                     </AnimatePresence>
                 </div>
 
-                <div className="mt-8 flex items-center justify-center gap-3">
-                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">
-                      Nexus Security Protocol v5 // 04.23
-                   </p>
+                <div className="mt-8 flex flex-col items-center gap-6">
+                   <div className="flex items-center gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">
+                         Nexus Security Protocol v5 // 04.23
+                      </p>
+                   </div>
+
+                   <div className="w-full h-px bg-white/5" />
+
+                   <button
+                       onClick={async () => {
+                           try {
+                               setLoading(true);
+                               const { signInWithPopup } = await import('firebase/auth');
+                               const { auth, googleProvider } = await import('../../services/firebase');
+                               const result = await signInWithPopup(auth, googleProvider);
+                               const idToken = await result.user.getIdToken();
+                               
+                               const res = await api.post('/dev/verify-google', { idToken });
+                               const { token } = res.data;
+                               
+                               localStorage.setItem('nexus_dev_token', token);
+                               localStorage.setItem('nexus_dev_mode', 'true');
+                               api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                               
+                               navigate('/nexus-master-console');
+                           } catch (err: any) {
+                               setError(err.response?.data?.error || 'Google Identity Verification Failed');
+                           } finally {
+                               setLoading(false);
+                           }
+                       }}
+                       disabled={loading}
+                       className="flex items-center gap-3 px-6 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-bold text-white transition-all hover:scale-105 disabled:opacity-20"
+                   >
+                       <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
+                       Login with Google Identity
+                   </button>
                 </div>
             </motion.div>
         </div>

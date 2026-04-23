@@ -66,6 +66,8 @@ import hrFeaturesRoutes from './routes/hrFeatures.routes';
 import publicApiRoutes from './routes/public-api.routes';
 import integrationsRoutes from './routes/integrations.routes';
 import botRoutes from './routes/bot.routes';
+import settingsRoutes from './routes/settings.routes';
+import maintenanceRoutes from './routes/maintenance.routes';
 
 // Config already loaded at top level
 
@@ -284,8 +286,8 @@ app.use('/api/export', exportLimiter, exportRoutes);
 app.use('/api/it', itadminRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/privacy', privacyRoutes);
-app.use('/api/settings', require('./routes/settings.routes').default);
-app.use('/api/maintenance', require('./routes/maintenance.routes').default);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/compensation', compensationRoutes);
 app.use('/api/enterprise', enterpriseRoutes);
 app.use('/api/performance-v2', performanceV2Routes);

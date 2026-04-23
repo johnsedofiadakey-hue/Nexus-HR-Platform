@@ -208,26 +208,53 @@ const Login = () => {
             </div>
 
             {/* Submit Button */}
-            <motion.button
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98, y: 0 }}
-              type="submit"
-              disabled={loading}
-              className="w-full relative group overflow-hidden bg-[var(--primary)] py-5 rounded-2xl flex items-center justify-center font-black uppercase tracking-[0.3em] text-[11px] text-[var(--text-inverse)] shadow-lg transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
-              {loading ? (
-                <div className="flex items-center gap-3">
-                  <Loader2 size={18} className="animate-spin" />
-                  <span>{t('login.loading')}</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <span>{t('login.button')}</span>
-                  <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
-                </div>
-              )}
-            </motion.button>
+            <div className="space-y-4">
+              <motion.button
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98, y: 0 }}
+                type="submit"
+                disabled={loading}
+                className="w-full relative group overflow-hidden bg-[var(--primary)] py-5 rounded-2xl flex items-center justify-center font-black uppercase tracking-[0.3em] text-[11px] text-[var(--text-inverse)] shadow-lg transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                {loading ? (
+                  <div className="flex items-center gap-3">
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>{t('login.loading')}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <span>{t('login.button')}</span>
+                    <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+                  </div>
+                )}
+              </motion.button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+                    const res = await api.post('/auth/sandbox');
+                    const { token, refreshToken, user } = res.data;
+                    localStorage.setItem('nexus_auth_token', token);
+                    if (refreshToken) localStorage.setItem('nexus_refresh_token', refreshToken);
+                    localStorage.setItem('nexus_user', JSON.stringify(user || {}));
+                    localStorage.setItem('nexus_is_sandbox', 'true');
+                    navigate('/dashboard');
+                    toast.success('Entering Sandbox Environment - Simulation Active');
+                  } catch (err: any) {
+                    toast.error('Sandbox engine busy. Please try again.');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="w-full py-4 rounded-xl border border-[var(--primary)]/20 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all flex items-center justify-center gap-3 group"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-pulse" />
+                Explore Sandbox Demo
+              </button>
+            </div>
           </form>
 
           {/* Social Identity Providers (SSO) */}
@@ -307,10 +334,17 @@ const Login = () => {
             </p>
             <button 
               onClick={() => toast.info(`${t('login.contact_it', 'Please contact the IT Manager or HR to manually reset your access.')}`)}
-              className="mt-2 flex items-center justify-center gap-2 mx-auto text-[10px] font-black uppercase tracking-[0.2em] text-[var(--primary)] hover:brightness-110 transition-all group"
+              className="mt-2 flex items-center justify-center gap-2 mx-auto text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all group"
             >
               <Shield size={12} className="group-hover:rotate-12 transition-transform" />
               <span>Contact IT Support</span>
+            </button>
+            <button 
+              onClick={() => navigate('/vault')}
+              className="mt-6 flex items-center justify-center gap-2 mx-auto text-[9px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]/30 hover:text-[var(--primary)] transition-all group"
+            >
+              <Lock size={10} className="group-hover:scale-110 transition-transform" />
+              <span>Master Portal</span>
             </button>
           </div>
         </div>
