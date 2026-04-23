@@ -106,11 +106,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="nx-card p-4 border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-lg">
       <p className="font-bold text-[var(--text-primary)] mb-2 text-sm">{label}</p>
-      {payload.map((p: any) => (
-        <div key={p.name} className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+      {payload.map((p: any, i: number) => (
+        <div key={p?.name || i} className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full" style={{ background: p?.color }} />
           <p className="text-[12px] font-medium text-[var(--text-secondary)]">
-            {p.name}: <span className="text-[var(--text-primary)] font-bold">{p.value}%</span>
+            {p?.name || 'Metric'}: <span className="text-[var(--text-primary)] font-bold">{p?.value}%</span>
           </p>
         </div>
       ))}

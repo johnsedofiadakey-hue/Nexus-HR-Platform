@@ -238,7 +238,7 @@ const AssignKpiModal = ({ isOpen, onClose, employeeId, employeeName, onSuccess }
                           onChange={e => setTargetDepartmentId(e.target.value)}
                         >
                           <option value="">-- Apply Globally --</option>
-                          {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                          {(departments || []).filter(Boolean).map(d => <option key={d.id} value={d.id}>{d.name || 'Department'}</option>)}
                         </select>
                       )}
                     </div>
@@ -335,30 +335,30 @@ const AssignKpiModal = ({ isOpen, onClose, employeeId, employeeName, onSuccess }
 
                 {mandates.length > 0 ? (
                   <div className="space-y-4">
-                    {mandates.map((m, idx) => (
+                    {(mandates || []).filter(Boolean).map((m, idx) => (
                       <motion.div 
                         initial={{ opacity: 0, x: 10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        key={idx} 
+                        key={m.id || idx} 
                         className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-emerald-500/30 transition-all"
                       >
-                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500/60 mb-2">{m.title}</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500/60 mb-2">{m.title || 'Untitled Mandate'}</p>
                         <div className="space-y-2 mb-3">
-                          {m.items.map((item: any, i: number) => (
+                          {(m.items || []).filter(Boolean).map((item: any, i: number) => (
                             <div key={i} className="text-[10px] text-slate-400 flex justify-between gap-2 border-b border-white/5 pb-1">
-                              <span>• {item.name}</span>
-                              <span className="text-emerald-500/50">W: {item.weight}</span>
+                              <span>• {item.name || 'Objective'}</span>
+                              <span className="text-emerald-500/50">W: {item.weight || 0}</span>
                             </div>
                           ))}
                         </div>
                         <button 
                           onClick={() => {
-                            const newItems = m.items.map((i: any) => ({
+                            const newItems = (m.items || []).filter(Boolean).map((i: any) => ({
                               category: i.category || 'Strategic',
-                              description: i.description || i.name,
-                              weight: i.weight,
-                              target: i.targetValue
+                              description: i.description || i.name || 'Objective',
+                              weight: i.weight || 0,
+                              target: i.targetValue || 0
                             }));
                             setItems([...items, ...newItems]);
                           }}

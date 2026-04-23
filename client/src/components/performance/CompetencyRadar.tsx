@@ -12,12 +12,15 @@ interface CompetencyRadarProps {
 }
 
 const CompetencyRadar: React.FC<CompetencyRadarProps> = ({ selfScores, managerScores, categories }) => {
-  const data = categories.map(cat => ({
-    subject: cat.name,
-    self: (selfScores[cat.id] || 0) * 20, // Convert 1-5 to 0-100
-    manager: (managerScores[cat.id] || 0) * 20,
-    fullMark: 100,
-  }));
+  const data = (categories || []).map(cat => {
+    if (!cat) return { subject: 'Unknown', self: 0, manager: 0, fullMark: 100 };
+    return {
+      subject: cat.name || 'Competency',
+      self: (selfScores[cat.id] || 0) * 20, // Convert 1-5 to 0-100
+      manager: (managerScores[cat.id] || 0) * 20,
+      fullMark: 100,
+    };
+  });
 
   return (
     <div className="w-full h-[350px] flex items-center justify-center -ml-4">
