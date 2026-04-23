@@ -29,7 +29,7 @@ export const exportTargetPdf = async (req: Request, res: Response) => {
 
     if (!target) return res.status(404).json({ error: 'Target not found' });
 
-    const pdfBuffer = await PdfExportService.generateBrandedPdf(orgId, `Target Achievement Certificate: ${target.title}`, target, 'TARGET');
+    const pdfBuffer = await PdfExportService.generateBrandedPdf(orgId, `Target Achievement Certificate: ${target.title}`, target as any, 'TARGET');
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=Target_${id}.pdf`);
@@ -67,7 +67,7 @@ export const exportAppraisalPdf = async (req: Request, res: Response) => {
 
     if (!packet) return res.status(404).json({ error: 'Appraisal packet not found' });
 
-    const pdfBuffer = await PdfExportService.generateBrandedPdf(orgId, `Performance Appraisal: ${packet.employee?.fullName}`, packet, 'APPRAISAL');
+    const pdfBuffer = await PdfExportService.generateBrandedPdf(orgId, `Performance Appraisal: ${packet.employee?.fullName}`, packet as any, 'APPRAISAL');
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=Appraisal_${id}.pdf`);
@@ -100,7 +100,7 @@ export const exportLeavePdf = async (req: Request, res: Response) => {
 
     if (!leave) return res.status(404).json({ error: 'Leave request not found' });
 
-    const pdfBuffer = await PdfExportService.generateBrandedPdf(orgId, `Leave Authorization Certificate`, leave, 'LEAVE');
+    const pdfBuffer = await PdfExportService.generateBrandedPdf(orgId, `Leave Authorization Certificate`, leave as any, 'LEAVE');
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=Leave_${id}.pdf`);
@@ -141,7 +141,7 @@ export const exportRoadmapPdf = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'No active targets identified for roadmap generation.' });
     }
 
-    const pdfBuffer = await PdfExportService.generateBrandedPdf(orgId, `Strategic Performance Roadmap: ${(req as any).user.name}`, targets, 'TARGET_ROADMAP');
+    const pdfBuffer = await PdfExportService.generateBrandedPdf(orgId, `Strategic Performance Roadmap: ${(req as any).user.name}`, targets as any, 'TARGET_ROADMAP');
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=Roadmap_${userId}.pdf`);

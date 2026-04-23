@@ -16,83 +16,83 @@ export interface PdfOrganization {
 
 export interface PdfAssignable {
   fullName: string;
-  employeeCode?: string;
-  jobTitle?: string;
-  departmentObj?: { name: string };
+  employeeCode?: string | null;
+  jobTitle?: string | null;
+  departmentObj?: { name: string } | null;
   signatureUrl?: string | null;
 }
 
 export interface PdfTargetMetric {
   title: string;
-  targetValue: number;
-  currentValue: number;
-  unit?: string;
+  targetValue: number | any;
+  currentValue: number | any;
+  unit?: string | null;
 }
 
 export interface PdfTargetContent {
   title: string;
-  description?: string;
-  progress: number;
-  assignee?: PdfAssignable;
-  department?: { name: string };
-  metrics?: PdfTargetMetric[];
+  description?: string | null;
+  progress: number | any;
+  assignee?: PdfAssignable | null;
+  department?: { name: string } | null;
+  metrics?: PdfTargetMetric[] | null;
 }
 
 export interface PdfReview {
   reviewStage: string;
-  reviewer?: PdfAssignable;
-  overallRating?: number;
-  summary?: string;
-  strengths?: string;
-  achievements?: string;
-  weaknesses?: string;
-  developmentNeeds?: string;
+  reviewer?: PdfAssignable | null;
+  overallRating?: number | any;
+  summary?: string | null;
+  strengths?: string | null;
+  achievements?: string | null;
+  weaknesses?: string | null;
+  developmentNeeds?: string | null;
   responses?: any; // JSON string or object
 }
 
 export interface PdfAppraisalContent {
-  employee?: PdfAssignable;
-  cycle?: { title: string };
-  finalScore?: number | string;
-  reviews?: PdfReview[];
-  finalVerdict?: string;
-  arbitrationLogic?: string;
-  finalReviewer?: PdfAssignable;
+  employee?: PdfAssignable | null;
+  cycle?: { title: string } | null;
+  finalScore?: number | string | any;
+  reviews?: PdfReview[] | null;
+  finalVerdict?: string | null;
+  arbitrationLogic?: string | null;
+  finalReviewer?: PdfAssignable | null;
 }
 
 export interface PdfLeaveContent {
   id: string;
-  employee?: PdfAssignable;
-  leaveType: string;
+  employee?: PdfAssignable | null;
+  leaveType: string | null;
   startDate: string | Date;
   endDate: string | Date;
-  leaveDays: number;
-  reason?: string;
-  reliever?: PdfAssignable;
-  relieverStatus?: string;
-  handoverAcknowledged?: boolean;
-  hrReviewer?: PdfAssignable;
-  manager?: PdfAssignable;
+  leaveDays: number | any;
+  reason?: string | null;
+  reliever?: PdfAssignable | null;
+  relieverStatus?: string | null;
+  handoverAcknowledged?: boolean | null;
+  hrReviewer?: PdfAssignable | null;
+  manager?: PdfAssignable | null;
 }
 
 export interface PdfPayslipContent {
   id: string;
-  currency?: string;
-  baseSalary: number;
-  overtime: number;
-  bonus: number;
-  allowances: number;
-  tax: number;
-  ssnit: number;
-  otherDeductions: number;
-  grossPay: number;
-  netPay: number;
-  notes?: string;
-  employee?: PdfAssignable;
+  currency?: string | null;
+  baseSalary: number | any;
+  overtime: number | any;
+  bonus: number | any;
+  allowances: number | any;
+  tax: number | any;
+  ssnit: number | any;
+  otherDeductions: number | any;
+  grossPay: number | any;
+  netPay: number | any;
+  notes?: string | null;
+  employee?: PdfAssignable | null;
   run?: {
     period: string;
     updatedAt: string | Date;
-  };
+  } | null;
 }
 
 export interface PdfBoardReportContent {

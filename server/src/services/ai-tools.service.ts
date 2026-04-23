@@ -120,8 +120,7 @@ export const executeTool = async (name: string, args: any, user: any) => {
       const me = await prisma.user.findUnique({
         where: { id: user.id },
         include: { 
-            departmentObj: true,
-            kpiAverageHistory: true
+            departmentObj: true
         }
       });
       if (!me) return { error: 'User context not found' };
@@ -129,7 +128,6 @@ export const executeTool = async (name: string, args: any, user: any) => {
       return {
         fullName: me.fullName,
         leaveBalance: leaveMetrics.balance,
-        currentKpiScore: me.currentKpiScore || 0,
         department: me.departmentObj?.name
       };
 
@@ -149,8 +147,7 @@ export const executeTool = async (name: string, args: any, user: any) => {
           endDate: end,
           leaveDays: diffDays,
           reason: args.reason || 'Requested via Cortex AI',
-          status: 'PENDING',
-          requestDate: new Date()
+          status: 'PENDING'
         }
       });
       return { 

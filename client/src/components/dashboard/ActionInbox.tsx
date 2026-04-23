@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, ArrowRight, Target, Calendar, ClipboardCheck, AlertCircle, Loader2, Users, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -33,16 +33,18 @@ const ActionInbox = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const lastCountRef = useRef(0);
   const fetchInbox = async (shouldSound = false) => {
     try {
       const res = await api.get('/inbox');
       const data = res.data || [];
       
       // If new actions arrived and we are polling, play the ring
-      if (shouldSound && data.length > actions.length) {
+      if (shouldSound && data.length > lastCountRef.current) {
         playNotificationSound();
       }
       
+      lastCountRef.current = data.length;
       setActions(data);
     } catch (e) {
       console.error('Inbox Fetch Error:', e);
@@ -54,9 +56,9 @@ const ActionInbox = () => {
   useEffect(() => {
     requestNotificationPermission();
     fetchInbox();
-    const interval = setInterval(() => fetchInbox(true), 15000); // Poll every 15s for better responsiveness
+    const interval = setInterval(() => fetchInbox(true), 30000); // Stabilized poll @ 30s for performance
     return () => clearInterval(interval);
-  }, [actions.length]);
+  }, []);
 
   if (loading) return (
     <div className="nx-card p-8 flex items-center justify-center min-h-[300px]">

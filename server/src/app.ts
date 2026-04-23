@@ -16,7 +16,7 @@ import { RenewalService } from './services/renewal.service';
 import { initWebSocket } from './services/websocket.service';
 import { TargetService } from './services/target.service';
 import { SchedulerService } from './services/scheduler.service';
-import { generalLimiter, exportLimiter, devLimiter } from './middleware/rate-limit.middleware';
+import { generalLimiter, exportLimiter, devLimiter, aiLimiter } from './middleware/rate-limit.middleware';
 import { xssSanitizer } from './middleware/xss-sanitizer.middleware';
 
 // Routes
@@ -307,9 +307,9 @@ app.use('/api/offboarding', offboardingRoutes);
 app.use('/api/hr', hrFeaturesRoutes);
 app.use('/api/public/v1', publicApiRoutes);
 app.use('/api/integrations', integrationsRoutes);
-app.use('/api/bot', botRoutes);
+app.use('/api/bot', aiLimiter, botRoutes);
 import aiRoutes from './routes/ai.routes';
-app.use('/api/ai', aiRoutes);
+app.use('/api/ai', aiLimiter, aiRoutes);
 
 // ─── DEBUG ROUTE (Development Only) ─────────────────────────────────────────
 if (process.env.NODE_ENV !== 'production') {

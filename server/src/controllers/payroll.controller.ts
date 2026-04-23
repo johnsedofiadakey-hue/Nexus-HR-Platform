@@ -190,7 +190,7 @@ export const downloadPayslipPDF = async (req: Request, res: Response) => {
     const pdfBuffer = await PdfExportService.generateBrandedPdf(
       organizationId, 
       `Electronic Payslip: ${item.run.period}`, 
-      item, 
+      item as any, 
       'PAYSLIP'
     );
 

@@ -305,13 +305,13 @@ export class PdfExportService {
     doc.fillColor('#f8fafc').rect(this.SAFE_MARGIN, idTop, this.CONTENT_WIDTH, 65).fill();
     
     doc.fillColor('#1e293b').fontSize(12).font('Helvetica-Bold');
-    doc.text(packet.employee?.fullName?.toUpperCase(), this.SAFE_MARGIN, idTop + 15, { align: 'center', width: this.CONTENT_WIDTH });
+    doc.text(packet.employee?.fullName?.toUpperCase() || 'OFFICIAL RECORD', this.SAFE_MARGIN, idTop + 15, { align: 'center', width: this.CONTENT_WIDTH });
     
     doc.fontSize(9).font('Helvetica').fillColor('#64748b');
     doc.text(packet.cycle?.title || 'ANNUAL PERFORMANCE REVIEW', this.SAFE_MARGIN, idTop + 32, { align: 'center', width: this.CONTENT_WIDTH });
     
     doc.fillColor(brandColor).fontSize(14).font('Helvetica-Bold');
-    doc.text(`SCORE: ${packet.finalScore || 'PENDING'} / 100`, this.SAFE_MARGIN, idTop + 45, { align: 'center', width: this.CONTENT_WIDTH });
+    doc.text(`SCORE: ${packet.finalScore ?? 'PENDING'} / 100`, this.SAFE_MARGIN, idTop + 45, { align: 'center', width: this.CONTENT_WIDTH });
     
     doc.y = idTop + 85;
     doc.moveDown(4);
@@ -409,9 +409,9 @@ export class PdfExportService {
     doc.fontSize(7).fillColor('#64748b').font('Helvetica-Bold').text('AUTHORIZED MANAGEMENT', 365, sigY + 8);
   }
 
-  private static renderSignature(doc: PDFKit.PDFDocument, sigUrl: string, xPos: number, yPos: number, lineWidth: number) {
+  private static renderSignature(doc: PDFKit.PDFDocument, sigUrl: string | null | undefined, xPos: number, yPos: number, lineWidth: number) {
      try {
-       if (sigUrl.startsWith('data:image')) {
+       if (sigUrl && sigUrl.startsWith('data:image')) {
          const b64 = sigUrl.split(',')[1];
          const img = Buffer.from(b64, 'base64');
          const imgWidth = 110; 
@@ -477,7 +477,7 @@ export class PdfExportService {
     doc.fillColor('#1e293b').fontSize(11).font('Helvetica').text(value || 'N/A', x, y + 12);
   }
 
-  private static renderPayslipContent(doc: PDFKIT.PDFDocument, item: PdfPayslipContent, brandColor: string) {
+  private static renderPayslipContent(doc: PDFKit.PDFDocument, item: PdfPayslipContent, brandColor: string) {
     const currency = item.currency || 'GHS';
     const formatAmount = (val: number) => val.toLocaleString('en-US', { minimumFractionDigits: 2 });
     const headerTop = doc.y;
@@ -510,7 +510,7 @@ export class PdfExportService {
     doc.fillColor('#fff').fontSize(28).font('Helvetica-Bold').text(`${currency} ${formatAmount(Number(item.netPay))}`, 360, summaryTop + 45);
   }
 
-  private static renderBoardReportContent(doc: PDFKIT.PDFDocument, data: PdfBoardReportContent, brandColor: string) {
+  private static renderBoardReportContent(doc: PDFKit.PDFDocument, data: PdfBoardReportContent, brandColor: string) {
     doc.fillColor('#0f172a').fontSize(24).font('Helvetica-Bold').text('BOARD REPORT', this.SAFE_MARGIN, doc.y);
     doc.moveDown(3);
     doc.fillColor(brandColor).fontSize(14).font('Helvetica-Bold').text('1. Human Capital Snapshot', this.SAFE_MARGIN, doc.y);
