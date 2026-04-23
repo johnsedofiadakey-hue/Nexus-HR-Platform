@@ -3,16 +3,17 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, Target, Clock, ChevronRight, CheckCircle2, 
-  TrendingUp, ClipboardCheck, AlertCircle, Award, Zap, ArrowRight, Shield, Activity
+  TrendingUp, ClipboardCheck, AlertCircle, Award, Zap, ArrowRight, Shield, Activity, Sparkles
 } from 'lucide-react';
 import api from '../../services/api';
 import { getStoredUser } from '../../utils/session';
+import { User } from '../../types/models';
 import ActionInbox from '../../components/dashboard/ActionInbox';
 import { useTranslation } from 'react-i18next';
 
 const ManagerDashboard = () => {
   const { t } = useTranslation();
-  const user = getStoredUser();
+  const user = getStoredUser() as Partial<User>;
   const [stats, setStats] = useState({ teamSize: 0, pendingReviews: 0, teamPerf: 88, openLeaves: 0 });
   const [loading, setLoading] = useState(true);
   const hour = new Date().getHours();
@@ -30,231 +31,237 @@ const ManagerDashboard = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  const cardStats = [
+    { label: t('manager_dashboard.team_members'), value: stats.teamSize || '0', icon: Users, color: 'var(--primary)', delay: 0.1 },
+    { label: t('manager_dashboard.pending_reviews'), value: stats.pendingReviews || '0', icon: ClipboardCheck, color: '#f59e0b', delay: 0.2 },
+    { label: t('manager_dashboard.team_performance'), value: `${Number(stats.teamPerf || 0).toFixed(1)}%`, icon: CheckCircle2, color: '#10b981', delay: 0.3 },
+    { label: t('manager_dashboard.open_leave_req'), value: stats.openLeaves || '0', icon: Clock, color: '#ec4899', delay: 0.4 },
+  ];
+
   return (
-    <div className="space-y-10 pb-20 max-w-[1600px] mx-auto page-enter">
+    <div className="relative space-y-12 pb-20 max-w-[1700px] mx-auto page-enter">
+      {/* Background Decorative Elements */}
+      <div className="bg-glow-radial -top-40 -left-40 opacity-40" />
+      <div className="bg-glow-radial bottom-0 -right-40" style={{ background: 'radial-gradient(circle, rgba(var(--accent-rgb), 0.1) 0%, transparent 70%)' }} />
+
       {/* Identity Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-end gap-6">
-        <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}>
-          <div className="flex items-center gap-3 mb-3">
-             <div className="px-3 py-1 rounded-full bg-[var(--primary)]/10 border border-[var(--primary)]/20 text-[10px] font-black text-[var(--primary)] uppercase tracking-widest flex items-center gap-2">
-                <Shield size={12} className="animate-pulse" /> {t('common.management')} {t('dashboard.console')}
+      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 pt-8">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <div className="flex items-center gap-3 mb-4">
+             <div className="px-4 py-1.5 rounded-full premium-glass border-glow-premium text-[11px] font-black text-[var(--primary)] uppercase tracking-[0.2em] flex items-center gap-2 shadow-xl">
+                <Shield size={14} className="animate-pulse text-[var(--primary)]" /> 
+                {t('common.management')} {t('dashboard.intelligence')}
              </div>
-             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-             <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">{greeting}</span>
+             <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]" />
+             <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-widest opacity-60">{greeting}</span>
           </div>
-          <h1 className="font-black text-5xl text-[var(--text-primary)] tracking-tight leading-none">
-            {user.name?.split(' ')[0] || 'Manager'} <span className="text-[var(--text-muted)] font-thin">/ {t('manager_dashboard.title')}</span>
+          <h1 className="font-black text-fluid-h1 text-[var(--text-primary)] tracking-ultra leading-[0.9]">
+            {user.fullName?.split(' ')[0] || 'Manager'} <span className="text-[var(--text-muted)] font-extralight block lg:inline lg:ml-2">/ {t('manager_dashboard.title')}</span>
           </h1>
-          <p className="text-[14px] font-medium mt-4 text-[var(--text-secondary)] opacity-70 max-w-2xl leading-relaxed">
-            {user.jobTitle || t('employees.roles.MANAGER')} &nbsp;·&nbsp; {t('manager_dashboard.subtitle')}
+          <p className="text-lg font-medium mt-6 text-[var(--text-secondary)] max-w-2xl leading-relaxed opacity-80">
+             {user.jobTitle || t('employees.roles.MANAGER')} <span className="mx-2 text-[var(--text-muted)]">|</span> {t('manager_dashboard.subtitle')}
           </p>
+        </motion.div>
+        
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
+          className="hidden lg:flex items-center gap-6 px-8 py-5 rounded-3xl premium-glass border-glow-premium shadow-2xl">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
+               <Activity size={24} />
+            </div>
+            <div>
+               <div className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">{t('dashboard.efficiency')}</div>
+               <div className="text-xl font-black text-[var(--text-primary)]">{stats.teamPerf}%</div>
+            </div>
+          </div>
+        </motion.div>
+      </header>
+
+      {/* Team Strategy Phase Layer */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
+          className="premium-glass border-glow-premium p-10 bg-gradient-to-br from-[var(--primary)]/5 to-transparent">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-10 flex items-center gap-3">
+            <Sparkles size={16} />
+            {t('manager_dashboard.team_strategy')}
+          </h3>
+          <div className="flex items-center justify-between gap-4 max-w-lg">
+             {[
+               { label: t('manager_dashboard.dept'), icon: Zap },
+               { label: t('manager_dashboard.team'), icon: Activity },
+               { label: t('manager_dashboard.focus'), icon: Target },
+             ].map((step, idx) => (
+               <div key={idx} className="flex flex-col items-center gap-4 flex-1 relative">
+                  <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border-2 transition-all duration-500 ${idx === 1 ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-2xl shadow-[var(--primary)]/40 scale-110' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-muted)]'}`}>
+                    <step.icon size={24} />
+                  </div>
+                  <span className={`text-[9px] font-black uppercase tracking-widest text-center ${idx === 1 ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>{step.label}</span>
+                  {idx < 2 && (
+                    <div className="absolute top-8 -right-4 w-8 h-[1px] bg-gradient-to-r from-[var(--border-subtle)] to-transparent" />
+                  )}
+               </div>
+             ))}
+          </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
+          className="premium-glass border-glow-premium p-10 bg-gradient-to-br from-purple-500/5 to-transparent">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-purple-400 mb-10 flex items-center gap-3">
+            <Award size={16} />
+            {t('manager_dashboard.team_growth')}
+          </h3>
+          <div className="flex items-center justify-between gap-4 max-w-lg">
+             {[
+               { label: t('md_dashboard.self_review'), icon: Users },
+               { label: t('md_dashboard.alignment'), icon: Shield },
+               { label: t('md_dashboard.growth'), icon: Award },
+             ].map((step, idx) => (
+               <div key={idx} className="flex flex-col items-center gap-4 flex-1 relative">
+                  <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border-2 transition-all duration-500 ${idx === 1 ? 'bg-purple-500 border-purple-500 text-white shadow-2xl shadow-purple-500/40 scale-110' : 'bg-purple-500/20 border-purple-500/30 text-purple-400'}`}>
+                    <step.icon size={24} />
+                  </div>
+                  <span className={`text-[9px] font-black uppercase tracking-widest text-center ${idx === 1 ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>{step.label}</span>
+                  {idx < 2 && (
+                    <div className="absolute top-8 -right-4 w-8 h-[1px] bg-gradient-to-r from-purple-500/30 to-transparent" />
+                  )}
+               </div>
+             ))}
+          </div>
         </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="nx-card p-10 border-[var(--primary)]/20 bg-[var(--primary)]/5">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-10 text-center flex items-center justify-center gap-3">
-            <Target size={14} />
-            {t('manager_dashboard.team_strategy')}
-          </h3>
-          <div className="flex items-center justify-center">
-             <div className="grid grid-cols-3 gap-4 w-full max-w-2xl">
-               {[
-                 { label: t('manager_dashboard.dept'), icon: Zap },
-                 { label: t('manager_dashboard.team'), icon: Activity },
-                 { label: t('manager_dashboard.focus'), icon: Target },
-               ].map((step, idx) => (
-                 <div key={idx} className="flex flex-col items-center gap-3 relative">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-2 transition-all ${idx === 1 ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/20' : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-muted)]'}`}>
-                      <step.icon size={20} />
-                    </div>
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${idx === 1 ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>{step.label}</span>
-                    {idx < 2 && (
-                      <div className="absolute top-7 -right-2 w-4 h-0.5 bg-[var(--border-subtle)]" />
-                    )}
-                 </div>
-               ))}
-             </div>
+      {/* Guidance Layer */}
+      {stats.pendingReviews > 0 && (
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
+          className="premium-glass border-glow-premium p-8 bg-amber-500/5 border-amber-500/20 flex flex-col md:flex-row items-center gap-8 shadow-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/20 flex-shrink-0">
+            <AlertCircle size={28} />
           </div>
-        </div>
-
-        <div className="nx-card p-10 border-purple-500/20 bg-purple-500/5">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-purple-400 mb-10 text-center flex items-center justify-center gap-3">
-            <Award size={14} />
-            {t('manager_dashboard.team_growth')}
-          </h3>
-          <div className="flex items-center justify-center">
-             <div className="grid grid-cols-3 gap-4 w-full max-w-2xl">
-               {[
-                 { label: t('md_dashboard.self_review'), icon: Users },
-                 { label: t('md_dashboard.alignment'), icon: Shield },
-                 { label: t('md_dashboard.growth'), icon: Award },
-               ].map((step, idx) => (
-                 <div key={idx} className="flex flex-col items-center gap-3 relative">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-2 transition-all ${idx === 1 ? 'bg-purple-500 border-purple-500 text-white shadow-lg shadow-purple-500/20' : 'bg-purple-500/20 border-purple-500/30 text-purple-400'}`}>
-                      <step.icon size={20} />
-                    </div>
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${idx === 1 ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>{step.label}</span>
-                    {idx < 2 && (
-                      <div className="absolute top-7 -right-2 w-4 h-0.5 bg-purple-500/30" />
-                    )}
-                 </div>
-               ))}
-             </div>
+          <div className="flex-1 text-center md:text-left">
+            <h4 className="text-xs font-black text-amber-400 uppercase tracking-[0.2em] mb-2">{t('manager_dashboard.active_guidance')}</h4>
+            <p className="text-lg font-medium text-[var(--text-primary)] opacity-80 leading-snug">
+              {t('manager_dashboard.guidance_desc', { pendingReviews: stats.pendingReviews, openLeaves: stats.openLeaves })}
+            </p>
           </div>
-        </div>
-      </div>
+          <Link to="/reviews/team" className="px-10 py-4 rounded-xl bg-amber-500 text-black font-black text-[11px] uppercase tracking-widest hover:bg-amber-400 transition-colors shadow-xl no-underline">
+            {t('manager_dashboard.review_now')}
+          </Link>
+        </motion.div>
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-4 h-full">
-          <ActionInbox />
-        </div>
-        <div className="lg:col-span-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 12 }} 
-            animate={{ opacity: 1, y: 0 }}
-            className="p-8 h-full rounded-2xl bg-amber-500/5 border border-amber-500/10 flex items-center gap-6"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/20">
-              <AlertCircle size={24} />
+      {/* Stats Cluster */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        {cardStats.map((s, i) => (
+          <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: s.delay }}
+            className="premium-glass border-glow-premium p-8 hover-float group shadow-xl">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-[var(--bg-elevated)] border border-[var(--border-subtle)] transition-all group-hover:scale-110 mb-8 shadow-inner">
+              <s.icon size={22} style={{ color: s.color }} />
             </div>
-            <div>
-              <p className="text-[11px] font-black text-white uppercase tracking-[0.2em] mb-1">{t('manager_dashboard.active_guidance')}</p>
-              <p className="text-xs font-medium text-amber-500/80 uppercase tracking-widest leading-relaxed">
-                {t('manager_dashboard.guidance_desc', { pendingReviews: stats.pendingReviews, openLeaves: stats.openLeaves })}
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: t('manager_dashboard.team_members'), value: stats.teamSize || '0', icon: Users, color: 'var(--primary)' },
-          { label: t('manager_dashboard.pending_reviews'), value: stats.pendingReviews || '0', icon: ClipboardCheck, color: '#f59e0b' },
-          { label: t('manager_dashboard.team_performance'), value: `${Number(stats.teamPerf || 0).toFixed(1)}%`, icon: CheckCircle2, color: '#10b981' },
-
-          { label: t('manager_dashboard.open_leave_req'), value: stats.openLeaves || '0', icon: Clock, color: '#ec4899' },
-        ].map((s, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-            className="nx-card p-8 group hover:border-[var(--primary)]/30 transition-all">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-[var(--bg-elevated)] border border-[var(--border-subtle)] transition-colors group-hover:border-[var(--primary)]/30 mb-6">
-              <s.icon size={22} style={{ color: s.color }} className="opacity-80" />
-            </div>
-            <div className="text-4xl font-black text-[var(--text-primary)] tracking-tight mb-2">
+            <div className="text-5xl font-black text-[var(--text-primary)] tracking-ultra mb-2">
               {loading ? <span className="text-[var(--text-muted)] animate-pulse">···</span> : s.value}
             </div>
-            <div className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">{s.label}</div>
+            <div className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] opacity-60 group-hover:opacity-100 transition-opacity">{s.label}</div>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        {/* PENDING REVIEWS (Purple Track) */}
-        <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} className="nx-card p-10 border-purple-500/20">
-          <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-4">
-               <div className="w-14 h-14 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-                  <ClipboardCheck size={24} />
-               </div>
-               <div>
-                  <h3 className="font-black text-2xl text-[var(--text-primary)] tracking-tight">{t('manager_dashboard.pending_reviews')}</h3>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mt-1">{t('manager_dashboard.growth_calibration')}</p>
-               </div>
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+        {/* Left: Performance Detail */}
+        <div className="xl:col-span-8 flex flex-col gap-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} 
+            className="premium-glass border-glow-premium p-10 shadow-2xl">
+            <div className="flex items-center justify-between mb-12">
+              <div>
+                <h3 className="font-black text-3xl text-[var(--text-primary)] tracking-ultra">{t('manager_dashboard.performance_analytics')}</h3>
+                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mt-2 opacity-60">{t('manager_dashboard.execution_scores')}</p>
+              </div>
+              <div className="text-right px-6 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                <div className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">{t('manager_dashboard.execution_velocity')}</div>
+                <div className="text-2xl font-black text-emerald-500 flex items-center gap-2 justify-end">
+                   {stats.teamPerf}% <TrendingUp size={20} />
+                </div>
+              </div>
             </div>
-            <Link to="/reviews/team" className="text-[11px] font-black uppercase tracking-widest text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-2 no-underline">
-               {t('manager_dashboard.view_all')} <ChevronRight size={14} />
+
+            <div className="h-4 w-full bg-[var(--bg-elevated)] rounded-full overflow-hidden mb-16 shadow-inner">
+               <motion.div 
+                 initial={{ width: 0 }} 
+                 animate={{ width: `${stats.teamPerf}%` }} 
+                 transition={{ duration: 1.5, ease: "easeOut" }}
+                 className="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] shadow-[0_0_24px_rgba(var(--primary-rgb),0.5)]"
+               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               {[
+                 { label: t('manager_dashboard.target_alignment'), value: '92%', status: 'HIGH' },
+                 { label: t('manager_dashboard.resource_drain'), value: t('manager_dashboard.optimal'), status: 'PERFECT' },
+                 { label: t('manager_dashboard.risk_profile'), value: t('manager_dashboard.low'), status: 'STABLE' },
+               ].map((metric, i) => (
+                 <div key={i} className="p-6 rounded-2xl bg-[var(--bg-elevated)]/50 border border-[var(--border-subtle)] hover:border-[var(--primary)]/30 transition-all shadow-sm">
+                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-3 opacity-60">{metric.label}</p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-2xl font-black text-[var(--text-primary)] tracking-tight">{metric.value}</p>
+                      <span className="text-[8px] font-black text-[var(--primary)] uppercase tracking-tighter bg-[var(--primary)]/10 px-2 py-0.5 rounded-full">{metric.status}</span>
+                    </div>
+                 </div>
+               ))}
+            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Link to="/kpi/team" className="premium-glass border-glow-premium p-8 group no-underline hover-float shadow-xl">
+               <div className="flex items-center justify-between mb-8">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center border border-[var(--primary)]/20">
+                    <Target size={22} />
+                  </div>
+                  <ArrowRight size={20} className="text-[var(--text-muted)] group-hover:text-[var(--primary)] group-hover:translate-x-1 transition-all" />
+               </div>
+               <h4 className="font-black text-xl text-[var(--text-primary)] uppercase tracking-tight mb-2 group-hover:text-[var(--primary)] transition-colors">{t('common.team_targets')}</h4>
+               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 leading-relaxed">{t('manager_dashboard.strategic_mission')}</p>
+            </Link>
+            <Link to="/reviews/team" className="premium-glass border-glow-premium p-8 group no-underline hover-float shadow-xl">
+               <div className="flex items-center justify-between mb-8">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                    <ClipboardCheck size={22} />
+                  </div>
+                  <ArrowRight size={20} className="text-[var(--text-muted)] group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+               </div>
+               <h4 className="font-black text-xl text-[var(--text-primary)] uppercase tracking-tight mb-2 group-hover:text-purple-400 transition-colors">{t('manager_dashboard.pending_reviews')}</h4>
+               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 leading-relaxed">{t('manager_dashboard.growth_calibration')}</p>
             </Link>
           </div>
+        </div>
+
+        {/* Right: Inbox & Sidebar */}
+        <div className="xl:col-span-4 flex flex-col gap-8">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+            <ActionInbox />
+          </motion.div>
           
-          <div className="space-y-4">
-             {stats.pendingReviews > 0 ? (
-                <div className="p-8 rounded-2xl bg-purple-500/5 border border-purple-500/10 flex flex-col sm:flex-row items-center justify-between gap-6 group hover:bg-purple-500/10 transition-all">
-                   <div className="text-center sm:text-left">
-                      <p className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">{stats.pendingReviews} {t('common.my_appraisals')} {t('common.active')}</p>
-                      <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">{t('md_dashboard.alignment')} & {t('md_dashboard.growth')}</p>
-                   </div>
-                   <Link to="/reviews/team" className="px-8 py-3 rounded-xl bg-purple-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-purple-900/40 hover:bg-purple-500 transition-all no-underline">{t('manager_dashboard.review_now')}</Link>
+          <div className="premium-glass border-glow-premium p-8 shadow-2xl bg-gradient-to-br from-[var(--primary)]/5 to-transparent">
+            <h4 className="text-[11px] font-black text-[var(--primary)] uppercase tracking-[0.3em] mb-8">{t('manager_dashboard.active_headcount')}</h4>
+            <div className="space-y-6">
+              {[1, 2, 3].map((_, i) => (
+                <div key={i} className="flex items-center justify-between group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-muted)] group-hover:border-[var(--primary)]/30 transition-all">
+                      <Users size={16} />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-black text-[var(--text-primary)] tracking-tight">Department Core</div>
+                      <div className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Active Shift</div>
+                    </div>
+                  </div>
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                 </div>
-             ) : (
-                <div className="p-16 text-center border-2 border-dashed border-[var(--border-subtle)] rounded-3xl">
-                   <CheckCircle2 size={40} className="mx-auto text-[var(--text-muted)] mb-4 opacity-50" />
-                   <p className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)]">{t('manager_dashboard.all_finalized')}</p>
-                </div>
-             )}
-          </div>
-        </motion.div>
-
-        {/* TEAM TARGETS (Indigo Track) */}
-        <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} className="nx-card p-10 border-[var(--primary)]/20">
-          <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-4">
-               <div className="w-14 h-14 rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center border border-[var(--primary)]/20">
-                  <Target size={24} />
-               </div>
-               <div>
-                  <h3 className="font-black text-2xl text-[var(--text-primary)] tracking-tight">{t('common.team_targets')}</h3>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mt-1">{t('manager_dashboard.strategic_mission')}</p>
-               </div>
+              ))}
             </div>
-            <Link to="/kpi/team" className="text-[11px] font-black uppercase tracking-widest text-[var(--primary)] hover:text-indigo-300 transition-colors flex items-center gap-2 no-underline">
-               {t('manager_dashboard.assign')} <ChevronRight size={14} />
+            <Link to="/employees" className="block mt-10 p-4 text-center rounded-xl border border-[var(--border-subtle)] text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--primary)] hover:border-[var(--primary)]/30 transition-all no-underline">
+              {t('manager_dashboard.view_team')}
             </Link>
           </div>
-
-          <div className="grid grid-cols-2 gap-6">
-             <div className="p-8 rounded-2xl bg-[var(--primary)]/5 border border-[var(--primary)]/10 hover:border-[var(--primary)]/30 transition-all">
-                <p className="text-4xl font-black text-[var(--text-primary)] mb-2">8</p>
-                <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{t('manager_dashboard.active_kpi')}</p>
-             </div>
-             <div className="p-8 rounded-2xl bg-[var(--primary)]/5 border border-[var(--primary)]/10 hover:border-[var(--primary)]/30 transition-all">
-                <p className="text-4xl font-black text-[var(--text-primary)] mb-2">2</p>
-                <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{t('manager_dashboard.draft_missions')}</p>
-             </div>
-          </div>
-        </motion.div>
-
-        {/* TEAM PERFORMANCE (Indigo Track) */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="xl:col-span-2 nx-card p-10 border-[var(--primary)]/20 bg-[var(--primary)]/[0.02]">
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <h3 className="font-black text-2xl text-[var(--text-primary)] tracking-tight">{t('manager_dashboard.performance_analytics')}</h3>
-              <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mt-1">{t('manager_dashboard.execution_scores')}</p>
-            </div>
-            <div className="flex items-center gap-3 text-3xl font-black text-emerald-500">
-               {Number(stats.teamPerf || 0).toFixed(1)}%
-
-               <TrendingUp size={24} />
-            </div>
-          </div>
-
-          <div className="h-3 w-full bg-[var(--bg-elevated)] rounded-full overflow-hidden mb-12">
-             <motion.div 
-               initial={{ width: 0 }} 
-               animate={{ width: `${stats.teamPerf}%` }} 
-               className="h-full bg-gradient-to-r from-[var(--primary)] to-[#8b5cf6] shadow-[0_0_20px_rgba(99,102,241,0.3)]"
-             />
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-             <div className="p-6 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-                <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">{t('manager_dashboard.execution_velocity')}</p>
-                <p className="text-sm font-bold text-[var(--text-primary)]">{t('manager_dashboard.high')}</p>
-             </div>
-             <div className="p-6 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-                <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">{t('manager_dashboard.target_alignment')}</p>
-                <p className="text-sm font-bold text-[var(--text-primary)]">92%</p>
-             </div>
-             <div className="p-6 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-                <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">{t('manager_dashboard.resource_drain')}</p>
-                <p className="text-sm font-bold text-[var(--text-primary)]">{t('manager_dashboard.optimal')}</p>
-             </div>
-             <div className="p-6 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-                <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-1">{t('manager_dashboard.risk_profile')}</p>
-                <p className="text-sm font-bold text-[var(--text-primary)]">{t('manager_dashboard.low')}</p>
-             </div>
-          </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

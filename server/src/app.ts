@@ -180,16 +180,20 @@ let isBooted = false;
 // ─── STARTUP PROTOCOL ───────────────────────────────────────────────────────
 const runStartupTasks = async () => {
   console.log('[Startup] Executing background initialization...');
+  const { exec } = require('child_process');
+  const { promisify } = require('util');
+  const execAsync = promisify(exec);
+
   try {
-    const { execSync } = require('child_process');
-    
     // 1. Database Migrations
     console.log('[Startup] 1/3: Running Prisma migrations...');
-    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+    const { stdout, stderr } = await execAsync('npx prisma migrate deploy');
+    if (stdout) console.log(`[Migration] ${stdout}`);
+    if (stderr) console.warn(`[Migration-Warn] ${stderr}`);
     
     // 2. System Setup
     console.log('[Startup] 2/3: Initializing system records...');
-    require('./scripts/setup'); // Assuming it exports a function or runs on import
+    require('./scripts/setup'); 
     
     // 3. Role/Dept Updates
     console.log('[Startup] 3/3: Running data optimization scripts...');

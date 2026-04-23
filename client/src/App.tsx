@@ -23,6 +23,7 @@ import NexusAIInsight from './components/layout/NexusAIInsight';
 import { getLogoUrl } from './utils/logo';
 import { getStoredUser, getRankFromRole } from './utils/session';
 import SandboxHUD from './components/layout/SandboxHUD';
+import { storage, StorageKey } from './services/storage';
 
 import Signup from './pages/Signup';
 
@@ -32,9 +33,7 @@ import DevDashboard from './pages/dev/DevDashboard';
 import BillingLock from './pages/BillingLock';
 
 const ForceLogout = () => {
-  localStorage.removeItem('nexus_auth_token');
-  localStorage.removeItem('nexus_refresh_token');
-  localStorage.removeItem('nexus_user');
+  storage.clearSession();
   sessionStorage.clear();
   // Redirect to login after clearing
   window.location.replace('/');
@@ -90,15 +89,15 @@ const PageLoader = () => (
 );
 
 const ProtectedRoute = () => {
-  const token = localStorage.getItem('nexus_auth_token');
+  const token = storage.getItem(StorageKey.AUTH_TOKEN, null);
   if (!token) return <Navigate to="/" replace />;
   return <Layout />;
 };
 
 const AdminGuard = () => {
-  const devToken = localStorage.getItem('nexus_dev_token');
-  const firebaseToken = localStorage.getItem('nexus_dev_firebase_token');
-  const devMode = localStorage.getItem('nexus_dev_mode') === 'true';
+  const devToken = storage.getItem(StorageKey.DEV_TOKEN, null);
+  const firebaseToken = storage.getItem(StorageKey.DEV_FIREBASE_TOKEN, null);
+  const devMode = storage.getItem(StorageKey.DEV_MODE, 'false') === 'true';
 
   // Server-issued dev JWT (from PIN verification) or Firebase Google Identity
   const hasAccess = !!devToken || (firebaseToken && devMode);
@@ -110,25 +109,27 @@ const AdminGuard = () => {
 
 const Layout = () => {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const { isOpen: isAIOpen, setIsOpen: setIsAIOpen } = useAI();
   const [isCollapsed, setIsCollapsed] = useState(() => {
-    return localStorage.getItem('sidebar_collapsed') === 'true';
+    return storage.getItem(StorageKey.SIDEBAR_COLLAPSED, 'false') === 'true';
   });
 
-  const userStr = localStorage.getItem('nexus_user');
-  const user = userStr ? JSON.parse(userStr) : null;
+  const user = React.useMemo(() => {
+    return storage.getItem(StorageKey.USER, null);
+  }, []);
   const isImpersonating = user?.isImpersonating;
 
   const handleExitImpersonation = () => {
-    localStorage.removeItem('nexus_auth_token');
-    localStorage.removeItem('nexus_user');
+    storage.removeItem(StorageKey.AUTH_TOKEN);
+    storage.removeItem(StorageKey.USER);
     window.location.href = '/';
   };
 
   useEffect(() => {
-    localStorage.setItem('sidebar_collapsed', String(isCollapsed));
+    storage.setItem(StorageKey.SIDEBAR_COLLAPSED, String(isCollapsed));
   }, [isCollapsed]);
 
   const { settings } = useTheme();
@@ -197,7 +198,7 @@ const Layout = () => {
                 <Suspense fallback={<PageLoader />}>
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
-                      key={useLocation().pathname}
+                      key={location.pathname}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
@@ -273,7 +274,7 @@ const AppContent = () => {
   const WARNING_LIMIT = 60 * 1000; // 60s warning
 
   useEffect(() => {
-    const token = localStorage.getItem('nexus_auth_token');
+    const token = storage.getItem(StorageKey.AUTH_TOKEN, null);
     if (!token) return;
 
     let warningTimer: any;
@@ -305,22 +306,31 @@ const AppContent = () => {
       }, IDLE_LIMIT + WARNING_LIMIT);
     };
 
+    // --- DEBOUNCED ACTIVITY SHIELD ---
+    let debounceTimer: any;
+    const throttledReset = () => {
+      if (debounceTimer) return;
+      debounceTimer = setTimeout(() => {
+        resetTimers();
+        debounceTimer = null;
+      }, 2000); // Only re-calc timers every 2 seconds of activity
+    };
+
     const handleGlobalLogout = () => {
-      localStorage.removeItem('nexus_auth_token');
-      localStorage.removeItem('nexus_refresh_token');
-      localStorage.removeItem('nexus_user');
+      storage.clearSession();
       window.location.replace('/?reason=timeout');
     };
 
     const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-    activityEvents.forEach(evt => window.addEventListener(evt, resetTimers));
+    activityEvents.forEach(evt => window.addEventListener(evt, throttledReset));
     resetTimers();
 
     return () => {
-      activityEvents.forEach(evt => window.removeEventListener(evt, resetTimers));
+      activityEvents.forEach(evt => window.removeEventListener(evt, throttledReset));
       if (warningTimer) clearTimeout(warningTimer);
       if (logoutTimer) clearTimeout(logoutTimer);
       if (countdownInterval) clearInterval(countdownInterval);
+      if (debounceTimer) clearTimeout(debounceTimer);
     };
   }, []);
 
@@ -454,13 +464,15 @@ const AppContent = () => {
 export default function App() {
   // BUILD_ID: 2026-04-10_18:18Z - FORCE_IDENTITY_SYNC
   return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <AIProvider>
-          <AppContent />
-        </AIProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+    <PageErrorBoundary>
+      <ThemeProvider>
+        <BrowserRouter>
+          <AIProvider>
+            <AppContent />
+          </AIProvider>
+        </BrowserRouter>
+      </ThemeProvider>
+    </PageErrorBoundary>
   );
 }
 

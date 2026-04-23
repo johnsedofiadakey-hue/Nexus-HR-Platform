@@ -15,9 +15,9 @@ import { cn } from '../../utils/cn';
 
 // Visual preview swatches for each theme
 const THEME_SWATCHES: Record<ThemeName, { bg: string; accent: string; text: string }> = {
-  'sophisticated-cyan': { bg: '#FFFEFA', accent: '#0ea5e9', text: '#0f172a' },
-  'modern-ember': { bg: '#020617', accent: '#fb7185', text: '#f8fafc' },
-  'calm-flora': { bg: '#fefce8', accent: '#22c55e', text: '#1a2e05' },
+  'premium-monolith': { bg: '#020617', accent: '#6366f1', text: '#f8fafc' },
+  'premium-canvas': { bg: '#ffffff', accent: '#6366f1', text: '#0f172a' },
+  'premium-aero': { bg: '#f8fafc', accent: '#10b981', text: '#0f172a' },
 };
 
 export const ThemeSwitcher = () => {

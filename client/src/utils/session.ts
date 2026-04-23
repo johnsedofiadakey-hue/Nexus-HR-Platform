@@ -1,3 +1,6 @@
+import { storage, StorageKey } from '../services/storage';
+import { ROLE_LABELS, ROLE_RANK_MAP } from '../types/roles';
+
 export type SessionUser = {
   id?: string;
   role?: string;
@@ -11,67 +14,25 @@ export type SessionUser = {
   isImpersonating?: boolean;
 };
 
-export const ROLE_LABELS: Record<string, string> = {
-  DEV: 'System Developer',
-  MD: 'Managing Director',
-  DIRECTOR: 'Director',
-  HR_OFFICER: 'HR Officer',
-  IT_MANAGER: 'IT Manager',
-  IT_ADMIN: 'IT Admin',
-  MANAGER: 'Manager',
-  SUPERVISOR: 'Supervisor',
-  STAFF: 'Staff',
-  CASUAL: 'Casual Worker',
-};
-
-export const ROLE_RANKS: Record<string, number> = {
-  DEV: 100, 
-  MD: 90, 
-  SUPER_ADMIN: 90,
-  DIRECTOR: 85, 
-  HR_ADMIN: 85,
-  HR_OFFICER: 85, 
-  IT_ADMIN: 85,
-  IT_MANAGER: 85, 
-  HR: 85,
-  MANAGER: 70, 
-  SUPERVISOR: 60, 
-  STAFF: 50, 
-  CASUAL: 40,
-  EMPLOYEE: 50
-};
+export { ROLE_LABELS, ROLE_RANK_MAP as ROLE_RANKS };
 
 export const getRankFromRole = (role?: string): number => {
   if (!role) return 0;
   const normalized = role.toUpperCase();
-  if (normalized === 'MD' || normalized === 'MANAGING DIRECTOR' || normalized === 'SUPER_ADMIN') return 90;
-  return ROLE_RANKS[normalized] ?? 0;
+  return ROLE_RANK_MAP[normalized] ?? 0;
 };
 
 export const getStoredUser = (): SessionUser => {
-  try {
-    const raw = localStorage.getItem('nexus_user');
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return {};
-    // Always compute rank from role so it's never stale
-    const rank = getRankFromRole(parsed.role);
-    return { ...parsed, rank } as SessionUser;
-  } catch {
-    return {};
-  }
+  const parsed = storage.getItem(StorageKey.USER, {} as any);
+  if (!parsed || typeof parsed !== 'object') return {};
+  // Always compute rank from role so it's never stale
+  const rank = getRankFromRole(parsed.role);
+  return { ...parsed, rank } as SessionUser;
 };
 
 export const sanitizeSessionStorage = () => {
-  try {
-    const userRaw = localStorage.getItem('nexus_user');
-    if (userRaw) {
-      const parsed = JSON.parse(userRaw);
-      if (!parsed || typeof parsed !== 'object') {
-        localStorage.removeItem('nexus_user');
-      }
-    }
-  } catch {
-    localStorage.removeItem('nexus_user');
+  const parsed = storage.getItem(StorageKey.USER, null);
+  if (!parsed || typeof parsed !== 'object') {
+    storage.removeItem(StorageKey.USER);
   }
 };

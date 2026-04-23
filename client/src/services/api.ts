@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { storage, StorageKey } from './storage';
+import { User } from '../types/models';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -10,16 +12,20 @@ const api = axios.create({
 let isRefreshing = false;
 let refreshQueue: Array<(token: string | null) => void> = [];
 
-const storeSession = (payload: { token: string; refreshToken?: string; user?: unknown }) => {
-  localStorage.setItem('nexus_auth_token', payload.token);
-  if (payload.refreshToken) localStorage.setItem('nexus_refresh_token', payload.refreshToken);
-  if (payload.user) localStorage.setItem('nexus_user', JSON.stringify(payload.user));
+interface SessionPayload {
+  token: string;
+  refreshToken?: string;
+  user?: User;
+}
+
+const storeSession = (payload: SessionPayload) => {
+  storage.setItem(StorageKey.AUTH_TOKEN, payload.token);
+  if (payload.refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, payload.refreshToken);
+  if (payload.user) storage.setItem(StorageKey.USER, payload.user);
 };
 
 const clearSession = () => {
-  localStorage.removeItem('nexus_auth_token');
-  localStorage.removeItem('nexus_refresh_token');
-  localStorage.removeItem('nexus_user');
+  storage.clearSession();
 };
 
 const flushRefreshQueue = (token: string | null) => {
@@ -49,14 +55,14 @@ const performSilentRefresh = async (): Promise<string | null> => {
     });
   }
 
-  const refreshToken = localStorage.getItem('nexus_refresh_token');
+  const refreshToken = storage.getItem(StorageKey.REFRESH_TOKEN, null);
   if (!refreshToken) return null;
 
   isRefreshing = true;
   try {
     console.log('[API Interceptor] Proactively refreshing stale session...');
     const refreshUrl = `${api.defaults.baseURL}/auth/refresh`;
-    const { data } = await axios.post(refreshUrl, { refreshToken });
+    const { data } = await axios.post<SessionPayload>(refreshUrl, { refreshToken });
     
     storeSession(data);
     flushRefreshQueue(data.token);
@@ -73,7 +79,7 @@ const performSilentRefresh = async (): Promise<string | null> => {
 
 api.interceptors.request.use(
   async (config) => {
-    let token = localStorage.getItem('nexus_auth_token');
+    let token = storage.getItem(StorageKey.AUTH_TOKEN, null);
     
     // 1. Skip logic for refresh route
     if (config.url?.includes('/auth/refresh')) {
@@ -96,16 +102,16 @@ api.interceptors.request.use(
     }
 
     // DEV CONSOLE: Use server-issued dev JWT for /dev/ routes
-    const devToken = localStorage.getItem('nexus_dev_token');
+    const devToken = storage.getItem(StorageKey.DEV_TOKEN, null);
     if (devToken && config.url?.includes('/dev')) {
       config.headers = config.headers || {};
       (config.headers as any)['Authorization'] = `Bearer ${devToken}`;
     }
 
     // FIREBASE DEV MODE: Inject Google ID Token as fallback
-    const devMode = localStorage.getItem('nexus_dev_mode') === 'true';
+    const devMode = storage.getItem(StorageKey.DEV_MODE, 'false') === 'true';
     if (devMode) {
-      const fbToken = localStorage.getItem('nexus_dev_firebase_token');
+      const fbToken = storage.getItem(StorageKey.DEV_FIREBASE_TOKEN, null);
       if (fbToken) {
         config.headers = config.headers || {};
         (config.headers as any)['X-Dev-Firebase-Token'] = fbToken;
@@ -129,7 +135,7 @@ api.interceptors.response.use(
     const originalRequest = error.config as (typeof error.config & { _retry?: boolean });
 
     if (error.response?.status === 401 && !originalRequest?._retry && !originalRequest.url?.includes('/auth/refresh')) {
-      const refreshToken = localStorage.getItem('nexus_refresh_token');
+      const refreshToken = storage.getItem(StorageKey.REFRESH_TOKEN, null);
       
       console.warn(`[API Interceptor] 401 detected for: ${originalRequest.url}. Attempting refresh...`);
 
@@ -139,7 +145,7 @@ api.interceptors.response.use(
       if (window.location.pathname !== '/') {
           // Safeguard: Don't redirect to root if we are in the Shadow Zone (Central Portal)
           const isShadowZone = window.location.pathname === '/' || window.location.pathname.includes('/dev-portal') || window.location.pathname.includes('/nexus-master-console');
-          const hasDevSession = !!localStorage.getItem('nexus_dev_token') || (!!localStorage.getItem('nexus_dev_firebase_token') && localStorage.getItem('nexus_dev_mode') === 'true');
+          const hasDevSession = !!storage.getItem(StorageKey.DEV_TOKEN, null) || (!!storage.getItem(StorageKey.DEV_FIREBASE_TOKEN, null) && storage.getItem(StorageKey.DEV_MODE, 'false') === 'true');
           
           if (isShadowZone || hasDevSession) {
               console.warn('[API Interceptor] Error in Central Zone - Suppressing root redirect to preserve admin context.');
@@ -171,7 +177,7 @@ api.interceptors.response.use(
       try {
         console.log('[API Interceptor] Calling /auth/refresh...');
         const refreshUrl = `${api.defaults.baseURL}/auth/refresh`;
-        const { data } = await axios.post(refreshUrl, { refreshToken });
+        const { data } = await axios.post<SessionPayload>(refreshUrl, { refreshToken });
         
         console.log('[API Interceptor] Refresh successful. New access token acquired.');
         storeSession(data);

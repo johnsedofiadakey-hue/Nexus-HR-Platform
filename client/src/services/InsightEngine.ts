@@ -2,6 +2,8 @@
  * Nexus Insight Engine
  * High-performance heuristic analysis for the Intelligence Layer.
  */
+import api from './api';
+import { User } from '../types/models';
 
 export interface StrategicInsight {
     id: string;
@@ -26,12 +28,21 @@ export interface StrategicVerdict {
     suggestedTargets?: SuggestedTarget[];
 }
 
-import api from './api';
+// Data Shape Interfaces
+interface PerformanceData {
+    reviews: Array<{
+        reviewStage: string;
+        overallRating?: number | string;
+        weaknesses?: string;
+        developmentNeeds?: string;
+    }>;
+    currentStage?: string;
+}
 
 export const analyzeContext = async (pathname: string, data: any): Promise<StrategicVerdict> => {
     let contextType = 'Organizational Health';
 
-    // Determine Context Type string for Gemini
+    // Determine Context Type string for AI/Heuristics
     if (pathname.match(/\/employees\/[a-zA-Z0-9-]+/) && data?.fullName) contextType = 'Employee Profile';
     else if (pathname.includes('/leave')) contextType = 'Leave Management';
     else if (pathname.includes('/recruitment')) contextType = 'Recruitment Pipeline';
@@ -48,39 +59,35 @@ export const analyzeContext = async (pathname: string, data: any): Promise<Strat
     }
 
     // --- FALLBACK HEURISTICS ---
-
-    if (contextType === 'Employee Profile') {
-        return analyzeEmployee(data);
+    switch (contextType) {
+        case 'Employee Profile':
+            return analyzeEmployee(data as User);
+        case 'Leave Management':
+            return analyzeLeave(data);
+        case 'Recruitment Pipeline':
+            return analyzeRecruitment(data);
+        case 'Performance Appraisal':
+            return analyzePerformance(data as PerformanceData);
+        default:
+            return {
+                title: "Organizational Pulse",
+                summary: "The system is currently monitoring global operations. Statistical variance is within expected parameters.",
+                recommendation: "Maintain current operational tempo. Monitor High-Impact KPI targets.",
+                confidence: 0.94,
+                insights: [
+                    { id: '1', type: 'SUCCESS', label: 'Stability', description: 'System-wide uptime and deployment sync at 99.9%.', impact: 10 },
+                    { id: '2', type: 'NEUTRAL', label: 'Efficiency', description: 'Resource allocation optimized across active departments.', impact: 45 }
+                ]
+            };
     }
-
-    if (contextType === 'Leave Management') {
-        return analyzeLeave(data);
-    }
-
-    if (contextType === 'Recruitment Pipeline') {
-        return analyzeRecruitment(data);
-    }
-
-    if (contextType === 'Performance Appraisal') {
-        return analyzePerformance(data);
-    }
-
-    // Default Fallback: Organizational Health
-    return {
-        title: "Organizational Pulse",
-        summary: "The system is currently monitoring global operations. Statistical variance is within expected parameters for the current fiscal cycle.",
-        recommendation: "Maintain current operational tempo. Monitor High-Impact KPI targets for end-of-quarter alignment.",
-        confidence: 0.94,
-        insights: [
-            { id: '1', type: 'SUCCESS', label: 'Stability', description: 'System-wide uptime and deployment sync at 99.9%.', impact: 10 },
-            { id: '2', type: 'NEUTRAL', label: 'Efficiency', description: 'Resource allocation optimized across 12 active departments.', impact: 45 }
-        ]
-    };
 };
 
-const analyzeEmployee = (employee: any): StrategicVerdict => {
-    const kpiScore = employee.kpiSummary?.averageScore || 0;
-    const riskScore = employee.riskProfile?.score || 0;
+const analyzeEmployee = (employee: User): StrategicVerdict => {
+    const kpiSummary = (employee as any).kpiSummary; 
+    const riskProfile = (employee as any).riskProfile;
+    
+    const kpiScore = kpiSummary?.averageScore || 0;
+    const riskScore = riskProfile?.score || 0;
     
     let title = "Talent Trajectory";
     let summary = `${employee.fullName} is demonstrating stable performance within the ${employee.departmentObj?.name || 'organization'}.`;
@@ -98,11 +105,11 @@ const analyzeEmployee = (employee: any): StrategicVerdict => {
     if (riskScore >= 10) {
         insights.push({ id: 'e2', type: 'CRITICAL', label: 'Retention Risk', description: 'Unresolved disciplinary or query history detected.', impact: 70 });
         summary = `Attention required. ${employee.fullName}'s internal risk profile has reached a critical threshold.`;
-        recommendation = "Initiate HR intervention or 1-on-1 counseling to address underlying friction.";
+        recommendation = "Initiate HR intervention or 1-on-1 counseling.";
     }
 
     // Add generic join date insight if recently joined
-    const joinDate = new Date(employee.joinDate);
+    const joinDate = new Date(employee.joinDate || Date.now());
     const monthsSinceJoin = (new Date().getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
     if (monthsSinceJoin < 3) {
         insights.push({ id: 'e3', type: 'NEUTRAL', label: 'Onboarding Phase', description: 'Operative is still within the first 90 days of integration.', impact: 20 });
@@ -133,7 +140,7 @@ const analyzeRecruitment = (_data: any): StrategicVerdict => {
     return {
         title: "Pipeline Velocity",
         summary: "Average time-to-hire has increased by 14% in the last 30-day window.",
-        recommendation: "Streamline technical interview stage or increase recruiter bandwidth for high-priority roles.",
+        recommendation: "Streamline technical interview stage or increase recruiter bandwidth.",
         confidence: 0.91,
         insights: [
             { id: 'r1', type: 'CRITICAL', label: 'Candidate Drop-off', description: 'High abandonment rate at the "Technical Assessment" stage.', impact: 75 },
@@ -142,10 +149,10 @@ const analyzeRecruitment = (_data: any): StrategicVerdict => {
     };
 };
 
-const analyzePerformance = (data: any): StrategicVerdict => {
-    const reviews = data?.reviews || [];
-    const selfReview = reviews.find((r: any) => r.reviewStage === 'SELF_REVIEW');
-    const managerReview = reviews.find((r: any) => r.reviewStage === 'MANAGER_REVIEW');
+const analyzePerformance = (data: PerformanceData): StrategicVerdict => {
+    const reviews = data.reviews || [];
+    const selfReview = reviews.find((r) => r.reviewStage === 'SELF_REVIEW');
+    const managerReview = reviews.find((r) => r.reviewStage === 'MANAGER_REVIEW');
 
     const selfScore = selfReview ? Number(selfReview.overallRating) : 0;
     const managerScore = managerReview ? Number(managerReview.overallRating) : 0;
@@ -153,7 +160,7 @@ const analyzePerformance = (data: any): StrategicVerdict => {
 
     let title = "Meritocracy Audit";
     let summary = "The system is analyzing the current appraisal alignment across all evaluation areas.";
-    let recommendation = "Ensure all reviewers have completed their qualitative commentary before final calibration.";
+    let recommendation = "Ensure all reviewers have completed their qualitative commentary.";
     let insights: StrategicInsight[] = [];
 
     if (scoreDelta > 30) {
@@ -164,34 +171,21 @@ const analyzePerformance = (data: any): StrategicVerdict => {
     }
 
     if (managerScore < 40 && selfScore > 80) {
-        insights.push({ id: 'p3', type: 'WARNING', label: 'Potential Bias', description: 'High discrepancy suggests possible outlier rating behavior or unrecognized achievements.', impact: 60 });
+        insights.push({ id: 'p3', type: 'WARNING', label: 'Potential Bias', description: 'High discrepancy suggests possible outlier rating behavior.', impact: 60 });
         recommendation = "Review manager's previous rating history for systemic harshness skew.";
-    }
-
-    if (data?.currentStage === 'FINAL_REVIEW') {
-        title = "Strategic Calibration";
-        summary = "Verification Phase: Awaiting final institutional certification of the 20/80 weighted result.";
-        insights.push({ id: 'p4', type: 'NEUTRAL', label: '20/80 Model', description: 'Baseline suggests a fair institutional score based on balanced oversight.', impact: 40 });
     }
 
     // Suggested Growth Targets based on weaknesses/development needs
     const suggestedTargets: SuggestedTarget[] = [];
-    const weaknesses = data?.reviews?.find((r: any) => r.reviewStage === 'MANAGER_REVIEW')?.weaknesses || '';
-    const devNeeds = data?.reviews?.find((r: any) => r.reviewStage === 'MANAGER_REVIEW')?.developmentNeeds || '';
+    const managerData = reviews.find((r) => r.reviewStage === 'MANAGER_REVIEW');
+    const weaknesses = managerData?.weaknesses || '';
+    const devNeeds = managerData?.developmentNeeds || '';
 
     if (weaknesses.toLowerCase().includes('communication') || devNeeds.toLowerCase().includes('communication')) {
-        suggestedTargets.push({ title: 'Communication Mastery', description: 'Complete a professional communication workshop and demonstrate improved clarity in weekly briefings.', priority: 'MEDIUM' });
+        suggestedTargets.push({ title: 'Communication Mastery', description: 'Complete a professional communication workshop.', priority: 'MEDIUM' });
     }
     if (weaknesses.toLowerCase().includes('technical') || devNeeds.toLowerCase().includes('skill')) {
-        suggestedTargets.push({ title: 'Technical Upskilling', description: 'Acquire certification in the identified technical gap area within the next 90 days.', priority: 'HIGH' });
-    }
-    if (weaknesses.toLowerCase().includes('leadership') || weaknesses.toLowerCase().includes('management')) {
-        suggestedTargets.push({ title: 'Leadership Foundational', description: 'Mentor a junior teammate for one quarter and provide a structured feedback report.', priority: 'HIGH' });
-    }
-
-    // Default target if nothing specific detected
-    if (suggestedTargets.length === 0 && (data?.reviews?.length || 0) > 0) {
-        suggestedTargets.push({ title: 'Operational Excellence', description: 'Refine current workflows to increase personal output by 15% without sacrificing quality.', priority: 'LOW' });
+        suggestedTargets.push({ title: 'Technical Upskilling', description: 'Acquire certification in the identified technical gap area.', priority: 'HIGH' });
     }
 
     return {

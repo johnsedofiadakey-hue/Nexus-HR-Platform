@@ -8,7 +8,13 @@ const SandboxHUD = () => {
     const isSandbox = localStorage.getItem('nexus_is_sandbox') === 'true';
     if (!isSandbox) return null;
 
-    const user = JSON.parse(localStorage.getItem('nexus_user') || '{}');
+    const user = React.useMemo(() => {
+        try {
+            return JSON.parse(localStorage.getItem('nexus_user') || '{}');
+        } catch (e) {
+            return {};
+        }
+    }, []);
 
     const tiers = [
         { name: 'Staff View', role: 'STAFF', email: 'charlie@demo-sand.com', icon: User },

@@ -319,15 +319,8 @@ export const processLeave = async (req: Request, res: Response) => {
     // 2. Manager / HR Processing (Rank >= 60)
     else if (rank >= 60) {
       if (rank >= 85) {
-        // HR/MD (Rank 85+) can move directly to APPROVED or handle MD_REVIEW
-        updated = await LeaveService.managerReview(id, actorId, action === 'APPROVE', comment);
-        // If HR/MD approves, we force it to APPROVED status if it was in any review stage
-        if (action === 'APPROVE') {
-          updated = await prisma.leaveRequest.update({
-            where: { id },
-            data: { status: 'APPROVED' }
-          });
-        }
+        // HR/MD (Rank 85+) can move directly to APPROVED
+        updated = await LeaveService.mdFinalReview(id, actorId, action === 'APPROVE', comment);
       } else if (leave.status === 'MD_REVIEW' && rank >= 90) {
         updated = await LeaveService.mdFinalReview(id, actorId, action === 'APPROVE', comment);
       } else if (['SUBMITTED', 'RELIEVER_ACCEPTED', 'MANAGER_REVIEW'].includes(leave.status)) {

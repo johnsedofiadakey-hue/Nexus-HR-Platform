@@ -29,7 +29,12 @@ const AnnouncementBanner = () => {
             const data = (Array.isArray(res.data) ? res.data : []).filter(Boolean);
             
             // Filter out dismissed announcements
-            const dismissedIds = JSON.parse(localStorage.getItem('dismissed_announcements') || '[]');
+            let dismissedIds: string[] = [];
+            try {
+                dismissedIds = JSON.parse(localStorage.getItem('dismissed_announcements') || '[]');
+            } catch (e) {
+                dismissedIds = [];
+            }
             const filtered = data.filter((a: Announcement) => a && !dismissedIds.includes(a.id));
             
             setAnnouncements(filtered);
@@ -41,7 +46,14 @@ const AnnouncementBanner = () => {
 }, []);
 
 const handleDismiss = (id: string) => {
-    const dismissedIds = JSON.parse(localStorage.getItem('dismissed_announcements') || '[]');
+    let dismissedIds: string[] = [];
+    try {
+        dismissedIds = JSON.parse(localStorage.getItem('dismissed_announcements') || '[]');
+    } catch (e) {
+        dismissedIds = [];
+    }
+    if (!Array.isArray(dismissedIds)) dismissedIds = [];
+    
     if (!dismissedIds.includes(id)) {
         dismissedIds.push(id);
         localStorage.setItem('dismissed_announcements', JSON.stringify(dismissedIds));

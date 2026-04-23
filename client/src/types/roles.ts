@@ -1,30 +1,41 @@
 export const RoleRank = {
     DEV: 100,
     MD: 90,
+    SUPER_ADMIN: 90,
+    DIRECTOR: 85,
+    HR_ADMIN: 85,
     HR_OFFICER: 85,
+    IT_ADMIN: 85,
     IT_MANAGER: 85,
-    DIRECTOR: 80,
+    HR: 85,
+    MID_MANAGER: 75,
     MANAGER: 70,
     SUPERVISOR: 60,
     STAFF: 50,
+    EMPLOYEE: 50,
     CASUAL: 40
 } as const;
 
-export type RoleRankType = typeof RoleRank[keyof typeof RoleRank];
+export type RoleName = keyof typeof RoleRank;
+export type RoleRankType = typeof RoleRank[RoleName];
 
 export const ROLE_RANK_MAP: Record<string, number> = {
-    DEV: RoleRank.DEV,
-    MD: RoleRank.MD,
-    HR_OFFICER: RoleRank.HR_OFFICER,
-    IT_MANAGER: RoleRank.IT_MANAGER,
-    DIRECTOR: RoleRank.DIRECTOR,
-    MANAGER: RoleRank.MANAGER,
-    SUPERVISOR: RoleRank.SUPERVISOR,
-    STAFF: RoleRank.STAFF,
-    CASUAL: RoleRank.CASUAL,
-    
-    // Support aliases
-    IT_ADMIN: RoleRank.IT_MANAGER,
-    HR_ADMIN: RoleRank.HR_OFFICER,
-    HR_MANAGER: RoleRank.HR_OFFICER // Self-healing fallback
+    ...RoleRank,
+    // Human readable aliases
+    'MANAGING DIRECTOR': RoleRank.MD,
+    'SYSTEM DEVELOPER': RoleRank.DEV
+};
+
+export const ROLE_LABELS: Record<string, string> = {
+  DEV: 'System Developer',
+  MD: 'Managing Director',
+  DIRECTOR: 'Director',
+  HR_OFFICER: 'HR Officer',
+  IT_MANAGER: 'IT Manager',
+  IT_ADMIN: 'IT Admin',
+  MANAGER: 'Manager',
+  MID_MANAGER: 'Mid-Level Manager',
+  SUPERVISOR: 'Supervisor',
+  STAFF: 'Staff',
+  CASUAL: 'Casual Worker',
 };

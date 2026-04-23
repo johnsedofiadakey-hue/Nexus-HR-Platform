@@ -226,11 +226,13 @@ body {
   --primary-light: #a78bfa;
   --primary-rgb: 139, 92, 246;
   --accent: #06b6d4;
+  --accent-rgb: 6, 182, 212;
   --growth: #8b5cf6;
   --growth-light: #a78bfa;
   
   --bg-main: #09090b;
   --bg-card: #121215; 
+  --bg-card-rgb: 18, 18, 21;
   --bg-elevated: #18181b;
   --bg-input: #09090b;
   
@@ -261,11 +263,13 @@ body {
   --primary-light: #6366f1;
   --primary-rgb: 79, 70, 229;
   --accent: #0ea5e9;
+  --accent-rgb: 14, 165, 233;
   --growth: #7c3aed;
   --growth-light: #8b5cf6;
   
   --bg-main: #f9fafb;
   --bg-card: #ffffff;
+  --bg-card-rgb: 255, 255, 255;
   --bg-elevated: #f3f4f6;
   --bg-input: #ffffff;
   
@@ -719,41 +723,72 @@ input[type="range"].nx-range::-webkit-slider-thumb:hover {
    NEXUS AI INSIGHT UTILITIES
    Special branding for the Intelligence Layer.
    ───────────────────────────────────────────────────────────────────────────── */
-.ai-glow-primary {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.1);
+/* ─────────────────────────────────────────────────────────────────────────────
+   NEXUS PREMIUM+ DESIGN SYSTEM (Next-Gen Visual Layer)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.premium-glass {
+  background: rgba(var(--bg-card-rgb, 18, 18, 21), 0.7);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }
 
-.ai-gradient-text {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.bg-glow-radial {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
 }
 
-.ai-neural-bg {
-  background-image: radial-gradient(circle at 2px 2px, var(--border-subtle) 1px, transparent 0);
-  background-size: 24px 24px;
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(0.98); }
-}
-
-.ai-border-glow {
+.border-glow-premium {
   position: relative;
 }
 
-.ai-border-glow::after {
+.border-glow-premium::before {
   content: '';
   position: absolute;
   inset: -1px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
   border-radius: inherit;
-  z-index: -1;
-  opacity: 0.5;
-  filter: blur(2px);
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.5), transparent, rgba(var(--primary-rgb), 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
+
+/* Typography Enhancements */
+.tracking-ultra {
+  letter-spacing: -0.05em;
+}
+
+.text-fluid-h1 {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+}
+
+/* Micro-animations */
+.hover-float {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-float:hover {
+  transform: translateY(-6px) scale(1.02);
+}
+
+.pulse-primary {
+  box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4);
+  animation: pulse-primary 2s infinite;
+}
+
+@keyframes pulse-primary {
+  0% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(var(--primary-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0); }
+}
+
