@@ -86,7 +86,43 @@ export const getSettings = async (organizationId = 'default-tenant', isAdmin = f
     }
   }) as any);
 
-  if (!org) return null;
+  if (!org) {
+    console.warn('[SettingsService] No organization found for ID:', organizationId, '- Using system fallback');
+    return {
+      companyName: 'Nexus HR Platform',
+      name: 'Nexus HR Platform',
+      subtitle: 'Premium HRM OS',
+      companyLogoUrl: '/favicon.ico',
+      logoUrl: '/favicon.ico',
+      primaryColor: '#4F46E5',
+      secondaryColor: '#1E293B',
+      accentColor: '#F59E0B',
+      textColor: '#FFFFFF',
+      sidebarColor: '#080c16',
+      themePreset: 'nexus-dark',
+      bgMain: '#080c16',
+      bgCard: '#111827',
+      textPrimary: '#ffffff',
+      textSecondary: '#94a3b8',
+      textMuted: '#64748b',
+      sidebarBg: '#080c16',
+      sidebarActive: '#1e293b',
+      sidebarText: '#ffffff',
+      bgElevated: '#1f2937',
+      bgInput: '#111827',
+      borderSubtle: 'rgba(255,255,255,0.05)',
+      textInverse: '#000000',
+      successColor: '#10b981',
+      warningColor: '#f59e0b',
+      errorColor: '#ef4444',
+      infoColor: '#06b6d4',
+      defaultLeaveAllowance: 24,
+      language: 'en',
+      plan: 'ENTERPRISE',
+      currency: 'GNF',
+      isAiEnabled: true
+    };
+  }
 
   // Fallback to Global (Master) prices if not set on this tenant
   let pricing = {
@@ -101,28 +137,32 @@ export const getSettings = async (organizationId = 'default-tenant', isAdmin = f
   };
 
   if (organizationId !== 'default-tenant' && (!pricing.monthlyPriceGHS || !pricing.paystackPublicKey)) {
-    const master = await (prisma.systemSettings.findUnique({
-      where: { organizationId: 'default-tenant' },
-      select: {
-          monthlyPriceGHS: true,
-          annualPriceGHS: true,
-          currency: true,
-          monthlyPrice: true,
-          annualPrice: true,
-          trialDays: true,
-          paystackPublicKey: true,
-          paystackPayLink: true
+    try {
+      const master = await (prisma.systemSettings.findUnique({
+        where: { organizationId: 'default-tenant' },
+        select: {
+            monthlyPriceGHS: true,
+            annualPriceGHS: true,
+            currency: true,
+            monthlyPrice: true,
+            annualPrice: true,
+            trialDays: true,
+            paystackPublicKey: true,
+            paystackPayLink: true
+        }
+      }) as any);
+      if (master) {
+        pricing.monthlyPriceGHS = pricing.monthlyPriceGHS ?? master.monthlyPriceGHS;
+        pricing.annualPriceGHS = pricing.annualPriceGHS ?? master.annualPriceGHS;
+        pricing.currency = pricing.currency ?? master.currency;
+        pricing.monthlyPrice = pricing.monthlyPrice ?? master.monthlyPrice;
+        pricing.annualPrice = pricing.annualPrice ?? master.annualPrice;
+        pricing.trialDays = pricing.trialDays ?? master.trialDays;
+        pricing.paystackPublicKey = pricing.paystackPublicKey ?? master.paystackPublicKey;
+        pricing.paystackPayLink = pricing.paystackPayLink ?? master.paystackPayLink;
       }
-    }) as any);
-    if (master) {
-      pricing.monthlyPriceGHS = pricing.monthlyPriceGHS ?? master.monthlyPriceGHS;
-      pricing.annualPriceGHS = pricing.annualPriceGHS ?? master.annualPriceGHS;
-      pricing.currency = pricing.currency ?? master.currency;
-      pricing.monthlyPrice = pricing.monthlyPrice ?? master.monthlyPrice;
-      pricing.annualPrice = pricing.annualPrice ?? master.annualPrice;
-      pricing.trialDays = pricing.trialDays ?? master.trialDays;
-      pricing.paystackPublicKey = pricing.paystackPublicKey ?? master.paystackPublicKey;
-      pricing.paystackPayLink = pricing.paystackPayLink ?? master.paystackPayLink;
+    } catch (e) {
+      console.error('[SettingsService] Master lookup failed:', e);
     }
   }
 

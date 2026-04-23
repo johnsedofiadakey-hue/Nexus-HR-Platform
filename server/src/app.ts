@@ -345,7 +345,11 @@ import { errorLogger } from './services/error-log.service';
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   errorLogger.log('GlobalErrorHandler', err);
-  res.status(500).json({ success: false, message: 'Internal Server Error' });
+  res.status(500).json({ 
+    success: false, 
+    message: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
+  });
 });
 
 // ─── START ──────────────────────────────────────────────────────────────────
