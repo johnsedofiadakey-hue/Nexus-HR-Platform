@@ -15,7 +15,7 @@ export class DemoSeederService {
       { name: 'Revenue Marketing' }
     ];
 
-    const createdDepts = [];
+    const createdDepts: any[] = [];
     for (const d of departments) {
       const dept = await prisma.department.create({
         data: {
