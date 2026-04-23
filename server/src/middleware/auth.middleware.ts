@@ -52,7 +52,28 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string; role?: string; name?: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: string; role?: string; name?: string; organizationId?: string };
+
+    // ── SANDBOX RESILIENCE BYPASS ──
+    // If this is a sandbox token, we prioritize simulation stability over strict DB lookup
+    // This prevents "Ghost Logouts" if the database is in a cold-start state or the seeded user is being refreshed.
+    if (decoded.organizationId === 'sandbox-org-001') {
+      (req as any).user = {
+        id: decoded.id,
+        role: decoded.role || 'MD',
+        name: decoded.name || 'Sandbox Operator',
+        organizationId: 'sandbox-org-001',
+        rank: getRoleRank(decoded.role || 'MD'),
+      };
+
+      return tenantContext.run({
+        organizationId: 'sandbox-org-001',
+        userId: decoded.id,
+        role: decoded.role || 'MD'
+      }, () => {
+        next();
+      });
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },

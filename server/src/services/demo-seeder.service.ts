@@ -1,177 +1,102 @@
 import prisma from '../prisma/client';
-import bcrypt from 'bcryptjs';
-import { maybeEncrypt } from '../utils/encryption';
+import { hash } from 'bcryptjs';
 
 export class DemoSeederService {
-  /**
-   * Seeds a professional dataset for a given organization.
-   * Ensures absolute isolation by only operating on data within organizationId.
-   */
   static async seedTenantData(organizationId: string) {
-    console.log(`[DemoSeeder] Initiating professional seed for Org: ${organizationId}`);
+    console.log(`[DemoSeeder] Initializing High-End Environment for ${organizationId}...`);
 
-    const hash = async (pw: string) => await bcrypt.hash(pw, 12);
-    const commonPass = await hash('NexusDemo@2025');
-
-    // 1. Create Core Departments
-    const depts = [
-      { name: 'Executive Suite', description: 'Leadership and Strategy' },
-      { name: 'Human Resources', description: 'People and Culture' },
-      { name: 'Finance & Accounts', description: 'Financial Operations' },
-      { name: 'IT & Infrastructure', description: 'Technology and Security' },
-      { name: 'Operations', description: 'Core Business Logistics' },
-      { name: 'Sales & Marketing', description: 'Growth and Branding' },
+    // 1. Create High-End Departments
+    const departments = [
+      { name: 'Executive Strategy', code: 'EXEC', color: '#6366F1' },
+      { name: 'Human Capital', code: 'HR', color: '#EC4899' },
+      { name: 'Financial Operations', code: 'FIN', color: '#10B981' },
+      { name: 'Product Engineering', code: 'ENG', color: '#3B82F6' },
+      { name: 'Global Sales', code: 'SALES', color: '#F59E0B' },
+      { name: 'Revenue Marketing', code: 'MKTG', color: '#8B5CF6' }
     ];
 
-    const createdDepts = await Promise.all(
-      depts.map(d => prisma.department.create({
-        data: { name: d.name, organizationId }
-      }))
-    );
-
-    const getDeptId = (name: string) => createdDepts.find(d => d.name === name)?.id;
-
-    // 2. Create MD (Managing Director)
-    const md = await prisma.user.create({
-      data: {
-        organizationId,
-        fullName: 'Executive Director',
-        email: `md@demo-${organizationId.slice(0, 4)}.com`,
-        passwordHash: commonPass,
-        role: 'MD',
-        jobTitle: 'Managing Director',
-        employeeCode: 'DEMO-001',
-        departmentId: getDeptId('Executive Suite'),
-        status: 'ACTIVE',
-        joinDate: new Date('2023-01-01'),
-        leaveBalance: 30,
-        leaveAllowance: 30,
-        salary: 15000,
-        currency: 'USD',
-        salaryEnc: maybeEncrypt('15000')
-      }
-    });
-
-    // 3. Create Key Managers
-    const hrManager = await prisma.user.create({
-      data: {
-        organizationId,
-        fullName: 'Sarah Jenkins',
-        email: `hr@demo-${organizationId.slice(0, 4)}.com`,
-        passwordHash: commonPass,
-        role: 'HR_OFFICER',
-        jobTitle: 'HR Manager',
-        employeeCode: 'DEMO-002',
-        departmentId: getDeptId('Human Resources'),
-        supervisorId: md.id,
-        status: 'ACTIVE',
-        joinDate: new Date('2023-06-15'),
-        salary: 8500,
-        currency: 'USD',
-        salaryEnc: maybeEncrypt('8500')
-      }
-    });
-
-    const itManager = await prisma.user.create({
-      data: {
-        organizationId,
-        fullName: 'David Tech',
-        email: `it@demo-${organizationId.slice(0, 4)}.com`,
-        passwordHash: commonPass,
-        role: 'IT_MANAGER',
-        jobTitle: 'IT Infrastructure Manager',
-        employeeCode: 'DEMO-003',
-        departmentId: getDeptId('IT & Infrastructure'),
-        supervisorId: md.id,
-        status: 'ACTIVE',
-        joinDate: new Date('2023-08-20'),
-        salary: 9000,
-        currency: 'USD',
-        salaryEnc: maybeEncrypt('9000')
-      }
-    });
-
-    // 4. Create Staff
-    const staffData = [
-      { name: 'Alice Wong', title: 'Senior Accountant', dept: 'Finance & Accounts', supervisor: md.id, role: 'MANAGER' },
-      { name: 'Bob Roberts', title: 'Operations Lead', dept: 'Operations', supervisor: md.id, role: 'MANAGER' },
-      { name: 'Charlie Dean', title: 'Fullstack Developer', dept: 'IT & Infrastructure', supervisor: itManager.id, role: 'STAFF' },
-      { name: 'Diana Prince', title: 'Social Media Strategist', dept: 'Sales & Marketing', supervisor: md.id, role: 'STAFF' },
-    ];
-
-    for (const [i, s] of staffData.entries()) {
-      await prisma.user.create({
+    const createdDepts = [];
+    for (const d of departments) {
+      const dept = await prisma.department.create({
         data: {
+          name: d.name,
           organizationId,
-          fullName: s.name,
-          email: `${s.name.split(' ')[0].toLowerCase()}@demo-${organizationId.slice(0, 4)}.com`,
-          passwordHash: commonPass,
-          role: s.role,
-          jobTitle: s.title,
-          employeeCode: `DEMO-10${i}`,
-          departmentId: getDeptId(s.dept),
-          supervisorId: s.supervisor,
-          status: 'ACTIVE',
-          joinDate: new Date('2024-01-10'),
-          salary: 5000,
-          currency: 'USD',
-          salaryEnc: maybeEncrypt('5000')
+          code: d.code,
+          color: d.color
         }
       });
+      createdDepts.push(dept);
     }
 
-    // 5. Create Sample Announcements
-    await prisma.announcement.create({
-      data: {
-        organizationId,
-        title: 'Welcome to the New HR Portal',
-        content: 'We are excited to launch Nexus HR Platform. Please update your profiles and review the employee handbook.',
-        priority: 'HIGH',
-        createdById: md.id,
-        targetAudience: 'EVERYONE',
-      }
-    });
+    const commonPass = await hash('NexusDemo@2025', 10);
 
-    await prisma.announcement.create({
-      data: {
-        organizationId,
-        title: 'Quarterly Town Hall',
-        content: 'Join us this Friday at 3:00 PM in the main conference room for our Q3 strategy update.',
-        priority: 'MEDIUM',
-        createdById: md.id,
-        targetAudience: 'EVERYONE',
-      }
-    });
+    // 2. Provision High-Level Executives (Directors)
+    const executives = [
+        { name: 'Sarah Montgomery', role: 'MD', email: `md@demo-sand.com`, title: 'Chief Executive Officer', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah' },
+        { name: 'Julian Vance', role: 'MD', email: `finance@demo-sand.com`, title: 'Chief Financial Officer', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Julian' }
+    ];
 
-    await prisma.announcement.create({
-      data: {
-        organizationId,
-        title: 'Planned IT Maintenance',
-        content: 'The internal server will be down for maintenance this Sunday between 2:00 AM and 5:00 AM.',
-        priority: 'LOW',
-        createdById: itManager.id,
-        targetAudience: 'EVERYONE',
-      }
-    });
-
-    // 6. Create Initial Leave Context
-    const staffUser = await prisma.user.findFirst({ where: { organizationId, role: 'STAFF' } });
-    if (staffUser) {
-        await prisma.leaveRequest.create({
+    for (const exec of executives) {
+        await prisma.user.create({
             data: {
+                fullName: exec.name,
+                email: exec.email,
+                password: commonPass,
+                role: exec.role,
+                status: 'ACTIVE',
                 organizationId,
-                employeeId: staffUser.id,
-                leaveType: 'Annual',
-                startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-                reason: 'Family Vacation',
-                status: 'SUBMITTED',
-                leaveDays: 5
+                jobTitle: exec.title,
+                avatar: exec.avatar,
+                departmentId: createdDepts.find(d => d.code === 'EXEC')?.id
             }
         });
     }
 
-    console.log(`[DemoSeeder] Seed successfully completed for Org: ${organizationId}`);
-    return { mdEmail: md.email, password: 'NexusDemo@2025' };
+    // 3. Populate Professional Staff
+    const staffTemplate = [
+        { name: 'Alice Thompson', role: 'MANAGER', dept: 'HR', title: 'HR Director', email: 'alice@demo-sand.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alice' },
+        { name: 'Marcus Chen', role: 'MANAGER', dept: 'ENG', title: 'Engineering Lead', email: 'marcus@demo-sand.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus' },
+        { name: 'Charlie Davis', role: 'STAFF', dept: 'ENG', title: 'Senior Developer', email: 'charlie@demo-sand.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie' },
+        { name: 'Elena Rodriguez', role: 'STAFF', dept: 'FIN', title: 'Senior Auditor', email: 'elena@demo-sand.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elena' },
+        { name: 'David Kim', role: 'STAFF', dept: 'SALES', title: 'Account Executive', email: 'david@demo-sand.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David' }
+    ];
+
+    for (const s of staffTemplate) {
+      await prisma.user.create({
+        data: {
+          fullName: s.name,
+          email: s.email,
+          password: commonPass,
+          role: s.role,
+          status: 'ACTIVE',
+          organizationId,
+          departmentId: createdDepts.find(d => d.code === s.dept)?.id,
+          jobTitle: s.title,
+          avatar: s.avatar
+        }
+      });
+    }
+
+    // 4. Institutional Announcements
+    await prisma.announcement.createMany({
+      data: [
+        {
+          title: 'Q2 Strategic Roadmap Unveiled',
+          content: 'We are excited to share our vision for the upcoming quarter, focusing on global expansion and AI-driven efficiency.',
+          importance: 'HIGH',
+          organizationId,
+          type: 'STRATEGY'
+        },
+        {
+          title: 'New Health & Wellness Initiative',
+          content: 'Starting next month, all employees will have access to our subsidized premium health membership program.',
+          importance: 'MEDIUM',
+          organizationId,
+          type: 'BENEFITS'
+        }
+      ]
+    });
+
+    console.log(`[DemoSeeder] High-End Environment Provisioned for ${organizationId}`);
   }
 }
