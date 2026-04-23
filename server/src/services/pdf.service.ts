@@ -40,7 +40,7 @@ export class PdfExportService {
       doc.on('error', (err) => reject(err));
 
       try {
-        // ─── 1. Async Header Rendering (Synchronized) ───
+        // --- 1. Async Header Rendering (Synchronized) ---
         await this.renderHeader(doc, org, primaryColor);
         
         doc.moveDown(5);
@@ -60,7 +60,7 @@ export class PdfExportService {
 
         doc.moveDown(3);
 
-        // ─── 2. Document Content ───
+        // --- 2. Document Content ---
         if (type === 'TARGET') {
           this.renderTargetContent(doc, content, primaryColor);
         } else if (type === 'TARGET_ROADMAP') {
@@ -79,7 +79,7 @@ export class PdfExportService {
           this.renderBoardReportContent(doc, content, primaryColor);
         }
 
-        // ─── 3. Finalization Overlay ───
+        // --- 3. Finalization Overlay ---
         const range = doc.bufferedPageRange();
         for (let i = range.start; i < range.start + range.count; i++) {
           doc.switchToPage(i);
@@ -100,11 +100,11 @@ export class PdfExportService {
     try {
       if (org?.logoUrl) {
         if (org.logoUrl.startsWith('data:image')) {
-          // 🛡️ Optimized: Directly render Base64 payload (Survives deployment wipes)
+          //  Optimized: Directly render Base64 payload (Survives deployment wipes)
           const b64 = org.logoUrl.split(',')[1];
           if (b64) doc.image(Buffer.from(b64, 'base64'), 50, 40, { width: 70 });
         } else {
-          // 🛡️ Guarded: Remote fetch with strict timeout to prevent process hanging
+          //  Guarded: Remote fetch with strict timeout to prevent process hanging
           const response = await axios.get(org.logoUrl, { 
             responseType: 'arraybuffer',
             timeout: 5000 
@@ -366,7 +366,7 @@ export class PdfExportService {
                   if (doc.y > 720) doc.addPage();
                   
                   doc.fontSize(9).font('Helvetica-Bold').fillColor('#334155').text(c.name, this.SAFE_MARGIN + 10, doc.y, { continued: true });
-                  doc.font('Helvetica').fillColor('#64748b').text(` — Rating: ${c.score || 0}/5`);
+                  doc.font('Helvetica').fillColor('#64748b').text(` -- Rating: ${c.score || 0}/5`);
                   
                   if (c.comment) {
                     doc.moveDown(0.2);
@@ -391,7 +391,7 @@ export class PdfExportService {
     const verdictHeight = doc.heightOfString(verdictText, { width: this.CONTENT_WIDTH - 30, lineGap: 2 });
     const boxHeight = Math.max(85, verdictHeight + 45); // Added extra padding
 
-    // 🛡️ Conservative page-break (Start sanction section on new page if less than 150px remains)
+    //  Conservative page-break (Start sanction section on new page if less than 150px remains)
     if (doc.y + boxHeight > 700) {
       doc.addPage();
     }
@@ -407,7 +407,7 @@ export class PdfExportService {
     
     doc.fillColor('#475569').fontSize(9).font('Helvetica-Oblique').text(verdictText, this.SAFE_MARGIN + 15, sanctionTop + 35, { width: this.CONTENT_WIDTH - 30, lineGap: 2 });
     
-    // 🖊️ Digital Signoff Row Logic
+    //  Digital Signoff Row Logic
     // Ensure signatures aren't orphans at the very bottom
     if (sanctionTop + boxHeight + 80 > 750) {
       doc.addPage();
@@ -419,14 +419,14 @@ export class PdfExportService {
     const sigY = doc.y;
     const sigLineWidth = 165;
     
-    // 🖊️ Employee Signature
+    //  Employee Signature
     if (packet.employee?.signatureUrl) {
        this.renderSignature(doc, packet.employee.signatureUrl, 70, sigY, sigLineWidth);
     }
     doc.strokeColor('#cbd5e1').lineWidth(0.5).moveTo(70, sigY).lineTo(70 + sigLineWidth, sigY).stroke();
     doc.fontSize(7).fillColor('#64748b').font('Helvetica-Bold').text('EMPLOYEE SIGN-OFF', 70, sigY + 8);
     
-    // 🖊️ Management Signature (MD or Final Reviewer)
+    //  Management Signature (MD or Final Reviewer)
     const managementSig = packet.finalReviewer?.signatureUrl || packet.reviews?.find((r: any) => r.reviewStage === 'MANAGER')?.reviewer?.signatureUrl;
     if (managementSig) {
        this.renderSignature(doc, managementSig, 365, sigY, sigLineWidth);
@@ -452,7 +452,7 @@ export class PdfExportService {
   }
 
   private static renderLeaveContent(doc: PDFKit.PDFDocument, leave: any, brandColor: string) {
-    // 🛡️ Formal Authorization Statement
+    //  Formal Authorization Statement
     doc.fillColor('#94a3b8').fontSize(9).font('Helvetica-Bold').text('LEAVE AUTHORIZATION SANCTION', { align: 'center', characterSpacing: 2, width: this.CONTENT_WIDTH });
     doc.moveDown(0.5);
     
@@ -463,7 +463,7 @@ export class PdfExportService {
 
     doc.moveDown(2);
     
-    // 📋 Core Details
+    //  Core Details
     const gridTop = doc.y;
     this.keyValGrid(doc, 70, gridTop, 'Leave ID', `${leave.id.substring(0, 8).toUpperCase()}`);
     this.keyValGrid(doc, 330, gridTop, 'Employee', leave.employee?.fullName || 'N/A');
@@ -481,7 +481,7 @@ export class PdfExportService {
 
     doc.moveDown(2.5);
 
-    // 📝 Justification
+    //  Justification
     if (leave.reason) {
       doc.fillColor(brandColor).fontSize(10).font('Helvetica-Bold').text('REASON FOR LEAVE', 70);
       doc.moveDown(0.3);
@@ -507,7 +507,7 @@ export class PdfExportService {
     const sigY = doc.y;
     const sigLineWidth = 160;
 
-    // 🖊️ Employee Signature
+    //  Employee Signature
     if (leave.employee?.signatureUrl) {
        this.renderSignature(doc, leave.employee.signatureUrl, 70, sigY, sigLineWidth);
     }
@@ -515,7 +515,7 @@ export class PdfExportService {
     doc.fontSize(7).fillColor('#64748b').font('Helvetica-Bold').text(leave.employee?.fullName?.toUpperCase() || 'EMPLOYEE', 70, sigY + 8);
     doc.font('Helvetica').fontSize(6).text('EMPLOYEE SIGNATURE', 70, sigY + 17);
 
-    // 🖊️ Management Signature
+    //  Management Signature
     const reviewerSig = leave.hrReviewer?.signatureUrl || leave.manager?.signatureUrl;
     if (reviewerSig) {
        this.renderSignature(doc, reviewerSig, 370, sigY, sigLineWidth);
