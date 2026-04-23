@@ -290,15 +290,15 @@ const AdminConsole = () => {
         }
     };
 
-    const tenants = (stats?.tenants || []).filter((t: any) =>
+    const tenants = (stats?.tenants || []).filter((t: any) => t && (
         t.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.subdomain?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    ));
 
     const summary = stats?.summary || {};
-    const totalActive = (stats?.tenants || []).filter((t: any) => t.billingStatus === 'ACTIVE' && !t.isSuspended).length;
-    const totalTrial = (stats?.tenants || []).filter((t: any) => t.billingStatus === 'FREE' && !t.isSuspended).length;
-    const totalSuspended = (stats?.tenants || []).filter((t: any) => t.isSuspended).length;
+    const totalActive = (stats?.tenants || []).filter((t: any) => t?.billingStatus === 'ACTIVE' && !t?.isSuspended).length;
+    const totalTrial = (stats?.tenants || []).filter((t: any) => t?.billingStatus === 'FREE' && !t?.isSuspended).length;
+    const totalSuspended = (stats?.tenants || []).filter((t: any) => t?.isSuspended).length;
 
     const navItems: { id: NavSection; label: string; icon: any }[] = [
         { id: 'organizations', label: 'Organizations', icon: Building2 },
@@ -463,8 +463,8 @@ const AdminConsole = () => {
                                                 >
                                                     {selectedTenantId === t.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600" />}
                                                     <div className="flex items-start justify-between gap-3">
-                                                        <div className="min-w-0">
-                                                            <p className={cn("text-sm font-black transition-colors truncate", selectedTenantId === t.id ? 'text-blue-700' : 'text-slate-900')}>{t.name}</p>
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className={cn("text-sm font-black transition-colors truncate", selectedTenantId === t.id ? 'text-blue-700' : 'text-slate-900')}>{t.name || 'Unnamed Organization'}</p>
                                                             <p className="text-[10px] font-bold text-slate-400 mt-1 flex items-center gap-1.5">
                                                                 <Globe size={10} /> {t.subdomain ? `${t.subdomain}.nexus-hr.com` : 'Base Routing'}
                                                             </p>
@@ -724,12 +724,12 @@ const AdminConsole = () => {
                                                 <Terminal size={14} />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-black text-slate-900 group-hover:text-blue-600 transition-colors capitalize">{log.action || log.type}</p>
-                                                <p className="text-xs font-medium text-slate-500 truncate mt-0.5">{log.details || log.message}</p>
+                                                <p className="text-sm font-black text-slate-900 group-hover:text-blue-600 transition-colors capitalize">{log?.action || log?.type || 'System Event'}</p>
+                                                <p className="text-xs font-medium text-slate-500 truncate mt-0.5">{log?.details || log?.message || 'Executing background protocol...'}</p>
                                             </div>
                                             <div className="text-right flex-shrink-0">
-                                                <p className="text-[10px] font-black text-slate-900 uppercase">{log.operatorEmail?.split('@')[0] || 'system'}</p>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mt-1 tabular-nums">{new Date(log.createdAt).toLocaleString()}</p>
+                                                <p className="text-[10px] font-black text-slate-900 uppercase">{log?.operatorEmail?.split('@')[0] || 'system'}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mt-1 tabular-nums">{log?.createdAt ? new Date(log.createdAt).toLocaleString() : 'Recent'}</p>
                                             </div>
                                         </div>
                                     ))}
