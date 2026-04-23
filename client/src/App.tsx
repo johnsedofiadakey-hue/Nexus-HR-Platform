@@ -23,6 +23,8 @@ import NexusAIInsight from './components/layout/NexusAIInsight';
 import { getLogoUrl } from './utils/logo';
 import { getStoredUser, getRankFromRole } from './utils/session';
 
+import Signup from './pages/Signup';
+
 // Eager-loaded (always needed)
 import Login from './pages/Login';
 import DevDashboard from './pages/dev/DevDashboard';
@@ -378,6 +380,8 @@ const AppContent = () => {
       <PageErrorBoundary>
         <Routes>
           <Route path="/" element={<StormglideHome />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/vault" element={<Suspense fallback={<PageLoader />}><DevLogin /></Suspense>} />
           <Route path="/force-logout" element={<ForceLogout />} />
           <Route path="/billing-lock" element={<BillingLock />} />
