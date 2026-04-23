@@ -613,7 +613,6 @@ export class PdfExportService {
       doc.fontSize(9).font('Helvetica-Oblique').fillColor('#94a3b8').text(`Disbursement Note: ${item.notes}`);
     }
   }
-  }
   private static renderBoardReportContent(doc: PDFKit.PDFDocument, data: any, brandColor: string) {
     // Top Section
     doc.fillColor('#0f172a').fontSize(24).font('Helvetica-Bold').text('BOARD REPORT', this.SAFE_MARGIN, doc.y);
