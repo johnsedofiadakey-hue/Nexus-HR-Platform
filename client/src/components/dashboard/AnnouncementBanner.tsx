@@ -25,46 +25,46 @@ const AnnouncementBanner = () => {
     useEffect(() => {
         const fetchAnnouncements = async () => {
             try {
-                const res = await api.get('/announcements');
-                const data = Array.isArray(res.data) ? res.data : [];
-                
-                // Filter out dismissed announcements
-                const dismissedIds = JSON.parse(localStorage.getItem('dismissed_announcements') || '[]');
-                const filtered = data.filter((a: Announcement) => !dismissedIds.includes(a.id));
-                
-                setAnnouncements(filtered);
-            } catch (err) {
-                console.error('Failed to fetch announcements:', err);
-            }
-        };
-        fetchAnnouncements();
-    }, []);
-
-    const handleDismiss = (id: string) => {
-        const dismissedIds = JSON.parse(localStorage.getItem('dismissed_announcements') || '[]');
-        if (!dismissedIds.includes(id)) {
-            dismissedIds.push(id);
-            localStorage.setItem('dismissed_announcements', JSON.stringify(dismissedIds));
-        }
-
-        // If we have more, show next, else hide
-        if (announcements.length > 1) {
-            const nextAnnouncements = announcements.filter(a => a.id !== id);
-            setAnnouncements(nextAnnouncements);
-            setCurrentIdx(0);
-        } else {
-            setIsVisible(false);
+            const res = await api.get('/announcements');
+            const data = (Array.isArray(res.data) ? res.data : []).filter(Boolean);
+            
+            // Filter out dismissed announcements
+            const dismissedIds = JSON.parse(localStorage.getItem('dismissed_announcements') || '[]');
+            const filtered = data.filter((a: Announcement) => a && !dismissedIds.includes(a.id));
+            
+            setAnnouncements(filtered);
+        } catch (err) {
+            console.error('Failed to fetch announcements:', err);
         }
     };
+    fetchAnnouncements();
+}, []);
 
-    const handleOpenDetail = (anno: Announcement) => {
-        setSelectedAnnouncement(anno);
-        setIsDetailOpen(true);
-    };
+const handleDismiss = (id: string) => {
+    const dismissedIds = JSON.parse(localStorage.getItem('dismissed_announcements') || '[]');
+    if (!dismissedIds.includes(id)) {
+        dismissedIds.push(id);
+        localStorage.setItem('dismissed_announcements', JSON.stringify(dismissedIds));
+    }
 
-    if (!Array.isArray(announcements) || announcements.length === 0 || !isVisible) return null;
+    // If we have more, show next, else hide
+    if (announcements.length > 1) {
+        const nextAnnouncements = announcements.filter(a => a && a.id !== id);
+        setAnnouncements(nextAnnouncements);
+        setCurrentIdx(0);
+    } else {
+        setIsVisible(false);
+    }
+};
 
-    const current = announcements[currentIdx];
+const handleOpenDetail = (anno: Announcement) => {
+    setSelectedAnnouncement(anno);
+    setIsDetailOpen(true);
+};
+
+if (!Array.isArray(announcements) || announcements.length === 0 || !isVisible || !announcements[currentIdx]) return null;
+
+const current = announcements[currentIdx];
 
     const priorityColors = {
         URGENT: 'text-rose-600 bg-rose-50 border-rose-200',

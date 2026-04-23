@@ -152,12 +152,12 @@ const NotificationInbox: React.FC<NotificationInboxProps> = ({ isOpen, onClose, 
                                         </div>
                                     </div>
                                 ) : (
-                                    notifications.map((n) => {
-                                        const { icon: Icon, color, bg } = getTypeStyles(n.type);
+                                    (notifications || []).filter(Boolean).map((n) => {
+                                        const { icon: Icon, color, bg } = getTypeStyles(n.type || 'INFO');
                                         return (
                                             <motion.div
                                                 layout
-                                                key={n.id}
+                                                key={n.id || Math.random()}
                                                 className={cn(
                                                     "nx-card p-5 group transition-all relative overflow-hidden bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-elevated)]",
                                                     !n.isRead && "ring-1 ring-[var(--primary)]/20 shadow-lg shadow-[var(--primary)]/5"

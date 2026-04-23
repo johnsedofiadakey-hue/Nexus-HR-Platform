@@ -216,7 +216,7 @@ const CalibrationView: React.FC = () => {
               <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)}
                 className="nx-input w-auto text-sm">
                 <option value="ALL">All Departments</option>
-                {departments.map((d: any) => <option key={d.id} value={d.name}>{d.name}</option>)}
+                {(departments || []).filter(Boolean).map((d: any) => <option key={d.id} value={d.name}>{d.name || d.id}</option>)}
               </select>
               <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">{filtered.length} employees</span>
             </div>

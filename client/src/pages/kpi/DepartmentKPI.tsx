@@ -316,7 +316,7 @@ const DepartmentKPI = () => {
                                 onChange={(e) => setNewKpi(p => ({ ...p, departmentId: e.target.value }))}
                             >
                                 <option value="" className="bg-slate-900">Select Department</option>
-                                {departments.map(d => <option key={d.id} value={d.id} className="bg-slate-900">{d.name}</option>)}
+                                {(departments || []).filter(Boolean).map(d => <option key={d.id} value={d.id} className="bg-slate-900">{d.name || 'Department'}</option>)}
                             </select>
                         </div>
                         <div className="space-y-3">

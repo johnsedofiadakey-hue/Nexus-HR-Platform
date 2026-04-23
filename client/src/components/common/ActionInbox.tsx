@@ -123,11 +123,11 @@ const ActionInbox: React.FC<ActionInboxProps> = ({ isOpen, onClose, onCountUpdat
                   </div>
                 </div>
               ) : (
-                actions.map((action) => {
-                  const Icon = getIcon(action.type);
+                (actions || []).filter(Boolean).map((action) => {
+                  const Icon = getIcon(action.type || 'UNKNOWN');
                   return (
                     <motion.button
-                      key={action.id}
+                      key={action.id || Math.random()}
                       onClick={() => {
                         navigate(action.link);
                         onClose();

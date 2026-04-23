@@ -215,7 +215,7 @@ const CreateTargetModal: React.FC<{
                   <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">{t('targets.department_label')}</label>
                   <select className="nx-input" value={form.departmentId} onChange={e => setForm({ ...form, departmentId: e.target.value })}>
                     <option value="">{t('targets.all_departments')}</option>
-                    {departments.map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                    {(departments || []).filter(Boolean).map((d: any) => <option key={d.id} value={d.id}>{d.name || 'Department'}</option>)}
                   </select>
                 </div>
               )}

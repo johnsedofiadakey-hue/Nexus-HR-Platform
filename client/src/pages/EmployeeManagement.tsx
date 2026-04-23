@@ -741,7 +741,7 @@ export default function EmployeeManagement() {
                              <FormField label={t('employees.department', 'Department')}>
                                 <select className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl px-5 py-3 text-[13px] font-bold focus:border-[var(--primary)] outline-none appearance-none cursor-pointer" value={form.departmentId || ''} onChange={e => setForm({ ...form, departmentId: e.target.value ? parseInt(e.target.value) : null })}>
                                    <option value="">{t('common.unassigned_dept')}</option>
-                                   {departments.map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                   {(departments || []).filter(Boolean).map((d: any) => <option key={d.id} value={d.id}>{d.name || 'Department'}</option>)}
                                 </select>
                              </FormField>
                          </div>
