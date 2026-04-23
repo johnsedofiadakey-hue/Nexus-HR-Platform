@@ -2,23 +2,33 @@ import prisma from '../prisma/client';
 import { hash } from 'bcryptjs';
 
 export class DemoSeederService {
+  /**
+   * Seeds a premium, high-end demonstration environment for a tenant.
+   * This provides potential clients with a realistic "wow" experience.
+   */
   static async seedTenantData(organizationId: string) {
-    console.log(`[DemoSeeder] Initializing High-End Environment for ${organizationId}...`);
+    console.log(`[DemoSeeder] Provisioning High-End Environment for ${organizationId}...`);
 
-    // 1. Create High-End Departments
+    // 1. Create Professional Departments
     const departments = [
       { name: 'Executive Strategy' },
       { name: 'Human Capital' },
       { name: 'Financial Operations' },
       { name: 'Product Engineering' },
-      { name: 'Global Sales' },
-      { name: 'Revenue Marketing' }
+      { name: 'Global Sales' }
     ];
 
     const createdDepts: any[] = [];
     for (const d of departments) {
-      const dept = await prisma.department.create({
-        data: {
+      const dept = await prisma.department.upsert({
+        where: { 
+          name_organizationId: {
+            name: d.name,
+            organizationId
+          }
+        },
+        update: {},
+        create: {
           name: d.name,
           organizationId
         }
@@ -26,83 +36,80 @@ export class DemoSeederService {
       createdDepts.push(dept);
     }
 
-    const commonPass = await hash('NexusDemo@2025', 10);
+    const commonPass = await hash('NexusDemo@2025', 12);
 
-    // 2. Provision High-Level Executives (Directors)
-    const executives = [
-        { name: 'Sarah Montgomery', role: 'MD', email: `md@demo-sand.com`, title: 'Chief Executive Officer', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah' },
-        { name: 'Julian Vance', role: 'MD', email: `finance@demo-sand.com`, title: 'Chief Financial Officer', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Julian' }
+    // 2. Identify Strategy Dept for Executives
+    const execDeptId = createdDepts.find(d => d.name === 'Executive Strategy')?.id;
+    const hrDeptId = createdDepts.find(d => d.name === 'Human Capital')?.id;
+
+    // 3. Provision High-Level MD (The Master Account)
+    const mdEmail = `md@demo-sand.com`;
+    const mdUser = await prisma.user.upsert({
+      where: { email: mdEmail },
+      update: { organizationId }, // Relocate to this org
+      create: {
+        fullName: 'Sarah Montgomery',
+        email: mdEmail,
+        passwordHash: commonPass,
+        role: 'MD',
+        status: 'ACTIVE',
+        organizationId,
+        jobTitle: 'Chief Executive Officer',
+        avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
+        departmentId: execDeptId
+      }
+    });
+
+    // 4. Provision HR Manager and Staff
+    const staff = [
+      { name: 'Alice Thompson', role: 'MANAGER', dept: 'Human Capital', title: 'HR Director', email: 'hr@demo-sand.com' },
+      { name: 'Marcus Chen', role: 'MANAGER', dept: 'Product Engineering', title: 'Engineering Lead', email: 'eng@demo-sand.com' },
+      { name: 'Elena Rodriguez', role: 'STAFF', dept: 'Financial Operations', title: 'Senior Auditor', email: 'audit@demo-sand.com' }
     ];
 
-    let seedMDId = '';
-
-    for (const exec of executives) {
-        const user = await prisma.user.create({
-            data: {
-                fullName: exec.name,
-                email: exec.email,
-                passwordHash: commonPass,
-                role: exec.role,
-                status: 'ACTIVE',
-                organizationId,
-                jobTitle: exec.title,
-                avatarUrl: exec.avatar,
-                departmentId: createdDepts.find(d => d.name === 'Executive Strategy')?.id
-            }
-        });
-        if (exec.role === 'MD' && !seedMDId) seedMDId = user.id;
-    }
-
-    // 3. Populate Professional Staff
-    const staffTemplate = [
-        { name: 'Alice Thompson', role: 'MANAGER', dept: 'Human Capital', title: 'HR Director', email: 'alice@demo-sand.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alice' },
-        { name: 'Marcus Chen', role: 'MANAGER', dept: 'Product Engineering', title: 'Engineering Lead', email: 'marcus@demo-sand.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus' },
-        { name: 'Charlie Davis', role: 'STAFF', dept: 'Product Engineering', title: 'Senior Developer', email: 'charlie@demo-sand.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie' },
-        { name: 'Elena Rodriguez', role: 'STAFF', dept: 'Financial Operations', title: 'Senior Auditor', email: 'elena@demo-sand.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elena' },
-        { name: 'David Kim', role: 'STAFF', dept: 'Global Sales', title: 'Account Executive', email: 'david@demo-sand.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David' }
-    ];
-
-    for (const s of staffTemplate) {
-      await prisma.user.create({
-        data: {
+    for (const s of staff) {
+      const deptId = createdDepts.find(d => d.name === s.dept)?.id;
+      await prisma.user.upsert({
+        where: { email: s.email },
+        update: { organizationId },
+        create: {
           fullName: s.name,
           email: s.email,
           passwordHash: commonPass,
           role: s.role,
           status: 'ACTIVE',
           organizationId,
-          departmentId: createdDepts.find(d => d.name === s.dept)?.id,
           jobTitle: s.title,
-          avatarUrl: s.avatar
+          departmentId: deptId,
+          avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.name.split(' ')[0]}`
         }
       });
     }
 
-    // 4. Institutional Announcements
-    if (seedMDId) {
-        await prisma.announcement.createMany({
-          data: [
-            {
-              title: 'Q2 Strategic Roadmap Unveiled',
-              content: 'We are excited to share our vision for the upcoming quarter, focusing on global expansion and AI-driven efficiency.',
-              priority: 'HIGH',
-              organizationId,
-              targetAudience: 'ALL',
-              createdById: seedMDId
-            },
-            {
-              title: 'New Health & Wellness Initiative',
-              content: 'Starting next month, all employees will have access to our subsidized premium health membership program.',
-              priority: 'NORMAL',
-              organizationId,
-              targetAudience: 'ALL',
-              createdById: seedMDId
-            }
-          ]
-        });
-    }
+    // 5. Populate Corporate Announcements
+    await prisma.announcement.createMany({
+      data: [
+        {
+          title: 'Q2 Strategic Roadmap Unveiled',
+          content: 'Our vision for the upcoming quarter focuses on global expansion and AI-driven efficiency.',
+          priority: 'HIGH',
+          organizationId,
+          targetAudience: 'ALL',
+          createdById: mdUser.id
+        },
+        {
+          title: 'New Health & Wellness Initiative',
+          content: 'Starting next month, all employees will have access to our subsidized premium health program.',
+          priority: 'NORMAL',
+          organizationId,
+          targetAudience: 'ALL',
+          createdById: mdUser.id
+        }
+      ],
+      skipDuplicates: true
+    });
 
-    console.log(`[DemoSeeder] High-End Environment Provisioned for ${organizationId}`);
-    return { mdEmail: `md@demo-sand.com` };
+    console.log(`[DemoSeeder] Environment successfully provisioned.`);
+    return { mdEmail };
   }
 }
