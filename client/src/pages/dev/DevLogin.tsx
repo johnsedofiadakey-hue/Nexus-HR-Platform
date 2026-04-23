@@ -11,8 +11,18 @@ const DevLogin = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key >= '0' && e.key <= '9') handleKeyPress(e.key);
+            if (e.key === 'Backspace') handleDelete();
+            if (e.key === 'Enter') handleSubmit();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [pin, loading]);
+
     const handleKeyPress = (val: string) => {
-        if (pin.length < 20) { // Support variable-length PINs
+        if (pin.length < 8) { 
             setPin(prev => prev + val);
             setError('');
         }
@@ -22,7 +32,7 @@ const DevLogin = () => {
 
     const handleSubmit = async () => {
         if (pin.length < 4) {
-            setError('PIN must be at least 4 characters');
+            setError('Code must be at least 4 digits');
             return;
         }
 
@@ -30,101 +40,70 @@ const DevLogin = () => {
         setError('');
 
         try {
-            // Server-side PIN verification — no client-side comparison
             const res = await api.post('/dev/verify-pin', { pin });
             const { token } = res.data;
 
-            // Store server-issued dev JWT
             localStorage.setItem('nexus_dev_token', token);
             localStorage.setItem('nexus_dev_mode', 'true');
             localStorage.removeItem('nexus_dev_firebase_token');
-
-            // Update API defaults for subsequent dev requests
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
             setTimeout(() => navigate('/nexus-master-console'), 600);
         } catch (err: any) {
             const data = err.response?.data;
-            setError(data?.error || 'Authentication failed');
-            if (data?.attemptsRemaining !== undefined) {
-                setAttemptsRemaining(data.attemptsRemaining);
-            }
+            setError(data?.error || 'Access Denied: Invalid Master Key');
+            setAttemptsRemaining(data?.attemptsRemaining ?? null);
             setPin('');
             setLoading(false);
         }
     };
 
-    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'enter'];
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'enter'];
 
     return (
-        <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-6">
+        <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 font-sans selection:bg-indigo-500/30">
+            {/* ── Background Grid ── */}
+            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #1e293b 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+            
             <motion.div
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="w-full max-w-sm"
+                className="w-full max-w-sm relative z-10"
             >
-                {/* Logo */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-2xl mb-4">
-                        <Shield size={22} className="text-white" />
+                <div className="text-center mb-10">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-[2rem] shadow-2xl shadow-indigo-500/20 mb-6">
+                        <Shield size={32} className="text-white" />
                     </div>
-                    <h1 className="text-xl font-bold text-white">Master Console</h1>
-                    <p className="text-sm text-slate-400 mt-1">Enter your access code to continue</p>
+                    <h1 className="text-3xl font-black text-white tracking-tight">Cluster Access</h1>
+                    <p className="text-sm text-slate-500 font-medium mt-2">Identity synchronization required.</p>
                 </div>
 
-                {/* Card */}
-                <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 shadow-xl">
-                    {/* PIN Dots */}
-                    <div className="flex justify-center gap-2 mb-8 min-h-[24px]">
-                        {pin.length === 0 ? (
-                            <div className="flex gap-2">
-                                {Array.from({ length: 6 }).map((_, i) => (
-                                    <div key={i} className="w-3 h-3 rounded-full bg-slate-700" />
-                                ))}
-                            </div>
-                        ) : (
-                            Array.from({ length: pin.length }).map((_, i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="w-3 h-3 rounded-full bg-indigo-500"
-                                />
-                            ))
-                        )}
+                <div className="nx-card p-10 border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                    
+                    <div className="flex justify-center gap-3 mb-10">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div 
+                                key={i} 
+                                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                                    pin.length > i 
+                                    ? 'bg-indigo-500 border-indigo-500 scale-125 shadow-[0_0_15px_rgba(99,102,241,0.5)]' 
+                                    : 'border-slate-700 bg-transparent'
+                                }`} 
+                            />
+                        ))}
                     </div>
 
-                    {/* Error */}
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-center mb-4"
-                        >
-                            <p className="text-xs text-rose-400 flex items-center justify-center gap-1.5">
-                                <AlertTriangle size={12} />
-                                {error}
-                            </p>
-                            {attemptsRemaining !== null && attemptsRemaining <= 3 && (
-                                <p className="text-[10px] text-amber-500 mt-1">
-                                    {attemptsRemaining} attempt{attemptsRemaining !== 1 ? 's' : ''} remaining before lockout
-                                </p>
-                            )}
-                        </motion.div>
-                    )}
-
-                    {/* Keypad */}
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-4">
                         {keys.map((key, idx) => {
-                            if (key === '') {
+                            if (key === 'del') {
                                 return (
                                     <button
                                         key={idx}
                                         onClick={handleDelete}
-                                        className="h-14 flex items-center justify-center text-slate-400 hover:text-white rounded-xl hover:bg-slate-700/50 transition-colors"
+                                        className="h-16 flex items-center justify-center text-slate-500 hover:text-white rounded-2xl bg-white/5 hover:bg-white/10 transition-all font-black text-xs uppercase tracking-widest"
                                     >
-                                        <Delete size={18} />
+                                        DEL
                                     </button>
                                 );
                             }
@@ -134,36 +113,69 @@ const DevLogin = () => {
                                         key={idx}
                                         onClick={handleSubmit}
                                         disabled={pin.length < 4 || loading}
-                                        className="h-14 flex items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                        className="h-16 flex items-center justify-center rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 disabled:opacity-20 transition-all group"
                                     >
                                         {loading ? (
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            <Loader2 size={24} className="animate-spin" />
                                         ) : (
-                                            <ArrowRight size={18} />
+                                            <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
                                         )}
                                     </button>
                                 );
                             }
                             return (
-                                <motion.button
+                                <button
                                     key={idx}
-                                    whileTap={{ scale: 0.92 }}
                                     onClick={() => handleKeyPress(key)}
-                                    className="h-14 text-lg font-semibold text-white bg-slate-700/50 hover:bg-slate-700 rounded-xl transition-colors"
+                                    className="h-16 text-xl font-black text-white bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all active:scale-90"
                                 >
                                     {key}
-                                </motion.button>
+                                </button>
                             );
                         })}
                     </div>
+
+                    <AnimatePresence>
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                className="mt-8 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-center"
+                            >
+                                <p className="text-[10px] font-black uppercase tracking-widest text-rose-400">
+                                    {error}
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
-                <p className="text-center text-xs text-slate-600 mt-6">
-                    Nexus Master Console · Server-Verified Access
-                </p>
+                <div className="mt-8 flex items-center justify-center gap-3">
+                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">
+                      Nexus Security Protocol v5 // 04.23
+                   </p>
+                </div>
             </motion.div>
         </div>
     );
 };
+
+const Loader2 = ({ size, className }: { size: number; className?: string }) => (
+    <svg 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className={className}
+    >
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+    </svg>
+);
 
 export default DevLogin;

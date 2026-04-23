@@ -6,7 +6,7 @@ import { admin, initializeFirebase } from '../services/firebase-admin';
 initializeFirebase();
 
 const JWT_SECRET = process.env.JWT_SECRET!;
-const DEV_PIN = process.env.DEV_CONSOLE_PIN || process.env.DEV_MASTER_KEY || 'NEXUS-DEV-MASTER-2025-SECURE';
+const DEV_PIN = process.env.DEV_CONSOLE_PIN || process.env.DEV_MASTER_KEY || '5646';
 
 // Track failed attempts per IP for rate limiting
 const failedAttempts = new Map<string, { count: number; lastAttempt: number }>();
