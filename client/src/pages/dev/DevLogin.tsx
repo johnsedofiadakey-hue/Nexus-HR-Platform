@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Shield, Delete, ArrowRight, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Shield, Delete, ArrowRight, AlertTriangle, Loader2 } from 'lucide-react';
 import api from '../../services/api';
 
 const DevLogin = () => {
@@ -62,154 +62,104 @@ const DevLogin = () => {
 
     return (
         <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 font-sans selection:bg-indigo-500/30">
-            {/* ── Background Grid ── */}
+            {/* ── Background Aesthetics ── */}
             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #1e293b 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-indigo-500/10 via-transparent to-blue-500/10" />
             
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-sm relative z-10"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-full max-w-lg relative z-10"
             >
-                <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-[2rem] shadow-2xl shadow-indigo-500/20 mb-6">
-                        <Shield size={32} className="text-white" />
-                    </div>
-                    <h1 className="text-3xl font-black text-white tracking-tight">Cluster Access</h1>
-                    <p className="text-sm text-slate-500 font-medium mt-2">Identity synchronization required.</p>
+                <div className="text-center mb-12">
+                    <motion.div 
+                        initial={{ rotate: -10, scale: 0.8 }}
+                        animate={{ rotate: 0, scale: 1 }}
+                        className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-slate-900 to-indigo-900 rounded-[2.5rem] shadow-2xl border border-white/10 mb-8 relative group"
+                    >
+                        <Shield size={40} className="text-indigo-400 group-hover:text-white transition-colors" />
+                        <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </motion.div>
+                    <h1 className="text-5xl font-black text-white tracking-tighter leading-none mb-4">
+                        Master <span className="text-indigo-500 underline decoration-indigo-500/30 underline-offset-8">Console.</span>
+                    </h1>
+                    <p className="text-slate-400 font-medium text-lg">Nexus Cluster Command & Intelligence</p>
                 </div>
 
-                <div className="nx-card p-10 border border-white/5 shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="bg-slate-900/40 backdrop-blur-3xl border border-white/5 rounded-[4rem] p-16 shadow-2xl relative overflow-hidden text-center">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-indigo-500/10 blur-[80px] rounded-full" />
                     
-                    <div className="flex justify-center gap-3 mb-10">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                            <div 
-                                key={i} 
-                                className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
-                                    pin.length > i 
-                                    ? 'bg-indigo-500 border-indigo-500 scale-125 shadow-[0_0_15px_rgba(99,102,241,0.5)]' 
-                                    : 'border-slate-700 bg-transparent'
-                                }`} 
-                            />
-                        ))}
-                    </div>
+                    <div className="relative z-10">
+                        <div className="mb-10">
+                            <div className="flex items-center justify-center gap-3 mb-2">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Security Active</span>
+                            </div>
+                            <p className="text-slate-300 text-sm font-medium">Verify your administrative identity via the Nexus Identity Provider.</p>
+                        </div>
 
-                    <div className="grid grid-cols-3 gap-4">
-                        {keys.map((key, idx) => {
-                            if (key === 'del') {
-                                return (
-                                    <button
-                                        key={idx}
-                                        onClick={handleDelete}
-                                        className="h-16 flex items-center justify-center text-slate-500 hover:text-white rounded-2xl bg-white/5 hover:bg-white/10 transition-all font-black text-xs uppercase tracking-widest"
-                                    >
-                                        DEL
-                                    </button>
-                                );
-                            }
-                            if (key === 'enter') {
-                                return (
-                                    <button
-                                        key={idx}
-                                        onClick={handleSubmit}
-                                        disabled={pin.length < 4 || loading}
-                                        className="h-16 flex items-center justify-center rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 disabled:opacity-20 transition-all group"
-                                    >
-                                        {loading ? (
-                                            <Loader2 size={24} className="animate-spin" />
-                                        ) : (
-                                            <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
-                                        )}
-                                    </button>
-                                );
-                            }
-                            return (
-                                <button
-                                    key={idx}
-                                    onClick={() => handleKeyPress(key)}
-                                    className="h-16 text-xl font-black text-white bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all active:scale-90"
-                                >
-                                    {key}
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    <AnimatePresence>
                         {error && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0 }}
-                                className="mt-8 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-center"
-                            >
-                                <p className="text-[10px] font-black uppercase tracking-widest text-rose-400">
-                                    {error}
-                                </p>
-                            </motion.div>
+                            <div className="mb-8 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold tracking-tight">
+                                {error}
+                            </div>
                         )}
-                    </AnimatePresence>
+
+                        <button
+                            onClick={async () => {
+                                try {
+                                    setLoading(true);
+                                    const { signInWithPopup } = await import('firebase/auth');
+                                    const { auth, googleProvider } = await import('../../services/firebase');
+                                    const result = await signInWithPopup(auth, googleProvider);
+                                    const idToken = await result.user.getIdToken();
+                                    
+                                    const res = await api.post('/dev/verify-google', { idToken });
+                                    const { token } = res.data;
+                                    
+                                    localStorage.setItem('nexus_dev_token', token);
+                                    localStorage.setItem('nexus_dev_mode', 'true');
+                                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                                    
+                                    navigate('/nexus-master-console');
+                                } catch (err: any) {
+                                    setError(err.response?.data?.error || 'Google Identity Verification Failed');
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }}
+                            disabled={loading}
+                            className="w-full h-20 bg-white hover:bg-slate-100 text-slate-950 rounded-3xl flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-indigo-500/10 group disabled:opacity-50"
+                        >
+                            {loading ? (
+                                <Loader2 size={24} className="animate-spin text-indigo-600" />
+                            ) : (
+                                <>
+                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6" alt="Google" />
+                                    <span className="text-sm font-black uppercase tracking-widest">Login with Nexus Intelligence</span>
+                                </>
+                            )}
+                        </button>
+                        
+                        <p className="mt-8 text-[9px] font-bold text-slate-600 uppercase tracking-widest">
+                            Authorized Personnel Only // Node ID: NS-772
+                        </p>
+                    </div>
                 </div>
 
-                <div className="mt-8 flex flex-col items-center gap-6">
-                   <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">
-                         Nexus Security Protocol v5 // 04.23
-                      </p>
-                   </div>
-
-                   <div className="w-full h-px bg-white/5" />
-
-                   <button
-                       onClick={async () => {
-                           try {
-                               setLoading(true);
-                               const { signInWithPopup } = await import('firebase/auth');
-                               const { auth, googleProvider } = await import('../../services/firebase');
-                               const result = await signInWithPopup(auth, googleProvider);
-                               const idToken = await result.user.getIdToken();
-                               
-                               const res = await api.post('/dev/verify-google', { idToken });
-                               const { token } = res.data;
-                               
-                               localStorage.setItem('nexus_dev_token', token);
-                               localStorage.setItem('nexus_dev_mode', 'true');
-                               api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                               
-                               navigate('/nexus-master-console');
-                           } catch (err: any) {
-                               setError(err.response?.data?.error || 'Google Identity Verification Failed');
-                           } finally {
-                               setLoading(false);
-                           }
-                       }}
-                       disabled={loading}
-                       className="flex items-center gap-3 px-6 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-bold text-white transition-all hover:scale-105 disabled:opacity-20"
-                   >
-                       <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
-                       Login with Google Identity
-                   </button>
+                <div className="mt-12 flex items-center justify-center gap-8 opacity-20">
+                    <div className="flex items-center gap-2">
+                        <ArrowRight size={14} className="text-white" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white">Encrypted Handshake</span>
+                    </div>
+                    <div className="w-1 h-1 rounded-full bg-white/20" />
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle size={14} className="text-white" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white">SOC-2 Compliant</span>
+                    </div>
                 </div>
             </motion.div>
         </div>
     );
 };
-
-const Loader2 = ({ size, className }: { size: number; className?: string }) => (
-    <svg 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="3" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        className={className}
-    >
-        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-    </svg>
-);
 
 export default DevLogin;

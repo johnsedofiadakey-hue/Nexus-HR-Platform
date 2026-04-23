@@ -599,14 +599,11 @@ export const impersonateTenant = async (req: Request, res: Response) => {
 export const sandboxLogin = async (req: Request, res: Response) => {
   try {
     // 1. Establish Sandbox Context
-    // We use a fixed ID for the shared corporate simulation
     const SANDBOX_ORG_ID = 'sandbox-org-001';
     
-    // Check if sandbox exists, if not, fallback to default or error
     let organization = await prisma.organization.findUnique({ where: { id: SANDBOX_ORG_ID } });
     
     if (!organization) {
-      // Create a minimal sandbox if it doesn't exist (First run)
       organization = await prisma.organization.create({
         data: {
           id: SANDBOX_ORG_ID,
@@ -623,30 +620,43 @@ export const sandboxLogin = async (req: Request, res: Response) => {
         }
       });
       
-      // Auto-Seed the fresh sandbox with professional data
       const { DemoSeederService } = await import('../services/demo-seeder.service');
       await DemoSeederService.seedTenantData(SANDBOX_ORG_ID);
     }
 
-    // 2. Issue Token
+    // 2. Resolve a Real User from the Sandbox for the token
+    // We fetch the MD user seeded by DemoSeederService
+    const sandboxMD = await prisma.user.findFirst({
+      where: { organizationId: SANDBOX_ORG_ID, role: 'MD' }
+    });
+
+    if (!sandboxMD) {
+        // Fail-safe: if seeder somehow missed it, re-seed
+        const { DemoSeederService } = await import('../services/demo-seeder.service');
+        await DemoSeederService.seedTenantData(SANDBOX_ORG_ID);
+    }
+
+    const targetUser = sandboxMD || { id: 'fallback-md', fullName: 'Sandbox Director', role: 'MD', email: 'md@demo-sand.com' };
+
+    // 3. Issue Token using the REAL database ID
     const token = signAccessToken({
-      id: `sandbox-guest-${crypto.randomBytes(4).toString('hex')}`,
+      id: targetUser.id,
       role: 'MD',
-      name: 'Sandbox Operator',
+      name: targetUser.fullName || 'Sandbox Operator',
       status: 'ACTIVE',
       organizationId: SANDBOX_ORG_ID
     });
 
-    const refreshToken = await issueRefreshToken('sandbox-guest-root', SANDBOX_ORG_ID, req);
+    const refreshToken = await issueRefreshToken(targetUser.id, SANDBOX_ORG_ID, req);
 
     return res.status(200).json({
       token,
       refreshToken,
       isSandbox: true,
       user: {
-        id: 'sandbox-guest-root',
-        name: 'Sandbox Operator',
-        email: 'demo@stormglide.io',
+        id: targetUser.id,
+        name: targetUser.fullName,
+        email: targetUser.email,
         role: 'MD',
         jobTitle: 'Simulation Lead',
         rank: getRoleRank('MD'),
