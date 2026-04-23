@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate, requireRole } from '../middleware/auth.middleware';
 import { upload } from '../middleware/upload.middleware';
+import { validate, CreateUserSchema, UpdateUserSchema } from '../middleware/validate.middleware';
 import {
   createEmployee, getAllEmployees, getEmployee,
   updateEmployee, deleteEmployee, hardDeleteEmployee,
@@ -21,7 +22,7 @@ router.get('/:id/risk', requireRole(80), getUserRiskProfile);
 router.get('/:id/risk-profile', requireRole(80), getUserRiskProfile); // alias
 
 // Create (HR Manager / MD only - Rank 85+)
-router.post('/', requireRole(85), createEmployee);
+router.post('/', requireRole(85), validate(CreateUserSchema), createEmployee);
 
 // Update
 // Allow self-edit; require rank 70+ to edit others

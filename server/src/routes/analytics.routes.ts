@@ -7,6 +7,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/executive', requireRole(70), analyticsController.getExecutiveStats); // Manager+
+router.get('/executive/board-report/pdf', requireRole(80), analyticsController.downloadBoardReportPDF); // Director+
 router.get('/dept-growth', requireRole(80), analyticsController.getDepartmentGrowth); // Director+
 router.get('/personal', analyticsController.getPersonalStats); // Any authenticated user (Staff)
 

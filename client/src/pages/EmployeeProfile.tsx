@@ -29,6 +29,7 @@ const EmployeeProfile = () => {
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [leaveAdjustForm, setLeaveAdjustForm] = useState({ leaveBalance: '', leaveAllowance: '', reason: '' });
     const [adjustingLeave, setAdjustingLeave] = useState(false);
+    const [riskProfile, setRiskProfile] = useState<any>(null);
     const { t } = useTranslation();
     const { setContextData } = useAI();
 
@@ -37,12 +38,14 @@ const EmployeeProfile = () => {
     const fetchEmployee = useCallback(async () => {
         setLoading(true);
         try {
-            const [empRes, kpiRes] = await Promise.all([
+            const [empRes, kpiRes, riskRes] = await Promise.all([
                 api.get(`/employees/${id}`),
-                api.get(`/kpis/summary/individual?employeeId=${id}`).catch(() => ({ data: { averageScore: 0 } }))
+                api.get(`/kpis/summary/individual?employeeId=${id}`).catch(() => ({ data: { averageScore: 0 } })),
+                getRankFromRole(currentUser?.role) >= 80 ? api.get(`/employees/${id}/risk`).catch(() => null) : Promise.resolve(null)
             ]);
             setEmployee(empRes.data);
             setKpiSummary(kpiRes.data);
+            if (riskRes) setRiskProfile(riskRes.data);
         } catch (e) {
             console.error(e);
             toast.error('Error: Staff record not found');
@@ -192,6 +195,17 @@ const EmployeeProfile = () => {
                                  <span className="px-4 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[9px] font-black tracking-widest flex items-center gap-2">
                                     <ShieldCheck size={14} /> VERIFIED
                                 </span>
+                                {riskProfile && (
+                                     <span className={cn(
+                                         "px-4 py-1.5 rounded-xl text-[9px] font-black tracking-widest flex items-center gap-2",
+                                         riskProfile.overallRisk === 'CRITICAL' ? "bg-rose-500/10 border-rose-500/20 text-rose-600 animate-bounce" :
+                                         riskProfile.overallRisk === 'HIGH' ? "bg-orange-500/10 border-orange-500/20 text-orange-600" :
+                                         riskProfile.overallRisk === 'MEDIUM' ? "bg-amber-500/10 border-amber-500/20 text-amber-600" :
+                                         "bg-blue-500/10 border-blue-500/20 text-blue-600"
+                                     )}>
+                                         <Zap size={14} /> FLIGHT RISK: {riskProfile.overallRisk}
+                                     </span>
+                                )}
                                 {employee.isOnLeave && (
                                     <span className="px-4 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 text-[9px] font-black tracking-widest flex items-center gap-2 animate-pulse">
                                         <Clock size={14} /> ON LEAVE

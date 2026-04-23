@@ -241,7 +241,7 @@ const Payroll = () => {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="nx-table">
+                    <table className="nx-table nexus-responsive-table">
                       <thead>
                         <tr className="bg-[var(--bg-elevated)]/20">
                           <th className="px-10">{t('payroll.headers.period')}</th>
@@ -255,7 +255,7 @@ const Payroll = () => {
                       <tbody className="divide-y divide-[var(--border-subtle)]/50">
                         {(myPayslips || []).map((slip: any) => (
                           <tr key={slip.id} className="hover:bg-[var(--bg-elevated)]/30 transition-all group">
-                            <td className="px-10 py-6">
+                            <td className="px-10 py-6" data-label={t('payroll.headers.period')}>
                               <div className="flex items-center gap-4">
                                 <div className="p-2 rounded-lg bg-[var(--primary)]/5 text-[var(--primary)] group-hover:bg-[var(--primary)]/10 transition-colors">
                                     <Calendar size={14} />
@@ -263,15 +263,15 @@ const Payroll = () => {
                                 <span className="text-[14px] font-bold tracking-tight text-[var(--text-primary)]">{slip.run?.period}</span>
                               </div>
                             </td>
-                            <td className="text-[13px] font-medium text-[var(--text-secondary)]">{fmt(slip.grossPay, slip.currency, i18n.language)}</td>
-                            <td className="text-[13px] font-bold text-rose-500">-{fmt(slip.tax, slip.currency, i18n.language)}</td>
-                            <td className="text-[13px] font-bold text-amber-500">-{fmt(slip.ssnit, slip.currency, i18n.language)}</td>
-                            <td className="py-6">
+                            <td className="text-[13px] font-medium text-[var(--text-secondary)]" data-label={t('payroll.headers.gross')}>{fmt(slip.grossPay, slip.currency, i18n.language)}</td>
+                            <td className="text-[13px] font-bold text-rose-500" data-label={t('payroll.headers.tax')}>-{fmt(slip.tax, slip.currency, i18n.language)}</td>
+                            <td className="text-[13px] font-bold text-amber-500" data-label={t('payroll.headers.ss')}>-{fmt(slip.ssnit, slip.currency, i18n.language)}</td>
+                            <td className="py-6" data-label={t('payroll.headers.net')}>
                               <div className="px-4 py-2 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-emerald-600 font-black text-[15px] w-fit">
                                 {fmt(slip.netPay, slip.currency, i18n.language)}
                               </div>
                             </td>
-                            <td className="text-right px-10">
+                            <td className="text-right px-10" data-label={t('payroll.headers.action')}>
                               <button
                                 onClick={() => downloadPayslip(slip.runId, user?.id || '')}
                                 className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--bg-card)] border border-transparent hover:border-[var(--border-subtle)] transition-all"
@@ -498,26 +498,26 @@ const Payroll = () => {
                                    const bonus = Number(item.bonus);
                                    return (
                                      <tr key={item.id} className="hover:bg-[var(--bg-elevated)]/30 transition-all group">
-                                       <td className="px-8 py-6">
+                                       <td className="px-8 py-6" data-label={t('payroll.headers.associate')}>
                                          <p className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">{item.employee.fullName}</p>
                                          <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mt-0.5 opacity-60">{item.employee.jobTitle}</p>
                                        </td>
-                                       <td className="text-[13px] font-medium text-[var(--text-secondary)]">{fmt(item.baseSalary, item.currency, i18n.language)}</td>
-                                       <td>
+                                       <td className="text-[13px] font-medium text-[var(--text-secondary)]" data-label={t('payroll.headers.baseline')}>{fmt(item.baseSalary, item.currency, i18n.language)}</td>
+                                       <td data-label={t('payroll.headers.adjustments')}>
                                          {extras > 0 ? (
                                            <div className="px-3 py-1 rounded-lg bg-indigo-50 text-indigo-500 border border-indigo-100 text-[10px] font-black w-fit">+{fmt(extras, '', i18n.language)}</div>
                                          ) : <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase opacity-30">—</span>}
                                        </td>
-                                       <td>
+                                       <td data-label={t('payroll.headers.bonuses')}>
                                          {bonus > 0 ? (
                                             <div className="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black w-fit shadow-sm flex items-center gap-1.5">
                                                <TrendingUp size={10} /> {fmt(bonus, '', i18n.language)}
                                             </div>
                                          ) : <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase opacity-30">—</span>}
                                        </td>
-                                       <td className="text-[10px] font-bold text-rose-500">-{fmt(Number(item.tax) + Number(item.ssnit), '', i18n.language)}</td>
-                                       <td className="text-[14px] font-black text-[var(--text-primary)]">{fmt(item.netPay, item.currency, i18n.language)}</td>
-                                       <td className="text-right px-8">
+                                       <td className="text-[10px] font-bold text-rose-500" data-label={t('payroll.headers.fiscal_withholding')}>-{fmt(Number(item.tax) + Number(item.ssnit), '', i18n.language)}</td>
+                                       <td className="text-[14px] font-black text-[var(--text-primary)]" data-label={t('payroll.headers.net_payout')}>{fmt(item.netPay, item.currency, i18n.language)}</td>
+                                       <td className="text-right px-8" data-label={t('payroll.headers.action')}>
                                           <div className="flex justify-end gap-2 pr-2">
                                             {selectedRun.status === 'DRAFT' && isMD && (
                                               !isEditing ? (

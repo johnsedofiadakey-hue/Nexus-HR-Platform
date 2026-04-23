@@ -102,12 +102,32 @@ export default function DocumentVault({ employeeId, isAdmin }: { employeeId: str
                 <h4 className="text-sm font-bold text-white mb-1 truncate" title={doc.title}>{doc.title}</h4>
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{new Date(doc.uploadedAt).toLocaleDateString()} · {doc.category}</p>
 
-                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <a href={doc.fileUrl} download={doc.title} className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors">
+                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  {doc.fileUrl.toLowerCase().includes('.pdf') && !doc.title.includes('[Signed]') && (
+                     <button
+                        onClick={async () => {
+                           if (!window.confirm('Do you want to digitally sign this ' + doc.title + '? This will permanently embed your e-signature. Ensure your signature is configured in your profile.')) return;
+                           try {
+                               const res = await api.post(`/documents/${doc.id}/sign`);
+                               toast.info('Document signed successfully!');
+                               fetchDocs();
+                               // Download the new one automatically
+                               window.open(res.data.document.fileUrl, '_blank');
+                           } catch (err: any) {
+                               toast.info(err?.response?.data?.error || 'Failed to sign document');
+                           }
+                        }}
+                        className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 hover:bg-emerald-500/20 transition-colors"
+                        title="Digitally Sign Document"
+                     >
+                        <FileText size={14} />
+                     </button>
+                  )}
+                  <a href={doc.fileUrl} download={doc.title} className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors" title="Download">
                     <Download size={14} />
                   </a>
                   {isAdmin && (
-                    <button onClick={() => handleDelete(doc.id)} className="w-8 h-8 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 hover:bg-rose-500/20 transition-colors">
+                    <button onClick={() => handleDelete(doc.id)} className="w-8 h-8 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 hover:bg-rose-500/20 transition-colors" title="Delete">
                       <Trash2 size={14} />
                     </button>
                   )}

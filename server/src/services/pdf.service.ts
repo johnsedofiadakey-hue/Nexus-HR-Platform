@@ -258,20 +258,26 @@ export class PdfExportService {
     doc.rect(50, tableTop, 500, 25).fill('#1e293b');
     doc.fillColor('#fff').fontSize(8).font('Helvetica-Bold');
     doc.text('OBJECTIVE IDENTIFIER', 65, tableTop + 8);
-    doc.text('PHASE STATUS', 350, tableTop + 8);
-    doc.text('WEIGHT', 480, tableTop + 8);
+    doc.text('PHASE STATUS', 300, tableTop + 8);
+    doc.text('PROGRESS', 480, tableTop + 8);
 
     let currentY = tableTop + 25;
     targets.forEach((t, i) => {
       if (currentY > 700) { doc.addPage(); currentY = 50; }
-      doc.fillColor(i % 2 === 0 ? '#ffffff' : '#f9fafb').rect(50, currentY, 500, 30).fill();
-      doc.fillColor('#334155').fontSize(9).font('Helvetica').text(t.title.toUpperCase(), 65, currentY + 10, { width: 250, lineBreak: false });
+      doc.fillColor(i % 2 === 0 ? '#ffffff' : '#f9fafb').rect(50, currentY, 500, 35).fill();
+      
+      doc.fillColor('#334155').fontSize(9).font('Helvetica-Bold').text(t.title.toUpperCase(), 65, currentY + 12, { width: 220, lineBreak: false });
       
       const statusLabel = t.progress >= 100 ? 'FINALIZED' : t.progress > 0 ? 'ACTIVE DEVELOPMENT' : 'INITIALIZED';
-      doc.fillColor(t.progress >= 100 ? '#059669' : '#64748b').font('Helvetica-Bold').text(statusLabel, 350, currentY + 10);
-      doc.fillColor('#1e293b').text(`${t.progress}%`, 480, currentY + 10);
+      doc.fillColor(t.progress >= 100 ? '#059669' : '#64748b').font('Helvetica-Bold').text(statusLabel, 300, currentY + 12);
       
-      currentY += 30;
+      // Progress Bar in PDF
+      const barWidth = 60;
+      doc.rect(480, currentY + 14, barWidth, 6).fill('#e2e8f0');
+      doc.rect(480, currentY + 14, (t.progress / 100) * barWidth, 6).fill(brandColor);
+      doc.fillColor('#1e293b').fontSize(8).text(`${t.progress}%`, 480, currentY + 4);
+      
+      currentY += 35;
     });
 
     doc.moveDown(3);
@@ -524,6 +530,9 @@ export class PdfExportService {
   }
 
   private static renderPayslipContent(doc: PDFKit.PDFDocument, item: any, brandColor: string) {
+    const currency = item.currency || 'GHS';
+    const formatAmount = (val: number) => val.toLocaleString('en-US', { minimumFractionDigits: 2 });
+
     // 1. Employee Branding Header
     const headerTop = doc.y;
     doc.fillColor('#f8fafc').rect(this.SAFE_MARGIN, headerTop, this.CONTENT_WIDTH, 70).fill();
@@ -531,9 +540,11 @@ export class PdfExportService {
     doc.fillColor('#1e293b').fontSize(12).font('Helvetica-Bold').text(item.employee?.fullName?.toUpperCase(), this.SAFE_MARGIN + 15, headerTop + 15);
     doc.fillColor('#64748b').fontSize(8).font('Helvetica').text(`EMPLOYEE CODE: ${item.employee?.employeeCode || 'N/A'}`, this.SAFE_MARGIN + 15, headerTop + 32);
     doc.text(`DESIGNATION: ${item.employee?.jobTitle || 'N/A'}`, this.SAFE_MARGIN + 15, headerTop + 42);
+    doc.text(`DEPARTMENT: ${item.employee?.departmentObj?.name || 'N/A'}`, this.SAFE_MARGIN + 15, headerTop + 52);
     
     doc.fillColor(brandColor).fontSize(10).font('Helvetica-Bold').text('PAYMENT PERIOD', this.SAFE_MARGIN +this.CONTENT_WIDTH - 200, headerTop + 15, { align: 'right', width: 185 });
     doc.fillColor('#1e293b').fontSize(12).font('Helvetica').text(item.run?.period, 350, headerTop + 28, { align: 'right', width: 185 });
+    doc.fillColor('#64748b').fontSize(8).text(`Currency: ${currency}`, 350, headerTop + 45, { align: 'right', width: 185 });
 
     doc.moveDown(5);
 
@@ -541,7 +552,7 @@ export class PdfExportService {
     const tableTop = doc.y;
     doc.rect(50, tableTop, 500, 22).fill(brandColor);
     doc.fillColor('#fff').fontSize(9).font('Helvetica-Bold').text('EARNINGS & DEDUCTIONS', 65, tableTop + 7);
-    doc.text('AMOUNT (GHS)', 450, tableTop + 7, { align: 'right', width: 85 });
+    doc.text(`AMOUNT (${currency})`, 450, tableTop + 7, { align: 'right', width: 85 });
 
     let currentY = tableTop + 22;
     const drawRow = (label: string, value: number, isDeduction = false) => {
@@ -549,7 +560,7 @@ export class PdfExportService {
       doc.fillColor(currentY % 44 === 22 ? '#f9fafb' : '#ffffff').rect(50, currentY, 500, 22).fill();
       doc.fillColor('#334155').fontSize(9).font('Helvetica').text(label.toUpperCase(), 65, currentY + 7);
       
-      const formatted = value.toLocaleString('en-US', { minimumFractionDigits: 2 });
+      const formatted = formatAmount(value);
       doc.fillColor(isDeduction ? '#ef4444' : '#1e293b').font('Helvetica-Bold').text(`${isDeduction ? '-' : ''}${formatted}`, 450, currentY + 7, { align: 'right', width: 85 });
       currentY += 22;
     };
@@ -561,7 +572,7 @@ export class PdfExportService {
 
     // Deductions
     drawRow('Income Tax (PAYE)', Number(item.tax), true);
-    if (Number(item.ssnit)) drawRow('Statutory Pension (SSNIT)', Number(item.ssnit), true);
+    if (Number(item.ssnit)) drawRow('Statutory Pension / Social Security', Number(item.ssnit), true);
     if (Number(item.otherDeductions)) drawRow('Other Benefits / Deductions', Number(item.otherDeductions), true);
 
     const totalDed = Number(item.tax) + Number(item.ssnit) + Number(item.otherDeductions);
@@ -570,21 +581,25 @@ export class PdfExportService {
     doc.y = currentY + 30;
     const summaryTop = doc.y;
     
-    // Background highlight for Net Payout
-    doc.fillColor('#f8fafc').rect(50, summaryTop, 500, 100).fill();
-    doc.strokeColor('#e2e8f0').lineWidth(0.5).rect(50, summaryTop, 500, 100).stroke();
+    // Background highlight for Net Payout - High Contrast Commercial Box
+    doc.fillColor('#0f172a').rect(50, summaryTop, 500, 110).fill();
+    
+    // Inner accent border
+    doc.strokeColor(brandColor).lineWidth(2).rect(60, summaryTop + 10, 480, 90).stroke();
 
-    doc.fillColor('#64748b').fontSize(8).font('Helvetica-Bold').text('GROSS EARNINGS', 70, summaryTop + 20);
-    doc.fillColor('#1e293b').fontSize(11).font('Helvetica').text(Number(item.grossPay).toLocaleString('en-US', { minimumFractionDigits: 2 }), 70, summaryTop + 32);
+    doc.fillColor('rgba(255,255,255,0.6)').fontSize(8).font('Helvetica-Bold').text('GROSS EARNINGS', 80, summaryTop + 30);
+    doc.fillColor('#fff').fontSize(14).font('Helvetica-Bold').text(formatAmount(Number(item.grossPay)), 80, summaryTop + 45);
 
-    doc.fillColor('#64748b').fontSize(8).font('Helvetica-Bold').text('TOTAL DEDUCTIONS', 200, summaryTop + 20);
-    doc.fillColor('#ef4444').fontSize(11).font('Helvetica').text(totalDed.toLocaleString('en-US', { minimumFractionDigits: 2 }), 200, summaryTop + 32);
+    doc.fillColor('rgba(255,255,255,0.6)').fontSize(8).font('Helvetica-Bold').text('TOTAL DEDUCTIONS', 220, summaryTop + 30);
+    doc.fillColor('#fb7185').fontSize(14).font('Helvetica-Bold').text(formatAmount(totalDed), 220, summaryTop + 45);
 
     // Vertical Divider
-    doc.strokeColor('#e2e8f0').lineWidth(1).moveTo(330, summaryTop + 15).lineTo(330, summaryTop + 85).stroke();
+    doc.strokeColor('rgba(255,255,255,0.1)').lineWidth(1).moveTo(340, summaryTop + 25).lineTo(340, summaryTop + 85).stroke();
 
-    doc.fillColor(brandColor).fontSize(9).font('Helvetica-Bold').text('NET PAYOUT', 350, summaryTop + 30, { characterSpacing: 1 });
-    doc.fillColor('#1e293b').fontSize(24).font('Helvetica-Bold').text(`GHS ${Number(item.netPay).toLocaleString('en-US', { minimumFractionDigits: 2 })}`, 350, summaryTop + 45, { characterSpacing: -1 });
+    doc.fillColor(brandColor).fontSize(9).font('Helvetica-Bold').text('NET PAYOUT', 360, summaryTop + 30, { characterSpacing: 2 });
+    doc.fillColor('#fff').fontSize(28).font('Helvetica-Bold').text(`${currency} ${formatAmount(Number(item.netPay))}`, 360, summaryTop + 45, { characterSpacing: -1 });
+
+    doc.moveDown(9);
 
     doc.moveDown(8);
     
@@ -598,10 +613,61 @@ export class PdfExportService {
       doc.fontSize(9).font('Helvetica-Oblique').fillColor('#94a3b8').text(`Disbursement Note: ${item.notes}`);
     }
   }
+  }
+  private static renderBoardReportContent(doc: PDFKit.PDFDocument, data: any, brandColor: string) {
+    // Top Section
+    doc.fillColor('#0f172a').fontSize(24).font('Helvetica-Bold').text('BOARD REPORT', this.SAFE_MARGIN, doc.y);
+    doc.fontSize(10).fillColor('#64748b').font('Helvetica').text(`Generated on: ${new Date().toLocaleDateString()}  •  Confidential`, this.SAFE_MARGIN, doc.y + 5);
+    doc.moveDown(3);
+
+    // Section 1: Human Capital Summary
+    doc.fillColor(brandColor).fontSize(14).font('Helvetica-Bold').text('1. Human Capital Snapshot', this.SAFE_MARGIN, doc.y);
+    doc.moveTo(this.SAFE_MARGIN, doc.y + 5).lineTo(this.SAFE_MARGIN + this.CONTENT_WIDTH, doc.y + 5).strokeColor(brandColor).lineWidth(2).stroke();
+    doc.moveDown(1.5);
+
+    const metricsTop = doc.y;
+    this.drawMetricCard(doc, 'Total Headcount', String(data.totalEmployees || 0), 50, metricsTop, 150, brandColor);
+    this.drawMetricCard(doc, 'Pending Leaves', String(data.pendingLeaves || 0), 220, metricsTop, 150, '#eab308');
+    this.drawMetricCard(doc, 'Open Appraisals', String(data.pendingAppraisals || 0), 390, metricsTop, 150, '#3b82f6');
+    doc.y = metricsTop + 80;
+    doc.moveDown(2);
+
+    // Section 2: Financial Snapshot
+    doc.fillColor(brandColor).fontSize(14).font('Helvetica-Bold').text('2. Financial Overview (Payroll)', this.SAFE_MARGIN, doc.y);
+    doc.moveTo(this.SAFE_MARGIN, doc.y + 5).lineTo(this.SAFE_MARGIN + this.CONTENT_WIDTH, doc.y + 5).strokeColor(brandColor).lineWidth(2).stroke();
+    doc.moveDown(1.5);
+
+    doc.fillColor('#0f172a').fontSize(12).font('Helvetica').text('Latest Payroll Run Total Net Pay:', this.SAFE_MARGIN, doc.y);
+    doc.fillColor('#10b981').fontSize(24).font('Helvetica-Bold').text(`${(data.payrollTotal || 0).toLocaleString('en-US', { style: 'currency', currency: 'GHS' })}`, this.SAFE_MARGIN, doc.y + 10);
+    doc.moveDown(3);
+
+    // Section 3: AI Strategic Insights (if provided)
+    if (data.insights && data.insights.length > 0) {
+      doc.fillColor(brandColor).fontSize(14).font('Helvetica-Bold').text('3. Strategic Intelligence (Cortex AI)', this.SAFE_MARGIN, doc.y);
+      doc.moveTo(this.SAFE_MARGIN, doc.y + 5).lineTo(this.SAFE_MARGIN + this.CONTENT_WIDTH, doc.y + 5).strokeColor(brandColor).lineWidth(2).stroke();
+      doc.moveDown(1.5);
+      
+      data.insights.forEach((insight: any) => {
+        doc.fillColor('#1e293b').fontSize(11).font('Helvetica-Bold').text(insight.label || 'Insight');
+        doc.fillColor('#475569').fontSize(10).font('Helvetica').text(insight.description);
+        doc.moveDown(0.5);
+      });
+    }
+
+    doc.moveDown(4);
+    doc.fillColor('#94a3b8').fontSize(9).font('Helvetica').text('This document was automatically generated by Nexus Executive Insights.', { align: 'center' });
+  }
+
+  private static drawMetricCard(doc: PDFKit.PDFDocument, title: string, value: string, x: number, y: number, width: number, color: string) {
+    doc.roundedRect(x, y, width, 60, 8).fillColor('#f8fafc').fill();
+    doc.fillColor('#64748b').fontSize(10).font('Helvetica-Bold').text(title.toUpperCase(), x + 10, y + 10, { width: width - 20, align: 'center' });
+    doc.fillColor(color).fontSize(18).font('Helvetica-Bold').text(value, x + 10, y + 30, { width: width - 20, align: 'center' });
+  }
 
   private static recordMetadata(doc: PDFKit.PDFDocument, label: string, value: string) {
     doc.fontSize(9).font('Helvetica-Bold').fillColor('#64748b').text(`${label.toUpperCase()}: `, this.SAFE_MARGIN, doc.y, { continued: true }).font('Helvetica').fillColor('#1e293b').text(value);
     doc.moveDown(0.2);
   }
 }
+
 

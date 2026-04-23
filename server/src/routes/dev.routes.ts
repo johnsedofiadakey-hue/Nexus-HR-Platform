@@ -20,16 +20,21 @@ import {
   getTenantAuditTrail,
   provisionClient,
 } from '../controllers/dev.controller';
-import { devAuth } from '../middleware/devAuth.middleware';
+import { devAuth, verifyDevPin } from '../middleware/devAuth.middleware';
+import { validate, DevPinSchema, ProvisionSchema, TenantFeatureToggleSchema, TrialExtensionSchema, BankAccessSchema } from '../middleware/validate.middleware';
 
 const router = Router();
 
+// ─── PUBLIC: PIN verification (no devAuth required) ──────────────────────
+router.post('/verify-pin', validate(DevPinSchema), verifyDevPin);
+
+// ─── PROTECTED: All routes below require dev authentication ──────────────
 router.get('/stats', devAuth, getSystemStats);
 router.get('/integrity', devAuth, checkIntegrity);
 router.get('/telemetry', devAuth, getSecurityTelemetry);
 router.get('/telemetry/api', devAuth, getApiUsageStats);
-router.post('/tenant/feature', devAuth, toggleTenantFeature);
-router.post('/tenant/trial', devAuth, extendTrial);
+router.post('/tenant/feature', devAuth, validate(TenantFeatureToggleSchema), toggleTenantFeature);
+router.post('/tenant/trial', devAuth, validate(TrialExtensionSchema), extendTrial);
 router.post('/tenant/bulk-action', devAuth, bulkTenantAction);
 router.get('/logs', devAuth, getSystemLogs);
 router.get('/tenant/:id', devAuth, getTenantDetails);
@@ -37,13 +42,13 @@ router.patch('/tenant/:id/network', devAuth, updateTenantNetwork);
 router.patch('/tenant/:id/billing', devAuth, updateTenantBilling);
 router.get('/tenant/:id/audit', devAuth, getTenantAuditTrail);
 router.post('/backup', devAuth, triggerBackup);
-router.post('/grant-bank-access', devAuth, grantBankTransferAccess);
+router.post('/grant-bank-access', devAuth, validate(BankAccessSchema), grantBankTransferAccess);
 
 // Tenant/Organization management
 router.get('/organizations', devAuth, listOrganizations);
 router.post('/organizations', devAuth, createOrganization);
 router.get('/users', devAuth, listAllUsers);
 router.post('/tenant/seed-demo', devAuth, seedDemoTenant);
-router.post('/provision', devAuth, provisionClient);
+router.post('/provision', devAuth, validate(ProvisionSchema), provisionClient);
 
 export default router;

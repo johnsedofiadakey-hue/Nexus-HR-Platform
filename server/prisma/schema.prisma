@@ -228,6 +228,8 @@ model AssetAssignment {
   userId            String?
   assetId           String?
   assignedAt        DateTime  @default(now())
+  handoverSignature String?   // Base64 or URL to signed image
+  returnSignature   String?   // Base64 or URL to return signature
   asset             Asset?    @relation(fields: [assetId], references: [id], onDelete: Cascade)
   loggedBy          User?     @relation("LoggedByAssignments", fields: [loggedById], references: [id], onDelete: Cascade)
   user              User?     @relation("UserAssignments", fields: [userId], references: [id], onDelete: Cascade)

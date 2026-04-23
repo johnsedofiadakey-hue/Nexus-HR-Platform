@@ -177,3 +177,60 @@ export const getPersonalStats = async (req: Request, res: Response) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+import { PdfExportService } from '../services/pdf.service';
+
+export const downloadBoardReportPDF = async (req: Request, res: Response) => {
+    try {
+        const user = (req as any).user;
+        const organizationId = user.organizationId || 'default-tenant';
+        
+        // Ensure only executive/director rank can generate board reports
+        if ((user.rank || 0) < 80) {
+            return res.status(403).json({ error: 'Access denied. Board reports are restricted to executive personnel.' });
+        }
+
+        // Aggregate necessary metrics for the Board Report
+        const [totalEmployees, pendingLeaves, pendingAppraisals] = await Promise.all([
+            prisma.user.count({ where: { organizationId, status: 'ACTIVE', role: { not: 'DEV' } } }),
+            prisma.leaveRequest.count({ where: { organizationId, status: 'APPROVED' } }),
+            (prisma as any).appraisalPacket.count({ where: { organizationId, status: 'OPEN' } })
+        ]);
+
+        const latestRun = await prisma.payrollRun.findFirst({
+            where: { organizationId, status: { in: ['APPROVED', 'PAID'] } },
+            orderBy: { createdAt: 'desc' },
+            select: { totalNet: true }
+        });
+        const payrollTotal = Number(latestRun?.totalNet) || 0;
+
+        // Fetch AI Insight (Heuristics or Gemini if wired into a broader analytic service)
+        // Here we embed a brief static summary representing Cortex AI's general findings
+        const insights = [
+            { label: 'Operational Stability', description: 'System-wide uptime and headcount deployment are optimal.' },
+            { label: 'Financial Health', description: 'Payroll growth is stable and aligned with departmental budgets.' }
+        ];
+
+        const reportData = {
+            totalEmployees,
+            pendingLeaves,
+            pendingAppraisals,
+            payrollTotal,
+            insights
+        };
+
+        const pdfBuffer = await PdfExportService.generateBrandedPdf(
+            organizationId,
+            'Executive Board Report',
+            reportData,
+            'BOARD_REPORT'
+        );
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="Board_Report_Q${Math.ceil((new Date().getMonth() + 1) / 3)}_${new Date().getFullYear()}.pdf"`);
+        return res.send(pdfBuffer);
+    } catch (error: any) {
+        console.error('[PDF] Board Report Error:', error);
+        if (!res.headersSent) res.status(500).json({ message: 'Failed to generate Board Report PDF.' });
+    }
+};

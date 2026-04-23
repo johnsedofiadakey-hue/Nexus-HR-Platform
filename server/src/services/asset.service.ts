@@ -25,7 +25,7 @@ export const getAllAssets = async (organizationId: string) => {
     });
 };
 
-export const assignAsset = async (organizationId: string, assetId: string, userId: string, condition?: string) => {
+export const assignAsset = async (organizationId: string, assetId: string, userId: string, condition?: string, signature?: string) => {
     const asset = await prisma.asset.findFirst({
         where: { id: assetId, organizationId }
     });
@@ -38,7 +38,8 @@ export const assignAsset = async (organizationId: string, assetId: string, userI
                 organizationId,
                 assetId,
                 userId,
-                conditionOnAssign: condition
+                conditionOnAssign: condition,
+                handoverSignature: signature
             }
         });
 
@@ -51,7 +52,7 @@ export const assignAsset = async (organizationId: string, assetId: string, userI
     });
 };
 
-export const returnAsset = async (organizationId: string, assetId: string, condition?: string) => {
+export const returnAsset = async (organizationId: string, assetId: string, condition?: string, signature?: string) => {
     const asset = await prisma.asset.findFirst({
         where: { id: assetId, organizationId },
         include: { assignments: { where: { returnedAt: null, organizationId } } }
@@ -67,7 +68,8 @@ export const returnAsset = async (organizationId: string, assetId: string, condi
             where: { id: assignmentId },
             data: {
                 returnedAt: new Date(),
-                conditionOnReturn: condition
+                conditionOnReturn: condition,
+                returnSignature: signature
             }
         });
 

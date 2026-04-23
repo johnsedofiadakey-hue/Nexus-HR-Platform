@@ -38,12 +38,18 @@ import { tenantContext } from '../utils/context';
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.warn(`[Auth Middleware] No bearer token provided for: ${req.method} ${req.path}`);
-    return res.status(401).json({ error: 'No token provided' });
+  let token = '';
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query.token && typeof req.query.token === 'string') {
+    token = req.query.token;
   }
 
-  const token = authHeader.split(' ')[1];
+  if (!token) {
+    console.warn(`[Auth Middleware] No token provided for: ${req.method} ${req.path}`);
+    return res.status(401).json({ error: 'No token provided' });
+  }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { id: string; role?: string; name?: string };

@@ -160,6 +160,87 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+// ─── SSO LOGIN (Google / Microsoft via Identity Token) ─────────────────────
+export const ssoLogin = async (req: Request, res: Response) => {
+  try {
+    const { idToken, provider } = req.body as { idToken?: string; provider?: string };
+
+    if (!idToken) {
+      return res.status(400).json({ error: 'OAuth ID token is required' });
+    }
+
+    const admin = (await import('firebase-admin')).default;
+    let decodedToken;
+    try {
+       decodedToken = await admin.auth().verifyIdToken(idToken);
+    } catch (firebaseErr: any) {
+       console.error('[Auth] SSO Firebase Token Verification failed:', firebaseErr);
+       return res.status(401).json({ error: 'Invalid or expired SSO identity token' });
+    }
+
+    const email = decodedToken.email;
+    if (!email) {
+       return res.status(401).json({ error: 'No email address embedded in SSO token.' });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await prisma.user.findUnique({ 
+      where: { email: normalizedEmail },
+      select: { id: true, email: true, fullName: true, role: true, status: true, 
+                avatarUrl: true, organizationId: true, jobTitle: true,
+                departmentId: true }
+    });
+
+    if (!user) {
+      await safeLogSecurityEvent({ email: normalizedEmail, success: false, organizationId: 'default-tenant', reason: 'SSO_USER_NOT_FOUND', req });
+      return res.status(401).json({ error: `The SSO email (${normalizedEmail}) is not registered in our HR records.` });
+    }
+
+    if (user.status === 'TERMINATED') {
+      await safeLogSecurityEvent({ email: normalizedEmail, success: false, organizationId: user.organizationId || 'default-tenant', reason: 'SSO_ACCOUNT_TERMINATED', req });
+      return res.status(403).json({ error: 'This account has been deactivated. Contact HR.' });
+    }
+
+    const orgId = user.organizationId || 'default-tenant';
+
+    const token = signAccessToken({
+      id: user.id,
+      role: user.role,
+      name: user.fullName,
+      status: user.status || 'ACTIVE',
+      organizationId: orgId
+    });
+    
+    // In SSO, we also issue our Native Refresh token so they don't have to keep doing the OAuth popup.
+    const refreshToken = await issueRefreshToken(user.id, orgId, req);
+
+    await safeLogSecurityEvent({ email: normalizedEmail, success: true, organizationId: orgId, reason: `LOGIN_OK_${provider?.toUpperCase() || 'SSO'}`, req });
+
+    return res.status(200).json({
+      token,
+      refreshToken,
+      user: {
+        id: user.id,
+        name: user.fullName,
+        email: user.email,
+        role: user.role,
+        jobTitle: user.jobTitle,
+        rank: getRoleRank(user.role),
+        organizationId: orgId,
+        avatar: user.avatarUrl,
+        departmentId: user.departmentId,
+      },
+      tokenMeta: {
+        accessExpiresIn: ACCESS_TOKEN_TTL,
+        refreshExpiresInHours: REFRESH_TOKEN_WINDOW_HOURS,
+      },
+    });
+  } catch (error) {
+    console.error('[Auth] SSO Login error:', error);
+    return res.status(500).json({ error: 'Internal Server Error during SSO authentication' });
+  }
+};
+
 // ─── REFRESH ACCESS TOKEN ────────────────────────────────────────────────
 export const refreshAccessToken = async (req: Request, res: Response) => {
   try {

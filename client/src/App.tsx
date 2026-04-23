@@ -1,7 +1,7 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
 import StormglideHome from './pages/StormglideHome';
 import { motion } from 'framer-motion';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import CommandPalette from './components/layout/CommandPalette';
 import PageErrorBoundary from './components/layout/PageErrorBoundary';
@@ -78,6 +78,7 @@ const Offboarding = lazy(() => import('./pages/Offboarding'));
 const Disciplinary = lazy(() => import('./pages/Disciplinary'));
 const PolicyLibrary = lazy(() => import('./pages/PolicyLibrary'));
 const ProbationTracker = lazy(() => import('./pages/ProbationTracker'));
+const AttendanceKiosk = lazy(() => import('./pages/AttendanceKiosk'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-64 bg-[var(--bg-main)]">
@@ -92,12 +93,12 @@ const ProtectedRoute = () => {
 };
 
 const AdminGuard = () => {
-  const devKey = localStorage.getItem('nexus_dev_key');
+  const devToken = localStorage.getItem('nexus_dev_token');
   const firebaseToken = localStorage.getItem('nexus_dev_firebase_token');
   const devMode = localStorage.getItem('nexus_dev_mode') === 'true';
 
-  // Support both the new PIN override and the fallback Google Identity
-  const hasAccess = devKey === '564669' || (firebaseToken && devMode);
+  // Server-issued dev JWT (from PIN verification) or Firebase Google Identity
+  const hasAccess = !!devToken || (firebaseToken && devMode);
 
   if (!hasAccess) return <Navigate to="/" replace />;
 
@@ -191,7 +192,18 @@ const Layout = () => {
             <div className="max-w-[1600px] mx-auto pb-24 lg:pb-0">
               <ChunkErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
-                  <Outlet />
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={useLocation().pathname}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                      className="w-full"
+                    >
+                      <Outlet />
+                    </motion.div>
+                  </AnimatePresence>
                 </Suspense>
               </ChunkErrorBoundary>
             </div>
@@ -417,6 +429,7 @@ const AppContent = () => {
             <Route path="/disciplinary" element={<RoleGuard minRank={50}><Disciplinary /></RoleGuard>} />
             <Route path="/policies" element={<PolicyLibrary />} />
             <Route path="/probation" element={<RoleGuard minRank={70}><ProbationTracker /></RoleGuard>} />
+            <Route path="/kiosk" element={<AttendanceKiosk />} />
           </Route>
 
           {/* Nexus Master Console - Completely Isolated SaaS Logic */}

@@ -95,13 +95,14 @@ api.interceptors.request.use(
       (config.headers as any)['Authorization'] = `Bearer ${token}`;
     }
 
-    const devKey = localStorage.getItem('nexus_dev_key');
-    if (devKey) {
+    // DEV CONSOLE: Use server-issued dev JWT for /dev/ routes
+    const devToken = localStorage.getItem('nexus_dev_token');
+    if (devToken && config.url?.includes('/dev')) {
       config.headers = config.headers || {};
-      (config.headers as any)['x-dev-master-key'] = devKey;
+      (config.headers as any)['Authorization'] = `Bearer ${devToken}`;
     }
 
-    // FIREBASE DEV MODE: Inject Google ID Token
+    // FIREBASE DEV MODE: Inject Google ID Token as fallback
     const devMode = localStorage.getItem('nexus_dev_mode') === 'true';
     if (devMode) {
       const fbToken = localStorage.getItem('nexus_dev_firebase_token');
@@ -138,7 +139,7 @@ api.interceptors.response.use(
       if (window.location.pathname !== '/') {
           // Safeguard: Don't redirect to root if we are in the Shadow Zone (Central Portal)
           const isShadowZone = window.location.pathname === '/' || window.location.pathname.includes('/dev-portal') || window.location.pathname.includes('/nexus-master-console');
-          const hasDevSession = !!localStorage.getItem('nexus_dev_key') || (!!localStorage.getItem('nexus_dev_firebase_token') && localStorage.getItem('nexus_dev_mode') === 'true');
+          const hasDevSession = !!localStorage.getItem('nexus_dev_token') || (!!localStorage.getItem('nexus_dev_firebase_token') && localStorage.getItem('nexus_dev_mode') === 'true');
           
           if (isShadowZone || hasDevSession) {
               console.warn('[API Interceptor] Error in Central Zone - Suppressing root redirect to preserve admin context.');

@@ -29,21 +29,17 @@ const MDDashboard = () => {
 
   useEffect(() => {
     api.get('/analytics/executive')
-      .then(res => setStats({
-        totalEmployees: res.data?.totalEmployees || 0,
-        activeLeaves: res.data?.activeLeaves || 0,
-        pendingTasks: res.data?.pendingTasks || 4,
-        payrollTotal: res.data?.payrollTotal || 0,
-        attendanceRate: res.data?.attendanceRate || 0,
-        growth: Array.isArray(res.data?.growth) ? res.data.growth :
-          [{ name: 'Jan', value: 4000 }, { name: 'Feb', value: 3200 }, { name: 'Mar', value: 2800 },
-           { name: 'Apr', value: 3600 }, { name: 'May', value: 4200 }, { name: 'Jun', value: 3900 }, { name: 'Jul', value: 4800 }]
-      }))
-      .catch(() => setStats({
-        totalEmployees: 0, activeLeaves: 0, pendingTasks: 0, payrollTotal: 0, attendanceRate: 0,
-        growth: [{ name: 'Jan', value: 4000 }, { name: 'Feb', value: 3200 }, { name: 'Mar', value: 2800 },
-                 { name: 'Apr', value: 3600 }, { name: 'May', value: 4200 }, { name: 'Jun', value: 3900 }, { name: 'Jul', value: 4800 }]
-      }))
+      .then(res => {
+        setStats({
+          totalEmployees: res.data?.totalEmployees || 0,
+          activeLeaves: res.data?.activeLeaves || 0,
+          pendingTasks: res.data?.pendingTasks || 0,
+          payrollTotal: res.data?.payrollTotal || 0,
+          attendanceRate: res.data?.attendanceRate || 0,
+          growth: Array.isArray(res.data?.growth) ? res.data.growth : []
+        });
+      })
+      .catch(() => setStats(null))
       .finally(() => setLoading(false));
   }, []);
 
@@ -72,6 +68,16 @@ const MDDashboard = () => {
           <p className="text-[14px] font-medium mt-4 text-[var(--text-secondary)] opacity-70 max-w-2xl leading-relaxed">
             {user.jobTitle || t('employees.roles.MD')} &nbsp;·&nbsp; {t('md_dashboard.subtitle')}
           </p>
+        </motion.div>
+        
+        {/* Executive Actions */}
+        <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} className="flex pb-1">
+           <button
+             onClick={() => window.open('/api/analytics/executive/board-report/pdf?token=' + localStorage.getItem('nexus_auth_token'))}
+             className="px-6 py-3 rounded-xl bg-[var(--primary)] text-white text-sm font-black uppercase tracking-widest flex items-center gap-3 hover:bg-[var(--accent)] hover:shadow-[0_0_20px_var(--primary)] hover:shadow-[var(--primary)]/30 transition-all active:scale-95"
+           >
+             <FileText size={18} /> Download Board Report
+           </button>
         </motion.div>
       </div>
 
@@ -168,29 +174,39 @@ const MDDashboard = () => {
              <TrendingUp size={20} />
           </div>
         </div>
-        <ResponsiveContainer width="100%" height={260}>
-          <AreaChart data={stats?.growth || []}>
-            <defs>
-              <linearGradient id="mdGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" opacity={0.5} />
-            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 10, fontWeight: 700 }} dy={10} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 10, fontWeight: 700 }} />
-            <Tooltip 
-              contentStyle={{ 
-                background: 'var(--bg-card)', 
-                border: '1px solid var(--border-subtle)', 
-                borderRadius: '16px',
-                boxShadow: 'var(--shadow-lg)'
-              }}
-              itemStyle={{ color: 'var(--text-primary)', fontSize: '12px', fontWeight: 'bold' }}
-            />
-            <Area type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={3} fill="url(#mdGrad)" />
-          </AreaChart>
-        </ResponsiveContainer>
+        {loading ? (
+          <div className="h-[260px] w-full bg-[var(--bg-elevated)]/50 rounded-xl animate-pulse flex items-center justify-center">
+            <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Aggregating Institutional Data...</span>
+          </div>
+        ) : stats?.growth && stats.growth.length > 0 ? (
+          <ResponsiveContainer width="100%" height={260}>
+            <AreaChart data={stats.growth}>
+              <defs>
+                <linearGradient id="mdGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" opacity={0.5} />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 10, fontWeight: 700 }} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 10, fontWeight: 700 }} />
+              <Tooltip 
+                contentStyle={{ 
+                  background: 'var(--bg-card)', 
+                  border: '1px solid var(--border-subtle)', 
+                  borderRadius: '16px',
+                  boxShadow: 'var(--shadow-lg)'
+                }}
+                itemStyle={{ color: 'var(--text-primary)', fontSize: '12px', fontWeight: 'bold' }}
+              />
+              <Area type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={3} fill="url(#mdGrad)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-[260px] w-full border border-dashed border-[var(--border-subtle)] rounded-xl flex items-center justify-center">
+            <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-widest">{t('common.no_data_available')}</p>
+          </div>
+        )}
       </motion.div>
 
       {/* Quick Action Grid */}

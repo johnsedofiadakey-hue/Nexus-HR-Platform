@@ -26,32 +26,46 @@ export interface StrategicVerdict {
     suggestedTargets?: SuggestedTarget[];
 }
 
-/**
- * Maps the current pathname and context data to a Strategic Verdict.
- */
-export const analyzeContext = (pathname: string, data: any): StrategicVerdict => {
-    // 1. Employee Profile Context
-    // Pattern: /employees/:id
-    if (pathname.match(/\/employees\/[a-zA-Z0-9-]+/) && data?.fullName) {
+import api from './api';
+
+export const analyzeContext = async (pathname: string, data: any): Promise<StrategicVerdict> => {
+    let contextType = 'Organizational Health';
+
+    // Determine Context Type string for Gemini
+    if (pathname.match(/\/employees\/[a-zA-Z0-9-]+/) && data?.fullName) contextType = 'Employee Profile';
+    else if (pathname.includes('/leave')) contextType = 'Leave Management';
+    else if (pathname.includes('/recruitment')) contextType = 'Recruitment Pipeline';
+    else if (pathname.includes('/reviews') || pathname.includes('/performance')) contextType = 'Performance Appraisal';
+
+    try {
+        // Try requesting a real AI insight
+        const response = await api.post('/ai/insight', { contextType, data });
+        if (response.data && response.data.title) {
+             return response.data as StrategicVerdict;
+        }
+    } catch (error) {
+        console.warn('AI Insight Engine backend failed, falling back to heuristics:', error);
+    }
+
+    // --- FALLBACK HEURISTICS ---
+
+    if (contextType === 'Employee Profile') {
         return analyzeEmployee(data);
     }
 
-    // 2. Leave Management Context
-    if (pathname.includes('/leave')) {
+    if (contextType === 'Leave Management') {
         return analyzeLeave(data);
     }
 
-    // 3. Recruitment Context
-    if (pathname.includes('/recruitment')) {
+    if (contextType === 'Recruitment Pipeline') {
         return analyzeRecruitment(data);
     }
 
-    // 4. Performance/Appraisal Context
-    if (pathname.includes('/reviews') || pathname.includes('/performance')) {
+    if (contextType === 'Performance Appraisal') {
         return analyzePerformance(data);
     }
 
-    // Default: Organizational Health
+    // Default Fallback: Organizational Health
     return {
         title: "Organizational Pulse",
         summary: "The system is currently monitoring global operations. Statistical variance is within expected parameters for the current fiscal cycle.",

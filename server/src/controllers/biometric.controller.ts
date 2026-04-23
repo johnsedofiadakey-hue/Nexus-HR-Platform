@@ -111,3 +111,73 @@ export const syncPunches = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Internal Server Error during sync.' });
   }
 };
+
+export const kioskPunch = async (req: Request, res: Response) => {
+  try {
+    const { employeeCode, type } = req.body;
+    // We let the frontend pass the organizationId of the kiosk
+    const organizationId = req.body.organizationId || 'default-tenant';
+
+    if (!employeeCode || !type) {
+       return res.status(400).json({ error: 'employeeCode and type (CHECKIN/CHECKOUT) are required.' });
+    }
+
+    const employee = await prisma.user.findFirst({
+      where: { employeeCode, organizationId, status: 'ACTIVE' }
+    });
+
+    if (!employee) {
+       return res.status(404).json({ error: 'Invalid Employee Code.' });
+    }
+
+    const punchDate = new Date();
+    const normalizedDate = new Date(punchDate);
+    normalizedDate.setHours(0, 0, 0, 0);
+
+    const existingLog = await prisma.attendanceLog.findUnique({
+      where: {
+        employeeId_date: {
+          employeeId: employee.id,
+          date: normalizedDate
+        }
+      }
+    });
+
+    if (!existingLog) {
+      if (type === 'CHECKOUT') {
+         return res.status(400).json({ error: 'Cannot checkout without an active clock-in today.' });
+      }
+
+      await prisma.attendanceLog.create({
+        data: {
+          organizationId,
+          employeeId: employee.id,
+          date: normalizedDate,
+          clockIn: punchDate,
+          source: 'KIOSK',
+          status: 'PRESENT'
+        }
+      });
+      return res.json({ message: 'Successfully Clocked In', user: employee.fullName, timestamp: punchDate });
+    } else {
+      if (type === 'CHECKIN') {
+         return res.status(400).json({ error: 'You are already clocked in for today.' });
+      }
+
+      if (existingLog.clockOut) {
+         return res.status(400).json({ error: 'You have already clocked out for today.' });
+      }
+
+      await prisma.attendanceLog.update({
+        where: { id: existingLog.id },
+        data: { clockOut: punchDate, source: 'KIOSK' }
+      });
+      
+      return res.json({ message: 'Successfully Clocked Out', user: employee.fullName, timestamp: punchDate, durationMinutes: Math.round((punchDate.getTime() - existingLog.clockIn!.getTime()) / 60000) });
+    }
+
+  } catch (error: any) {
+    console.error('[KioskPunch] error:', error);
+    return res.status(500).json({ error: 'Kiosk malfunction.' });
+  }
+};

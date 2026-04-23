@@ -1,4 +1,5 @@
-console.log(`[Startup] ${new Date().toISOString()} - Nexus HR Platform Core Initializing...`);
+const APP_VERSION = require('../package.json').version || '4.0.0';
+console.log(`[Startup] ${new Date().toISOString()} - Nexus HR Platform v${APP_VERSION} Initializing...`);
 import express, { Application, Request, Response, NextFunction } from 'express';
 import http from 'http';
 import cors from 'cors';
@@ -64,6 +65,7 @@ import offboardingRoutes from './routes/offboarding.routes';
 import hrFeaturesRoutes from './routes/hrFeatures.routes';
 import publicApiRoutes from './routes/public-api.routes';
 import integrationsRoutes from './routes/integrations.routes';
+import botRoutes from './routes/bot.routes';
 
 // Config already loaded at top level
 
@@ -210,7 +212,7 @@ app.get('/api/health', async (req, res) => {
     return res.json({ 
       status: isBooted ? 'UP' : 'BOOTING', 
       database: 'CONNECTED',
-      version: '3.4.1-STABLE', 
+      version: APP_VERSION, 
       bootComplete: isBooted,
       nodeEnv: process.env.NODE_ENV 
     });
@@ -219,6 +221,7 @@ app.get('/api/health', async (req, res) => {
     return res.status(503).json({ 
       status: 'DEGRADED', 
       database: 'DISCONNECTED',
+      version: APP_VERSION,
       error: err.message 
     });
   }
@@ -237,10 +240,15 @@ app.get('/api/routes', (req, res) => {
   res.json(routes.filter(r => r.path !== ''));
 });
 
-app.get('/', (_req: Request, res: Response) => res.json({ message: '🚀 HRM Core Engine Running', version: '2.0.1', status: isBooted ? 'READY' : 'BOOTING' }));
+app.get('/', (_req: Request, res: Response) => res.json({ message: '🚀 Nexus HR Platform Core Running', version: APP_VERSION, status: isBooted ? 'READY' : 'BOOTING' }));
 
-import debugRoutes from './routes/debug.routes';
-app.use('/api/debug-env', debugRoutes);
+// Debug routes — development only
+if (process.env.NODE_ENV !== 'production') {
+  import('./routes/debug.routes').then(m => {
+    app.use('/api/debug-env', m.default);
+    console.log('[Config] Debug routes enabled (non-production)');
+  });
+}
 
 // Startup Sync deferred to after port binding to ensure deploy stability
 
@@ -292,33 +300,40 @@ app.use('/api/offboarding', offboardingRoutes);
 app.use('/api/hr', hrFeaturesRoutes);
 app.use('/api/public/v1', publicApiRoutes);
 app.use('/api/integrations', integrationsRoutes);
+app.use('/api/bot', botRoutes);
+import aiRoutes from './routes/ai.routes';
+app.use('/api/ai', aiRoutes);
 
-// ─── DEBUG ROUTE ────────────────────────────────────────────────────────────
-(app as any).get('/api/debug-routes', (req: Request, res: Response) => {
-  const routes: any[] = [];
-  (app as any)._router.stack.forEach((middleware: any) => {
-    if (middleware.route) {
-      routes.push({ path: middleware.route.path, methods: Object.keys(middleware.route.methods) });
-    } else if (middleware.name === 'router') {
-      middleware.handle.stack.forEach((handler: any) => {
-        if (handler.route) {
-          const path = middleware.regexp.toString().replace('/^', '').replace('\\/?(?=\\/|$)/i', '') + handler.route.path;
-          routes.push({ path: path.replace(/\\\//g, '/'), methods: Object.keys(handler.route.methods) });
-        }
-      });
-    }
+// ─── DEBUG ROUTE (Development Only) ─────────────────────────────────────────
+if (process.env.NODE_ENV !== 'production') {
+  (app as any).get('/api/debug-routes', (req: Request, res: Response) => {
+    const routes: any[] = [];
+    (app as any)._router.stack.forEach((middleware: any) => {
+      if (middleware.route) {
+        routes.push({ path: middleware.route.path, methods: Object.keys(middleware.route.methods) });
+      } else if (middleware.name === 'router') {
+        middleware.handle.stack.forEach((handler: any) => {
+          if (handler.route) {
+            const path = middleware.regexp.toString().replace('/^', '').replace('\\/?(?=\\/|$)/i', '') + handler.route.path;
+            routes.push({ path: path.replace(/\\\//g, '/'), methods: Object.keys(handler.route.methods) });
+          }
+        });
+      }
+    });
+    res.json(routes);
   });
-  res.json(routes);
-});
+}
 
-// ─── 404 HANDLER (DEBUG) ──────────────────────────────────────────────────
+// ─── 404 HANDLER ──────────────────────────────────────────────────────────
 app.use((req: Request, res: Response) => {
-  console.log(`[404] ${req.method} ${req.path}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[404] ${req.method} ${req.path}`);
+  }
   res.status(404).json({
     error: 'Route not found',
     requestedPath: req.path,
     requestedMethod: req.method,
-    version: '2.1.2'
+    version: APP_VERSION
   });
 });
 
@@ -332,7 +347,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 // ─── START ──────────────────────────────────────────────────────────────────
 server.listen(PORT, '0.0.0.0', async () => {
-  console.log(`\n🚀 Nexus HR Platform v2.0 listening on http://0.0.0.0:${PORT}`);
+  console.log(`\n🚀 Nexus HR Platform v${APP_VERSION} listening on http://0.0.0.0:${PORT}`);
   
   // Initialize internal services
   SchedulerService.init();

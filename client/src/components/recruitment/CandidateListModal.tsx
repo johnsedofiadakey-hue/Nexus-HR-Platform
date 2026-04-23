@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Mail, Phone, FileText, ExternalLink, 
-  User, ArrowRight, Calendar
+  User, ArrowRight, Calendar, Zap
 } from 'lucide-react';
 import api from '../../services/api';
 import { cn } from '../../utils/cn';
@@ -151,6 +151,24 @@ const CandidateListModal = ({ isOpen, onClose, jobId, jobTitle }: CandidateListM
                           </div>
 
                           <div className="flex flex-wrap items-center gap-2">
+                            <button
+                              onClick={async () => {
+                                const loadingToast = toast.loading('AI Analyzing candidate fit...');
+                                try {
+                                  const res = await api.post('/ai/parse-resume', { candidateId: candidate.id });
+                                  const aires = res.data;
+                                  toast.dismiss(loadingToast);
+                                  toast.success(`AI Match Score: ${aires.matchScore}%`);
+                                } catch (e) {
+                                  toast.dismiss(loadingToast);
+                                  toast.error('AI Analysis failed.');
+                                }
+                              }}
+                              className="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2"
+                            >
+                               <Zap size={12} /> AI Scan
+                            </button>
+
                             {['SCREENING', 'INTERVIEW_SCHEDULED', 'OFFERED', 'REJECTED'].map((status) => (
                               candidate.status !== status && (
                                 <button 

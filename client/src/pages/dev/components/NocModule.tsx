@@ -1,57 +1,28 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { cn } from '../../../utils/cn';
+import { LucideIcon } from 'lucide-react';
 
 interface NocModuleProps {
     title: string;
-    subtitle?: string;
-    icon: React.ElementType;
+    subtitle: string;
+    icon: LucideIcon;
     iconColor?: string;
-    className?: string;
     children: React.ReactNode;
-    headerAction?: React.ReactNode;
 }
 
-const NocModule: React.FC<NocModuleProps> = ({ 
-    title, 
-    subtitle, 
-    icon: Icon, 
-    iconColor = "text-emerald-500", 
-    className, 
-    children,
-    headerAction
-}) => {
+const NocModule: React.FC<NocModuleProps> = ({ title, subtitle, icon: Icon, iconColor = 'text-blue-600', children }) => {
     return (
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={cn(
-                "glass p-6 border-white/5 bg-white/[0.02] relative overflow-hidden group",
-                className
-            )}
-        >
-            <div className="flex justify-between items-start mb-6 relative z-10">
-                <div className="flex items-center gap-4">
-                    <div className={cn("p-2 rounded-xl bg-white/5 border border-white/5", iconColor)}>
-                        <Icon size={18} />
-                    </div>
-                    <div>
-                        <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">{title}</h3>
-                        {subtitle && <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{subtitle}</p>}
-                    </div>
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center gap-5">
+                <div className="w-14 h-14 bg-white border border-slate-100 rounded-2xl flex items-center justify-center shadow-xl shadow-slate-200/50 transition-transform hover:rotate-6">
+                    <Icon size={24} className={iconColor} />
                 </div>
-                {headerAction}
+                <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">{title}</h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{subtitle}</p>
+                </div>
             </div>
-            
-            <div className="relative z-10">
-                {children}
-            </div>
-            
-            {/* Background Decoration */}
-            <div className={cn("absolute top-0 right-0 p-8 opacity-[0.02] transition-transform group-hover:scale-110 pointer-events-none", iconColor)}>
-                <Icon size={120} />
-            </div>
-        </motion.div>
+            <div>{children}</div>
+        </div>
     );
 };
 

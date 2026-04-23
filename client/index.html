@@ -124,11 +124,30 @@
     <link rel="icon" id="dynamic-favicon" type="image/svg+xml" href="/vite.svg?v=1.9" />
     <link rel="apple-touch-icon" id="dynamic-apple-icon" href="/vite.svg" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HRM Enterprise Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="description" content="Nexus HR — Enterprise Human Resource Management Platform" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>Nexus HR Platform</title>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx?v=20260410_sync_v4_production"></script>
+    <script type="module" src="/src/main.tsx?v=20260423_v5_pulse"></script>
+    <script>
+      // Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then((reg) => {
+            console.log('[PWA] Service worker registered:', reg.scope);
+            // Check for updates every 30 minutes
+            setInterval(() => reg.update(), 30 * 60 * 1000);
+          }).catch((err) => {
+            console.warn('[PWA] Service worker registration failed:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

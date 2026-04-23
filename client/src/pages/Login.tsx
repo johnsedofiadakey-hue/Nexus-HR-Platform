@@ -230,6 +230,76 @@ const Login = () => {
             </motion.button>
           </form>
 
+          {/* Social Identity Providers (SSO) */}
+          <div className="mt-8 flex flex-col gap-4">
+            <div className="relative flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--border-subtle)]"></div></div>
+              <div className="relative bg-[var(--bg-card)] px-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Or Continue With</div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                disabled={loading}
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+                    const { signInWithPopup } = await import('firebase/auth');
+                    const { auth, googleProvider } = await import('../services/firebase');
+                    const result = await signInWithPopup(auth, googleProvider);
+                    const idToken = await result.user.getIdToken();
+                    
+                    const res = await api.post('/auth/sso', { idToken, provider: 'google' });
+                    const { token, refreshToken, user } = res.data;
+                    
+                    localStorage.setItem('nexus_auth_token', token);
+                    if (refreshToken) localStorage.setItem('nexus_refresh_token', refreshToken);
+                    localStorage.setItem('nexus_user', JSON.stringify(user || {}));
+                    navigate('/dashboard');
+                  } catch (err: any) {
+                    setError(err?.response?.data?.error || 'Google SSO failed.');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-3 py-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-main)] hover:bg-[var(--bg-elevated)] transition-colors text-[10px] font-bold text-[var(--text-primary)]"
+              >
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
+                Google
+              </button>
+              
+              <button
+                type="button"
+                disabled={loading}
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+                    const { signInWithPopup } = await import('firebase/auth');
+                    const { auth, microsoftProvider } = await import('../services/firebase');
+                    const result = await signInWithPopup(auth, microsoftProvider);
+                    const idToken = await result.user.getIdToken();
+                    
+                    const res = await api.post('/auth/sso', { idToken, provider: 'microsoft' });
+                    const { token, refreshToken, user } = res.data;
+                    
+                    localStorage.setItem('nexus_auth_token', token);
+                    if (refreshToken) localStorage.setItem('nexus_refresh_token', refreshToken);
+                    localStorage.setItem('nexus_user', JSON.stringify(user || {}));
+                    navigate('/dashboard');
+                  } catch (err: any) {
+                    setError(err?.response?.data?.error || 'Microsoft SSO failed.');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-3 py-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-main)] hover:bg-[var(--bg-elevated)] transition-colors text-[10px] font-bold text-[var(--text-primary)]"
+              >
+                <img src="https://www.svgrepo.com/show/475668/microsoft-color.svg" className="w-4 h-4 grayscale opacity-80" alt="Microsoft" />
+                Microsoft
+              </button>
+            </div>
+          </div>
+
           {/* IT Support Recovery Hint */}
           <div className="mt-8 pt-8 border-t border-[var(--border-subtle)] text-center">
             <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">

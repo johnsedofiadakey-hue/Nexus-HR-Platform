@@ -79,7 +79,36 @@ const calculateCNSS = (gross: number) => Math.round(gross * 0.025 * 100) / 100;
 
 type TaxResult = { tax: number; socialSecurity: number };
 
-const computeTaxes = (baseSalary: number, currency: string, grossPay: number): TaxResult => {
+const computeTaxes = async (organizationId: string, baseSalary: number, currency: string, grossPay: number): Promise<TaxResult> => {
+  // 1. Try to evaluate Custom DB-Driven Tax Rules first
+  const customRules = await prisma.taxRule.findMany({
+    where: { organizationId, isActive: true },
+    include: { brackets: { orderBy: { minAmount: 'asc' } } }
+  });
+
+  if (customRules.length > 0) {
+    let totalTax = 0;
+    
+    for (const rule of customRules) {
+        let remaining = grossPay;
+        for (const band of rule.brackets) {
+            const min = Number(band.minAmount);
+            const max = band.maxAmount ? Number(band.maxAmount) : Infinity;
+            const rate = Number(band.rate);
+            
+            if (remaining <= 0) break;
+            
+            const limit = max - min; // band width
+            const taxable = Math.min(remaining, limit);
+            totalTax += taxable * rate;
+            remaining -= taxable;
+        }
+    }
+    // Simplistic social security if custom tax rules exist.
+    return { tax: Math.round(totalTax * 100) / 100, socialSecurity: calculateSocialSecurity(grossPay) };
+  }
+
+  // 2. Fallback to Hardcoded Regional Multi-Country Engines
   switch (currency) {
     case 'GHS': {
       const { employeeSSNIT } = calculateGhanaSSNIT(baseSalary);
@@ -180,7 +209,7 @@ export const createPayrollRun = async (
     const otherDeductions = (adj?.otherDeductions ?? 0) + autoInstallment;
 
     const grossPay = base + overtime + bonus + allowances;
-    const { tax, socialSecurity: socialSecurityValue } = computeTaxes(base, currency, grossPay);
+    const { tax, socialSecurity: socialSecurityValue } = await computeTaxes(organizationId, base, currency, grossPay);
     const netPay = Math.max(0, grossPay - tax - socialSecurityValue - otherDeductions);
 
     const item = await prisma.payrollItem.create({
@@ -242,6 +271,14 @@ export const approvePayrollRun = async (organizationId: string, runId: string, a
     where: { paidInRunId: runId, organizationId },
     data: { status: 'PAID' }
   });
+  
+  // Trigger Enterprise Webhook
+  try {
+     const { triggerWebhook } = await import('./webhook.service');
+     await triggerWebhook(organizationId, 'PAYROLL_RUN_COMPLETED', run);
+  } catch (err) {
+     console.error('Failed to trigger webhook:', err);
+  }
   await prisma.loanInstallment.updateMany({
     where: { deductedRunId: runId, organizationId },
     data: { status: 'PAID', paidAt: new Date() }

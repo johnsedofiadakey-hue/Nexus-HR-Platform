@@ -23,7 +23,7 @@ const NetworkManager: React.FC<NetworkManagerProps> = ({ tenant, onUpdate }) => 
                 customDomain: customDomain.trim().toLowerCase() || null,
                 domainStatus: status
             });
-            toast.success('Network configuration patched');
+            toast.success('Routing Protocol Synchronized');
             onUpdate();
         } catch (error: any) {
             toast.error(error.response?.data?.error || 'Failed to update routing');
@@ -35,54 +35,63 @@ const NetworkManager: React.FC<NetworkManagerProps> = ({ tenant, onUpdate }) => 
     return (
         <NocModule 
             title="Infrastructure Routing" 
-            subtitle="DNS & Domain Protocols" 
+            subtitle="Software-Defined Networking & DNS Protocols" 
             icon={Globe}
-            iconColor="text-sky-400"
+            iconColor="text-blue-600"
         >
-            <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest pl-1">Project Subdomain</label>
+            <div className="space-y-8">
+                <div className="grid grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Project Subdomain</label>
                         <div className="relative">
-                            <Link2 size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-700" />
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300">
+                                <Link2 size={16} />
+                            </div>
                             <input 
                                 type="text"
                                 value={subdomain}
                                 onChange={e => setSubdomain(e.target.value)}
-                                className="w-full bg-black/40 border border-white/5 rounded-2xl py-3 pl-11 pr-4 text-xs font-mono text-white focus:border-sky-500/50 outline-none transition-all"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 pl-14 pr-24 text-sm font-black text-slate-900 focus:bg-white focus:border-blue-500 outline-none transition-all"
                                 placeholder="tenant-slug"
                             />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-700">.nexus-hrm.app</span>
+                            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 uppercase">.nexus</span>
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest pl-1">Custom Domain</label>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Custom Domain Protocol</label>
                         <div className="relative">
-                            <Globe size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-700" />
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300">
+                                <Globe size={16} />
+                            </div>
                             <input 
                                 type="text"
                                 value={customDomain}
                                 onChange={e => setCustomDomain(e.target.value)}
-                                className="w-full bg-black/40 border border-white/5 rounded-2xl py-3 pl-11 pr-4 text-xs font-mono text-white focus:border-sky-500/50 outline-none transition-all"
-                                placeholder="www.company.com"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-5 pl-14 pr-6 text-sm font-black text-slate-900 focus:bg-white focus:border-blue-500 outline-none transition-all"
+                                placeholder="www.enterprise.com"
                             />
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
-                    <div className="flex items-center gap-3">
-                        <ShieldCheck size={16} className={status === 'VERIFIED' ? 'text-emerald-500' : 'text-amber-500'} />
+                <div className="flex items-center justify-between p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                    <div className="flex items-center gap-5">
+                        <div className={cn(
+                            "w-12 h-12 rounded-2xl flex items-center justify-center transition-all",
+                            status === 'VERIFIED' ? 'bg-emerald-100 text-emerald-600 shadow-xl shadow-emerald-500/10' : 'bg-blue-100 text-blue-600 shadow-xl shadow-blue-500/10'
+                        )}>
+                            <ShieldCheck size={20} />
+                        </div>
                         <div>
-                            <div className="text-[10px] font-black text-white uppercase tracking-widest">DNS Propagation Status</div>
-                            <div className="text-[9px] text-slate-500 font-bold uppercase">{status}</div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Routing Status</div>
+                            <div className="text-sm font-black text-slate-900 mt-0.5">{status}</div>
                         </div>
                     </div>
                     <select 
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="bg-slate-900 border border-white/10 rounded-xl px-3 py-1.5 text-[10px] font-black text-white outline-none"
+                        className="bg-white border border-slate-200 rounded-xl px-5 py-2.5 text-[10px] font-black text-slate-900 outline-none shadow-sm hover:border-blue-500 transition-colors cursor-pointer"
                     >
                         <option value="PENDING">PENDING</option>
                         <option value="VERIFIED">VERIFIED</option>
@@ -94,9 +103,10 @@ const NetworkManager: React.FC<NetworkManagerProps> = ({ tenant, onUpdate }) => 
                 <button 
                     onClick={handleSave}
                     disabled={updating}
-                    className="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-widest transition-all shadow-2xl shadow-blue-600/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
                 >
-                    {updating ? <Activity size={12} className="animate-spin" /> : 'Commit Network Changes'}
+                    {updating ? <Activity size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
+                    {updating ? 'Synchronizing DNS...' : 'Commit Network Changes'}
                 </button>
             </div>
         </NocModule>

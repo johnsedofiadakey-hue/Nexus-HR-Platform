@@ -16,3 +16,43 @@ export const getLogs = async (req: Request, res: Response) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const exportLogsCSV = async (req: Request, res: Response) => {
+    try {
+        const userReq = (req as any).user;
+        const organizationId = userReq?.organizationId || 'default-tenant';
+
+        const { PrismaClient } = await import('@prisma/client');
+        const prismaLocal = new PrismaClient();
+        
+        // Fetch last 5000 audit logs
+        const logs = await prismaLocal.systemLog.findMany({
+            where: { organizationId },
+            orderBy: { createdAt: 'desc' },
+            take: 5000
+        });
+
+        const csvHeaders = ['Timestamp', 'Type/Action', 'Source', 'Operator ID', 'IP Address', 'Details'];
+        
+        const rows = logs.map(l => [
+            new Date(l.createdAt).toISOString(),
+            l.type || l.action || 'SYSTEM',
+            l.source || 'N/A',
+            l.operatorId || 'SYSTEM',
+            l.ipAddress || '0.0.0.0',
+            // Escape quotes and commas
+            `"${(l.details || l.message || '').replace(/"/g, '""')}"`
+        ]);
+
+        const csvContent = [csvHeaders.join(','), ...rows.map(r => r.join(','))].join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="audit_trail_${new Date().toISOString().split('T')[0]}.csv"`);
+        res.status(200).send(csvContent);
+        
+        await prismaLocal.$disconnect();
+    } catch (error: any) {
+        console.error('Audit CSV Export failed:', error);
+        res.status(500).json({ message: error.message });
+    }
+};

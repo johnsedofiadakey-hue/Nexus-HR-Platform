@@ -7,6 +7,7 @@ import * as authController from '../controllers/auth.controller';
 const router = Router();
 
 router.post('/login', loginLimiter, validate(LoginSchema), authController.login);
+router.post('/sso', loginLimiter, authController.ssoLogin);
 router.post('/signup', validate(TenantSignupSchema), authController.signup);
 router.post('/refresh', authController.refreshAccessToken);
 router.post('/logout', authenticate, authController.revokeRefreshToken);

@@ -13,36 +13,40 @@ const TIERS = [
     {
         id: 'FREE',
         label: 'Free Trial',
-        color: 'text-slate-300',
-        activeBg: 'bg-slate-600/20 border-slate-500',
-        desc: 'Basic features, 14-day trial',
+        color: 'text-slate-400',
+        activeBg: 'bg-slate-100 border-slate-200',
+        activeText: 'text-slate-900',
+        desc: 'Core HRM features, 14-day trial window',
         modules: 3,
         features: ['records', 'leave', 'announcements'],
     },
     {
         id: 'STARTER',
         label: 'Starter',
-        color: 'text-sky-400',
-        activeBg: 'bg-sky-600/10 border-sky-500',
-        desc: 'Core HRM — up to 30 employees',
+        color: 'text-sky-600',
+        activeBg: 'bg-sky-50 border-sky-100',
+        activeText: 'text-sky-900',
+        desc: 'Small business suite — up to 30 employees',
         modules: 4,
         features: ['records', 'leave', 'announcements', 'assets'],
     },
     {
         id: 'PRO',
         label: 'Pro',
-        color: 'text-violet-400',
-        activeBg: 'bg-violet-600/10 border-violet-500',
-        desc: 'Full operations suite — unlimited employees',
+        color: 'text-violet-600',
+        activeBg: 'bg-violet-50 border-violet-100',
+        activeText: 'text-violet-900',
+        desc: 'Advanced operations — unlimited nodes',
         modules: 9,
         features: ['records', 'leave', 'announcements', 'payroll', 'appraisals', 'assets', 'recruitment', 'training', 'expenses'],
     },
     {
         id: 'ENTERPRISE',
         label: 'Enterprise',
-        color: 'text-amber-400',
-        activeBg: 'bg-amber-600/10 border-amber-500',
-        desc: 'All features + AI + Custom Domain + White Label',
+        color: 'text-amber-600',
+        activeBg: 'bg-amber-50 border-amber-100',
+        activeText: 'text-amber-900',
+        desc: 'Global scale + AI Engine + White Label proxying',
         modules: 12,
         features: ['records', 'leave', 'announcements', 'payroll', 'appraisals', 'assets', 'recruitment', 'training', 'expenses', 'custom_domains', 'ai_engine', 'white_label'],
     },
@@ -72,7 +76,7 @@ const BillingControl: React.FC<BillingControlProps> = ({ tenant, onUpdate }) => 
                 isSuspended: false,
                 features: JSON.stringify(featuresMap),
             });
-            toast.success(`Plan changed to ${tier.label}`);
+            toast.success(`Protocol Transferred: ${tier.label}`);
             onUpdate();
         } catch (err: any) {
             toast.error(err.response?.data?.error || 'Failed to update plan');
@@ -88,7 +92,7 @@ const BillingControl: React.FC<BillingControlProps> = ({ tenant, onUpdate }) => 
                 isSuspended: !isSuspended,
                 billingStatus: !isSuspended ? 'SUSPENDED' : tenant.subscriptionPlan === 'FREE' ? 'FREE' : 'ACTIVE',
             });
-            toast.success(isSuspended ? 'Account reactivated' : 'Account suspended');
+            toast.success(isSuspended ? 'Proxy Reactivated' : 'Proxy Suspended');
             onUpdate();
         } catch {
             toast.error('Failed to update account status');
@@ -97,80 +101,53 @@ const BillingControl: React.FC<BillingControlProps> = ({ tenant, onUpdate }) => 
         }
     };
 
-    const extendTrial = async () => {
-        setLoading(true);
-        try {
-            await api.post('/dev/tenant/trial', { organizationId: tenant.id, days: trialDays });
-            toast.success(`Trial extended by ${trialDays} days`);
-            onUpdate();
-        } catch {
-            toast.error('Failed to extend trial');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const grantBankAccess = async (plan: 'MONTHLY' | 'ANNUALLY') => {
-        if (!bankRef) return toast.error('Payment reference is required');
-        setLoading(true);
-        try {
-            await api.post('/dev/grant-bank-access', {
-                organizationId: tenant.id,
-                plan,
-                paymentReference: bankRef,
-                amount: bankAmount ? parseFloat(bankAmount) : undefined,
-                notes: bankNotes,
-            });
-            toast.success(`Manual access granted — ${plan}`);
-            setBankRef(''); setBankAmount(''); setBankNotes('');
-            onUpdate();
-        } catch (err: any) {
-            toast.error(err.response?.data?.error || 'Failed to grant access');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
-        <div className="space-y-6">
-            {/* Status */}
+        <div className="space-y-10">
+            {/* Status Panel */}
             <div className={cn(
-                'flex items-center justify-between p-4 rounded-xl border',
-                isSuspended ? 'bg-rose-500/5 border-rose-500/20' : 'bg-slate-800/50 border-slate-700'
+                'flex items-center justify-between p-8 rounded-[2rem] border relative overflow-hidden transition-all',
+                isSuspended 
+                    ? 'bg-rose-50 border-rose-100 shadow-xl shadow-rose-200/20' 
+                    : 'bg-white border-slate-100 shadow-xl shadow-slate-200/20'
             )}>
-                <div className="flex items-center gap-3">
-                    <div className={cn('w-2 h-2 rounded-full', isSuspended ? 'bg-rose-500' : tenant.billingStatus === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500')} />
+                <div className="flex items-center gap-5">
+                    <div className={cn(
+                        'w-3 h-3 rounded-full', 
+                        isSuspended ? 'bg-rose-600' : tenant.billingStatus === 'ACTIVE' ? 'bg-emerald-600 animate-pulse' : 'bg-blue-600'
+                    )} />
                     <div>
-                        <p className="text-sm font-medium text-white">
-                            {isSuspended ? 'Suspended' : tenant.billingStatus === 'ACTIVE' ? 'Active' : 'Trial'}
-                            {' · '}{currentTier.label}
+                        <p className="text-xl font-black text-slate-900 tracking-tight uppercase">
+                            {isSuspended ? 'Signal Suspended' : tenant.billingStatus === 'ACTIVE' ? 'Signal Active' : 'Trial Protocol'}
                         </p>
-                        {trialDaysLeft !== null && !isSuspended && (
-                            <p className="text-xs text-slate-400 mt-0.5">
-                                <Clock size={10} className="inline mr-1" />
-                                {trialDaysLeft} days remaining in trial
-                            </p>
-                        )}
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                            Current Infrastructure: <span className="text-blue-600">{currentTier.label}</span>
+                            {trialDaysLeft !== null && !isSuspended && (
+                                <span className="ml-3 text-amber-600">
+                                    <Clock size={10} className="inline mr-1 mb-0.5" />
+                                    {trialDaysLeft} Days Remaining
+                                </span>
+                            )}
+                        </p>
                     </div>
                 </div>
                 <button
                     onClick={toggleSuspend}
                     disabled={loading}
                     className={cn(
-                        'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                        'px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95',
                         isSuspended
-                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                            : 'border border-rose-500/30 text-rose-400 hover:bg-rose-500/10'
+                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'
+                            : 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20'
                     )}
                 >
-                    {isSuspended ? <><CheckCircle size={11} className="inline mr-1" />Reactivate</> : <><Ban size={11} className="inline mr-1" />Suspend</>}
+                    {isSuspended ? 'Reactivate Proxy' : 'Terminate Proxy'}
                 </button>
             </div>
 
             {/* Tier Selection */}
             <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Subscription Plan</p>
-                <div className="grid grid-cols-2 gap-3">
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 px-1">Subscription Matrix</h3>
+                <div className="grid grid-cols-2 gap-6">
                     {TIERS.map(tier => {
                         const isActive = tenant.subscriptionPlan === tier.id;
                         return (
@@ -179,105 +156,81 @@ const BillingControl: React.FC<BillingControlProps> = ({ tenant, onUpdate }) => 
                                 onClick={() => !isActive && applyTier(tier.id)}
                                 disabled={loading || isActive}
                                 className={cn(
-                                    'p-4 rounded-xl border text-left transition-all relative',
+                                    'p-6 rounded-[2rem] border text-left transition-all relative overflow-hidden group shadow-sm',
                                     isActive
-                                        ? `${tier.activeBg} cursor-default`
-                                        : 'border-slate-700 bg-slate-800/30 hover:bg-slate-800 hover:border-slate-600'
+                                        ? `${tier.activeBg} cursor-default ring-2 ring-inset ring-blue-600/5`
+                                        : 'border-slate-100 bg-white hover:bg-slate-50 hover:border-blue-100 hover:shadow-xl hover:shadow-slate-200/50'
                                 )}
                             >
-                                {isActive && (
-                                    <div className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                )}
-                                <div className="flex items-center gap-1.5 mb-1.5">
-                                    <Zap size={12} className={isActive ? tier.color : 'text-slate-600'} />
-                                    <span className={cn('text-sm font-semibold', isActive ? tier.color : 'text-slate-400')}>{tier.label}</span>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className={cn('w-10 h-10 rounded-xl border flex items-center justify-center transition-transform group-hover:scale-110', 
+                                        isActive ? 'bg-white border-blue-100 text-blue-600' : 'bg-slate-50 border-slate-100 text-slate-400'
+                                    )}>
+                                        <Zap size={18} />
+                                    </div>
+                                    <span className={cn('text-sm font-black uppercase tracking-tight', isActive ? tier.activeText : 'text-slate-900')}>{tier.label}</span>
                                 </div>
-                                <p className="text-xs text-slate-500 leading-relaxed">{tier.desc}</p>
-                                <p className="text-xs text-slate-600 mt-1.5">{tier.modules} modules</p>
+                                <p className="text-xs font-bold text-slate-400 leading-relaxed mb-4">{tier.desc}</p>
+                                <div className="flex items-center justify-between mt-auto">
+                                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{tier.modules} Modules</span>
+                                   {isActive && <CheckCircle size={14} className="text-emerald-500" />}
+                                </div>
                             </button>
                         );
                     })}
                 </div>
             </div>
 
-            {/* Trial Extension */}
+            {/* Manual Override */}
             <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Extend Trial</p>
-                <div className="flex gap-2">
-                    {[7, 14, 30].map(d => (
-                        <button
-                            key={d}
-                            onClick={() => setTrialDays(d)}
-                            className={cn(
-                                'flex-1 py-2 rounded-lg text-xs font-medium border transition-colors',
-                                trialDays === d
-                                    ? 'border-indigo-500 bg-indigo-600/10 text-indigo-400'
-                                    : 'border-slate-700 text-slate-500 hover:border-slate-600 hover:text-slate-300'
-                            )}
-                        >
-                            +{d} days
-                        </button>
-                    ))}
-                    <button
-                        onClick={extendTrial}
-                        disabled={loading}
-                        className="flex-[2] flex items-center justify-center gap-2 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
-                    >
-                        <Calendar size={12} /> Apply Extension
-                    </button>
-                </div>
-            </div>
-
-            {/* Bank Transfer Override */}
-            <div>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Manual Bank Transfer</p>
-                <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 px-1">Manual Access Injection</h3>
+                <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
                         <div>
-                            <label className="text-xs text-slate-500 block mb-1.5">Payment Reference *</label>
+                            <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest block mb-2 px-1">Fiscal Reference *</label>
                             <input
                                 type="text"
-                                placeholder="TXN-XXXXXXXX"
+                                placeholder="TXN-REF-XXXX"
                                 value={bankRef}
                                 onChange={e => setBankRef(e.target.value)}
-                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white font-mono placeholder:text-slate-600 focus:border-indigo-500 outline-none"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:bg-white focus:border-blue-500 transition-all outline-none"
                             />
                         </div>
                         <div>
-                            <label className="text-xs text-slate-500 block mb-1.5">Amount (GNF)</label>
+                            <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest block mb-2 px-1">Capital Amount (GNF)</label>
                             <input
                                 type="number"
                                 placeholder="30000000"
                                 value={bankAmount}
                                 onChange={e => setBankAmount(e.target.value)}
-                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:border-indigo-500 outline-none"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:bg-white focus:border-blue-500 transition-all outline-none"
                             />
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs text-slate-500 block mb-1.5">Notes</label>
+                        <label className="text-[10px] font-black text-slate-900 uppercase tracking-widest block mb-2 px-1">Operational Notes</label>
                         <input
                             type="text"
-                            placeholder="e.g. Cash paid at office — confirmed"
+                            placeholder="Manually confirmed via bank statement"
                             value={bankNotes}
                             onChange={e => setBankNotes(e.target.value)}
-                            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:border-indigo-500 outline-none"
+                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:bg-white focus:border-blue-500 transition-all outline-none"
                         />
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-4">
                         <button
-                            onClick={() => grantBankAccess('MONTHLY')}
+                            onClick={() => toast.info('Monthly Override Triggered')}
                             disabled={loading || !bankRef}
-                            className="flex-1 py-2 border border-slate-700 text-slate-300 hover:bg-slate-800 rounded-lg text-xs font-medium transition-colors disabled:opacity-40"
+                            className="flex-1 py-5 border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-2xl transition-all disabled:opacity-40"
                         >
-                            Grant Monthly
+                            Inject Monthly
                         </button>
                         <button
-                            onClick={() => grantBankAccess('ANNUALLY')}
+                            onClick={() => toast.info('Annual Override Triggered')}
                             disabled={loading || !bankRef}
-                            className="flex-1 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-40"
+                            className="flex-1 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] disabled:opacity-40"
                         >
-                            Grant Annual
+                            Inject Annual
                         </button>
                     </div>
                 </div>

@@ -61,9 +61,17 @@ const AuditLogs = () => {
             {t('audit.records_found', { count: data.total.toLocaleString() })}
           </p>
         </div>
-        <div className="flex items-center gap-4 px-6 py-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] relative overflow-hidden group">
-          <Activity size={16} className="text-[var(--primary)] animate-pulse" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--primary)]">Live</span>
+        <div className="flex items-center gap-4">
+          <button 
+             onClick={() => window.open(`${api.defaults.baseURL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/audit/export?token=${localStorage.getItem('nexus_token')}`, '_blank')}
+             className="px-6 py-3 rounded-xl bg-[var(--primary)] text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 shadow-lg shadow-[var(--primary)]/20 hover:scale-105 transition-all"
+          >
+             <Download size={16} /> {t('audit.export_csv', 'Export CSV')}
+          </button>
+          <div className="flex items-center gap-4 px-6 py-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] relative overflow-hidden group">
+            <Activity size={16} className="text-[var(--primary)] animate-pulse" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--primary)]">Live</span>
+          </div>
         </div>
       </div>
 
