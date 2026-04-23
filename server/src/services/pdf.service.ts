@@ -482,7 +482,7 @@ export class PdfExportService {
     const formatAmount = (val: number) => val.toLocaleString('en-US', { minimumFractionDigits: 2 });
     const headerTop = doc.y;
     doc.fillColor('#f8fafc').rect(this.SAFE_MARGIN, headerTop, this.CONTENT_WIDTH, 70).fill();
-    doc.fillColor('#1e293b').fontSize(12).font('Helvetica-Bold').text(item.employee?.fullName?.toUpperCase(), this.SAFE_MARGIN + 15, headerTop + 15);
+    doc.fillColor('#1e293b').fontSize(12).font('Helvetica-Bold').text(item.employee?.fullName?.toUpperCase() || 'OFFICIAL PAYSLIP', this.SAFE_MARGIN + 15, headerTop + 15);
     doc.fillColor(brandColor).fontSize(10).font('Helvetica-Bold').text('PAYMENT PERIOD', 350, headerTop + 15, { align: 'right', width: 185 });
     doc.fillColor('#1e293b').fontSize(12).font('Helvetica').text(item.run?.period || 'N/A', 350, headerTop + 28, { align: 'right', width: 185 });
     

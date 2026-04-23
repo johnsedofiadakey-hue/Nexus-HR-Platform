@@ -101,7 +101,7 @@ Be concise, elite, and proactive. If a user asks to do something you have a tool
     // 4. Send Message & Handle Tool Execution Loop
     let result = await chatSession.sendMessage(message);
     let response = result.response;
-    let calls = response.getFunctionCalls();
+    let calls = response.functionCalls();
 
     // Iterate until AI stops calling functions
     while (calls && calls.length > 0) {
@@ -129,7 +129,7 @@ Be concise, elite, and proactive. If a user asks to do something you have a tool
       // Send tool results back to model
       result = await chatSession.sendMessage(toolResults as any);
       response = result.response;
-      calls = response.getFunctionCalls();
+      calls = response.functionCalls();
     }
 
     res.json({ reply: response.text() });
