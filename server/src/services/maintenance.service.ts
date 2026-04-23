@@ -30,8 +30,8 @@ export const runBackup = (): Promise<{ filename: string; path: string; sizeKB: n
 
       // ─── CLOUD SYNC ENGINE ───────────────────────────────────────────
       try {
-        const { GoogleDriveService } = await import('./google-drive.service');
-        cloudId = await GoogleDriveService.syncFileToCloud(filepath);
+        const { GoogleWorkspaceService } = await import('./workspace.service');
+        cloudId = await GoogleWorkspaceService.syncFileToCloud(filepath);
         console.log(`[Lifecycle] Backup synced to cloud: ${cloudId}`);
       } catch (err) {
         console.warn('[Lifecycle] Google Drive Sync skipped or failed:', (err as any).message);

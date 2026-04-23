@@ -1,4 +1,4 @@
-import { GoogleDriveService } from './services/google-drive.service';
+import { GoogleWorkspaceService } from './services/workspace.service';
 import 'dotenv/config';
 
 async function verifyFolder() {
@@ -6,7 +6,7 @@ async function verifyFolder() {
   console.log(`--- Testing Connection to Folder: ${FOLDER_ID} ---`);
   
   try {
-    const drive = await (GoogleDriveService as any).getDriveClient();
+    const drive = await (GoogleWorkspaceService as any).getDriveClient();
     
     console.log('1. Attempting to list files in folder...');
     const response = await drive.files.list({

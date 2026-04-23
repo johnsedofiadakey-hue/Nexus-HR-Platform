@@ -266,13 +266,13 @@ const NexusAIInsight: React.FC<NexusAIInsightProps> = ({ isOpen, onClose, contex
                                         
                                         {messages.map((m, i) => (
                                             <motion.div 
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
+                                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
                                                 key={i} 
                                                 className={cn(
-                                                    "max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed",
+                                                    "max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm",
                                                     m.role === 'user' 
-                                                        ? "ml-auto bg-[var(--primary)] text-white rounded-tr-sm" 
+                                                        ? "ml-auto bg-[var(--primary)] text-white rounded-tr-sm ai-glow-primary" 
                                                         : "mr-auto bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-tl-sm"
                                                 )}
                                             >
@@ -281,10 +281,23 @@ const NexusAIInsight: React.FC<NexusAIInsightProps> = ({ isOpen, onClose, contex
                                         ))}
                                         
                                         {isTyping && (
-                                            <div className="mr-auto max-w-[85%] p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-tl-sm flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce" />
-                                                <div className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce" style={{ animationDelay: '0.2s' }} />
-                                                <div className="w-2 h-2 rounded-full bg-[var(--primary)] animate-bounce" style={{ animationDelay: '0.4s' }} />
+                                            <div className="mr-auto max-w-[85%] p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-tl-sm space-y-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex gap-1">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-bounce" />
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-bounce" style={{ animationDelay: '0.2s' }} />
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-bounce" style={{ animationDelay: '0.4s' }} />
+                                                    </div>
+                                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--primary)] animate-pulse">Neural Sync in Progress</span>
+                                                </div>
+                                                <div className="h-1.5 w-full bg-[var(--bg-card)] rounded-full overflow-hidden">
+                                                    <motion.div 
+                                                        initial={{ x: '-100%' }}
+                                                        animate={{ x: '100%' }}
+                                                        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                                                        className="h-full w-1/3 bg-gradient-to-r from-transparent via-[var(--primary)] to-transparent"
+                                                    />
+                                                </div>
                                             </div>
                                         )}
                                         <div ref={messagesEndRef} />

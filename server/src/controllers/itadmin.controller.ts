@@ -4,7 +4,7 @@ import * as userService from '../services/user.service';
 import { sendWelcomeEmail } from '../services/email.service';
 import { logAction } from '../services/audit.service';
 import { notify } from '../services/websocket.service';
-import { GoogleDriveService } from '../services/google-drive.service';
+import { GoogleWorkspaceService } from '../services/workspace.service';
 
 /**
  * IT Admin specific controller.
@@ -87,7 +87,7 @@ export const itSystemOverview = async (_req: Request, res: Response) => {
       prisma.asset.count(),
       prisma.asset.count({ where: { status: 'AVAILABLE' } }),
       prisma.asset.count({ where: { status: 'ASSIGNED' } }),
-      GoogleDriveService.checkHealth()
+      GoogleWorkspaceService.checkHealth()
     ]);
 
     const recentAccounts = await prisma.user.findMany({
