@@ -448,9 +448,11 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {activity.length > 0 ? activity.slice(0, 8).map((item: any, idx: number) => (
+          {(activity || []).length > 0 ? (activity || []).slice(0, 8).map((item: any, idx: number) => {
+            if (!item) return null;
+            return (
             <motion.div
-              key={item.id}
+              key={item.id || idx}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.8 + (idx * 0.05) }}
@@ -461,17 +463,18 @@ const Dashboard = () => {
                   {(item.user?.[0] || '?').toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-black text-[var(--text-primary)] truncate">{item.user}</p>
+                  <p className="text-[13px] font-black text-[var(--text-primary)] truncate">{item.user || 'User'}</p>
                   <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-tighter">{item.time}</p>
                 </div>
               </div>
               <div className="space-y-2">
                  <p className="text-[11px] font-bold text-[var(--text-secondary)] leading-snug group-hover:text-[var(--text-primary)] transition-colors">
-                   {item.action} <span className="text-[var(--primary)]">@{item.target}</span>
+                   {item.action} <span className="text-[var(--primary)]">@{item.target || 'System'}</span>
                  </p>
               </div>
             </motion.div>
-          )) : (
+          );
+        }) : (
             <div className="col-span-full py-20 text-center bg-[var(--bg-elevated)] rounded-[3rem] border border-dashed border-[var(--border-subtle)]">
               <CheckCircle size={40} className="mx-auto mb-4 text-[var(--text-muted)] opacity-20" />
               <p className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.4em]">{t('inbox.all_clear')}</p>

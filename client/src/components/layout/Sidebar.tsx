@@ -104,8 +104,13 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, setIsCollapsed }: SidebarProps)
   
   const [pendingAppraisals, setPendingAppraisals] = useState(0);
 
-  const getInitials = (name: string) => {
-    return name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || (settings?.companyName ? settings.companyName.slice(0, 2).toUpperCase() : 'HQ');
+  const getInitials = (name?: string) => {
+    if (!name) return settings?.companyName ? settings.companyName.slice(0, 2).toUpperCase() : 'HQ';
+    try {
+      return name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    } catch (e) {
+      return 'HQ';
+    }
   };
 
   useEffect(() => {
