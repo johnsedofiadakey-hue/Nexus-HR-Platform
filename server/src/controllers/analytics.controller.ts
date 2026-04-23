@@ -223,7 +223,7 @@ export const downloadBoardReportPDF = async (req: Request, res: Response) => {
             organizationId,
             'Executive Board Report',
             reportData,
-            'BOARD_REPORT'
+            'BOARD_REPORT' as any
         );
 
         res.setHeader('Content-Type', 'application/pdf');

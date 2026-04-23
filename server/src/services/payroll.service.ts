@@ -84,7 +84,7 @@ const computeTaxes = async (organizationId: string, baseSalary: number, currency
   const customRules = await prisma.taxRule.findMany({
     where: { organizationId, isActive: true },
     include: { brackets: { orderBy: { minAmount: 'asc' } } }
-  });
+  }) as any[];
 
   if (customRules.length > 0) {
     let totalTax = 0;
@@ -204,12 +204,12 @@ export const createPayrollRun = async (
     // Aggregate manual adjustments with automatic module deductions
     const autoExpense = expenseMap.get(emp.id) || 0;
     const autoInstallment = installmentMap.get(emp.id) || 0;
-
     const allowances = (adj?.allowances ?? 0) + autoExpense;
     const otherDeductions = (adj?.otherDeductions ?? 0) + autoInstallment;
 
     const grossPay = base + overtime + bonus + allowances;
-    const { tax, socialSecurity: socialSecurityValue } = await computeTaxes(organizationId, base, currency, grossPay);
+    const { tax, socialSecurity } = await computeTaxes(organizationId, base, currency, grossPay);
+    const socialSecurityValue = socialSecurity;
     const netPay = Math.max(0, grossPay - tax - socialSecurityValue - otherDeductions);
 
     const item = await prisma.payrollItem.create({
@@ -386,7 +386,7 @@ export const updatePayrollItem = async (
   const allowances = data.allowances ?? Number(item.allowances);
   const otherDeductions = data.otherDeductions ?? Number(item.otherDeductions);
   const grossPay = base + overtime + bonus + allowances;
-  const { tax, socialSecurity: socialSecurityValue } = computeTaxes(base, item.currency, grossPay);
+  const { tax, socialSecurity: socialSecurityValue } = await computeTaxes(organizationId, base, item.currency, grossPay);
   const netPay = Math.max(0, grossPay - tax - socialSecurityValue - otherDeductions);
 
   await prisma.payrollItem.updateMany({

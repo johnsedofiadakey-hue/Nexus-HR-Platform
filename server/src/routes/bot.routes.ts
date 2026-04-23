@@ -28,9 +28,9 @@ router.post('/webhook', async (req, res) => {
         Return response in JSON: { "reply": "string", "intent": "string", "data": {} }
         `;
 
-        const model = ai.models.get('gemini-2.5-flash');
+        const model = (ai as any).getGenerativeModel({ model: 'gemini-1.5-flash' });
         const result = await model.generateContent(prompt);
-        const text = result.text || '{}';
+        const text = result.response.text() || '{}';
         const aiResponse = JSON.parse(text);
 
         // Logic to actually perform actions would go here (e.g. creating a leave request draft)

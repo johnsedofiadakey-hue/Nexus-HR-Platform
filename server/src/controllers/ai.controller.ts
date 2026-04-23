@@ -50,16 +50,16 @@ Context Data:
 ${JSON.stringify(sanitizedData, null, 2)}
 `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        temperature: 0.2, // Low temp for more consistent JSON structure
-      }
+    const model = (ai as any).getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+            temperature: 0.2,
+            responseMimeType: 'application/json',
+        }
     });
 
-    const text = response.text || '{}';
+    const text = result.response.text() || '{}';
     const jsonResult = JSON.parse(text);
 
     res.json(jsonResult);
@@ -92,10 +92,9 @@ Be concise, professional, and helpful. Do not reveal sensitive systemic IDs. Foc
 `;
     
     // Construct the contents array combining history and the new message
-    const contents = [];
+    const contents: any[] = [];
     
     // Add system instructions manually as first user message or part of history
-    // Since @google/genai syntax for chat session uses multi-turn, we can do:
     if (!history || history.length === 0) {
         contents.push({ role: 'user', parts: [{ text: `System Instruction: ${sysPrompt}\n\nUser Message: ${message}` }] });
     } else {
@@ -108,16 +107,16 @@ Be concise, professional, and helpful. Do not reveal sensitive systemic IDs. Foc
         contents.push({ role: 'user', parts: [{ text: message }] });
     }
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: contents,
-      // Pass the system instruction in config if the model supports it natively
-      config: {
-        systemInstruction: sysPrompt,
-      }
+    const model = (ai as any).getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const result = await model.generateContent({
+        contents,
+        generationConfig: {
+            maxOutputTokens: 1024,
+        }
     });
 
-    res.json({ reply: response.text });
+    const responseText = result.response.text();
+    res.json({ reply: responseText });
   } catch (err: any) {
     console.error('[AI] Chat Error:', err.message);
     res.status(500).json({ error: 'Failed to process chat message.' });

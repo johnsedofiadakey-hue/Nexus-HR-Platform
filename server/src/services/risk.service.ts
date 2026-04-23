@@ -10,11 +10,11 @@ export const calculateAttritionRisk = async (organizationId: string, employeeId:
     const employee = await prisma.user.findUnique({
         where: { id: employeeId, organizationId },
         include: {
-            appraisalsAsRatee: {
+            appraisalPackets: {
                 orderBy: { createdAt: 'desc' },
                 take: 2
             },
-            leaveRequests: {
+            leaves: {
                 where: { status: 'APPROVED' },
                 orderBy: { createdAt: 'desc' },
                 take: 10
@@ -40,9 +40,9 @@ export const calculateAttritionRisk = async (organizationId: string, employeeId:
     }
 
     // Factor 2: Appraisal Performance
-    const recentAppraisals = employee.appraisalsAsRatee;
-    if (recentAppraisals.length > 0) {
-        const avgScore = recentAppraisals.reduce((sum, a) => sum + (Number(a.finalRating) || 0), 0) / recentAppraisals.length;
+    const recentAppraisals = (employee as any).appraisalPackets;
+    if (recentAppraisals && recentAppraisals.length > 0) {
+        const avgScore = recentAppraisals.reduce((sum: number, a: any) => sum + (Number(a.finalScore) || 0), 0) / recentAppraisals.length;
         if (avgScore > 4) {
             // High performers are higher flight risks if stagnating
             score += 15;
@@ -54,7 +54,7 @@ export const calculateAttritionRisk = async (organizationId: string, employeeId:
     }
 
     // Factor 3: Leave Patterns (Burnout)
-    const recentLeave = employee.leaveRequests;
+    const recentLeave = (employee as any).leaves;
     if (recentLeave.length === 0 && yearsInCompany > 0.5) {
         score += 15;
         factors.push('Lack of restorative leave (Burnout risk)');

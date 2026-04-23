@@ -94,7 +94,8 @@ export const signDocument = async (req: Request, res: Response) => {
     let signatureBuffer: ArrayBuffer;
     if (user.signatureUrl.startsWith('data:image')) {
         const base64Data = user.signatureUrl.replace(/^data:image\/\w+;base64,/, '');
-        signatureBuffer = Buffer.from(base64Data, 'base64');
+        const nodeBuffer = Buffer.from(base64Data, 'base64');
+        signatureBuffer = nodeBuffer.buffer.slice(nodeBuffer.byteOffset, nodeBuffer.byteOffset + nodeBuffer.byteLength);
     } else {
         const sigResponse = await fetch(user.signatureUrl);
         if (!sigResponse.ok) throw new Error('Failed to fetch signature image');

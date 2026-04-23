@@ -1496,6 +1496,7 @@ model TaxRule {
   effectiveTo    DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+  brackets       TaxBracket[]
 
   @@index([organizationId, countryCode, taxType, isActive])
 }
@@ -1510,6 +1511,7 @@ model TaxBracket {
   fixedAmount    Decimal? @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  taxRule        TaxRule  @relation(fields: [taxRuleId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, taxRuleId])
 }
