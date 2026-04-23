@@ -10,7 +10,7 @@ export class PdfExportService {
   /**
    * Generates a premium, branded PDF for various document types.
    */
-  static async generateBrandedPdf(organizationId: string, title: string, content: any, type: 'TARGET' | 'APPRAISAL' | 'LEAVE' | 'PAYSLIP' | 'TARGET_ROADMAP'): Promise<Buffer> {
+  static async generateBrandedPdf(organizationId: string, title: string, content: any, type: 'TARGET' | 'APPRAISAL' | 'LEAVE' | 'PAYSLIP' | 'TARGET_ROADMAP' | 'BOARD_REPORT'): Promise<Buffer> {
     const org = await prisma.organization.findUnique({
       where: { id: organizationId || 'default-tenant' },
       select: {
@@ -75,6 +75,8 @@ export class PdfExportService {
           this.renderLeaveContent(doc, content, primaryColor);
         } else if (type === 'PAYSLIP') {
           this.renderPayslipContent(doc, content, primaryColor);
+        } else if (type === 'BOARD_REPORT') {
+          this.renderBoardReportContent(doc, content, primaryColor);
         }
 
         // ─── 3. Finalization Overlay ───
