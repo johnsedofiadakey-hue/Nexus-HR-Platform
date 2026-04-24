@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { storage, StorageKey } from '../services/storage';
 import { Lock, Mail, ArrowRight, Loader2, Eye, EyeOff, Shield, AlertCircle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from '../utils/toast';
@@ -18,7 +19,7 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
 
   useEffect(() => {
-    if (localStorage.getItem('nexus_auth_token')) navigate('/dashboard');
+    if (storage.getItem(StorageKey.AUTH_TOKEN, null)) navigate('/dashboard');
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -29,9 +30,9 @@ const Login = () => {
       const res = await api.post('/auth/login', formData);
       const { token, refreshToken, user } = res.data;
       
-      localStorage.setItem('nexus_auth_token', token);
-      if (refreshToken) localStorage.setItem('nexus_refresh_token', refreshToken);
-      localStorage.setItem('nexus_user', JSON.stringify(user || {}));
+      storage.setItem(StorageKey.AUTH_TOKEN, token);
+      if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
+      storage.setItem(StorageKey.USER, user || {});
 
       // --- PINNACLE WARMUP: Fetch and cache theme before redirect ---
       try {
@@ -54,8 +55,8 @@ const Login = () => {
         localStorage.setItem(`nexus_theme_preference_${orgId}`, s.themePreset || 'premium-monolith');
         
         // Save legacy global keys for login page stability
-        localStorage.setItem('nexus_theme_custom_colors', JSON.stringify(tokens));
-        localStorage.setItem('nexus_theme_preference', s.themePreset || 'premium-monolith');
+        storage.setItem(StorageKey.BRANDING_CACHE, tokens);
+        storage.setItem(StorageKey.THEME_PREFERENCE, s.themePreset || 'premium-monolith');
       } catch (warmupErr) {
         console.warn('[Warmup] Theme pre-fetch failed, falling back to defaults', warmupErr);
       }
@@ -237,10 +238,10 @@ const Login = () => {
                     setLoading(true);
                     const res = await api.post('/auth/sandbox');
                     const { token, refreshToken, user } = res.data;
-                    localStorage.setItem('nexus_auth_token', token);
-                    if (refreshToken) localStorage.setItem('nexus_refresh_token', refreshToken);
-                    localStorage.setItem('nexus_user', JSON.stringify(user || {}));
-                    localStorage.setItem('nexus_is_sandbox', 'true');
+                    storage.setItem(StorageKey.AUTH_TOKEN, token);
+                    if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
+                    storage.setItem(StorageKey.USER, user || {});
+                    storage.setItem(StorageKey.IS_SANDBOX, 'true');
                     navigate('/dashboard');
                     toast.success('Entering Sandbox Environment - Simulation Active');
                   } catch (err: any) {
@@ -279,9 +280,9 @@ const Login = () => {
                     const res = await api.post('/auth/sso', { idToken, provider: 'google' });
                     const { token, refreshToken, user } = res.data;
                     
-                    localStorage.setItem('nexus_auth_token', token);
-                    if (refreshToken) localStorage.setItem('nexus_refresh_token', refreshToken);
-                    localStorage.setItem('nexus_user', JSON.stringify(user || {}));
+                    storage.setItem(StorageKey.AUTH_TOKEN, token);
+                    if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
+                    storage.setItem(StorageKey.USER, user || {});
                     navigate('/dashboard');
                   } catch (err: any) {
                     setError(err?.response?.data?.error || 'Google SSO failed.');
@@ -309,9 +310,9 @@ const Login = () => {
                     const res = await api.post('/auth/sso', { idToken, provider: 'microsoft' });
                     const { token, refreshToken, user } = res.data;
                     
-                    localStorage.setItem('nexus_auth_token', token);
-                    if (refreshToken) localStorage.setItem('nexus_refresh_token', refreshToken);
-                    localStorage.setItem('nexus_user', JSON.stringify(user || {}));
+                    storage.setItem(StorageKey.AUTH_TOKEN, token);
+                    if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
+                    storage.setItem(StorageKey.USER, user || {});
                     navigate('/dashboard');
                   } catch (err: any) {
                     setError(err?.response?.data?.error || 'Microsoft SSO failed.');

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Delete, ArrowRight, AlertTriangle, Loader2 } from 'lucide-react';
 import api from '../../services/api';
+import { storage, StorageKey } from '../../services/storage';
 
 const DevLogin = () => {
     const [pin, setPin] = useState('');
@@ -43,9 +44,9 @@ const DevLogin = () => {
             const res = await api.post('/dev/verify-pin', { pin });
             const { token } = res.data;
 
-            localStorage.setItem('nexus_dev_token', token);
-            localStorage.setItem('nexus_dev_mode', 'true');
-            localStorage.removeItem('nexus_dev_firebase_token');
+            storage.setItem(StorageKey.DEV_TOKEN, token);
+            storage.setItem(StorageKey.DEV_MODE, 'true');
+            storage.removeItem(StorageKey.DEV_FIREBASE_TOKEN);
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
             setTimeout(() => navigate('/nexus-master-console'), 600);
@@ -116,8 +117,8 @@ const DevLogin = () => {
                                     const res = await api.post('/dev/verify-google', { idToken });
                                     const { token } = res.data;
                                     
-                                    localStorage.setItem('nexus_dev_token', token);
-                                    localStorage.setItem('nexus_dev_mode', 'true');
+                                    storage.setItem(StorageKey.DEV_TOKEN, token);
+                                    storage.setItem(StorageKey.DEV_MODE, 'true');
                                     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                                     
                                     navigate('/nexus-master-console');
