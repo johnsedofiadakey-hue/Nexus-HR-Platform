@@ -1,6 +1,6 @@
 {
   "name": "nexus-hr-platform-server",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "description": "Nexus HR Platform — Enterprise Multi-Tenant HRM API (Fortress)",
   "main": "src/app.ts",
   "scripts": {

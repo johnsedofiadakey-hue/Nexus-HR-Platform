@@ -129,12 +129,13 @@ export const devAuth = async (req: Request, res: Response, next: NextFunction) =
     const token = authHeader.split(' ')[1];
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as any;
-      if (decoded.type === 'dev-console' && decoded.role === 'DEV') {
+      if (decoded.role === 'DEV') {
         (req as any).user = {
           id: decoded.id || 'master-vault-root',
+          email: decoded.email,
           role: 'DEV',
-          name: 'Master Console Operator',
-          organizationId: null,
+          name: decoded.fullName || 'Master Operator',
+          organizationId: decoded.organizationId || null,
           rank: 100,
         };
         return next();
