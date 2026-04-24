@@ -1,4 +1,4 @@
-import admin from 'firebase-admin';
+import { admin, initializeFirebase } from './firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -10,25 +10,13 @@ export class FirebaseStorageService {
 
   private static init() {
     try {
-      if (admin.apps.length === 0) {
-        const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-        
-        if (!privateKey || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PROJECT_ID) {
-          console.warn('[FirebaseStorage] Warning: Missing credentials. Falling back to local/memory storage.');
-          return;
-        }
-
-        admin.initializeApp({
-          credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: privateKey,
-          }),
-          storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${process.env.FIREBASE_PROJECT_ID}.appspot.com`,
-        });
+      initializeFirebase();
+      if (admin.apps.length > 0) {
+        this.bucket = admin.storage().bucket();
+        console.log('[FirebaseStorage] Connected to bucket:', this.bucket.name);
+      } else {
+        console.warn('[FirebaseStorage] Skipping initialization: No Firebase app found.');
       }
-      this.bucket = admin.storage().bucket();
-      console.log('[FirebaseStorage] Initialized successfully.');
     } catch (error) {
       console.error('[FirebaseStorage] Initialization failed:', error);
     }

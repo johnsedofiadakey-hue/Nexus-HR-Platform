@@ -1,39 +1,18 @@
-import * as admin from 'firebase-admin';
+/**
+ * NUCLEAR CONSOLIDATION v2.0
+ * This file now re-exports from the centralized firebase-admin service
+ * to ensure all legacy code paths share the same initialized instance.
+ */
+import { admin, initializeFirebase } from '../services/firebase-admin';
 
-let isInitialized = false;
+// Ensure initialization
+initializeFirebase();
 
-const privateKey = process.env.FIREBASE_PRIVATE_KEY
-  ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-  : undefined;
-
-const config = {
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  privateKey: privateKey,
-};
-
-if (!admin.apps.length) {
-  if (!config.projectId || !config.clientEmail || !config.privateKey) {
-    console.warn('[Firebase] Warning: Firebase environment variables are missing. Cloud storage will be disabled.');
-  } else {
-    try {
-      admin.initializeApp({
-        credential: admin.credential.cert(config as any),
-        storageBucket: `${config.projectId}.firebasestorage.app`,
-      });
-      isInitialized = true;
-      console.log('[Firebase] Admin SDK Initialized Successfully');
-    } catch (error) {
-      console.error('[Firebase] Admin SDK Initialization Failed:', error);
-    }
-  }
-} else {
-  isInitialized = true;
-}
+const isInitialized = admin.apps.length > 0;
 
 export const getBucket = () => {
   if (!isInitialized) {
-    console.error('[Firebase] Attempted to access bucket without initialization.');
+    console.warn('[Firebase] Warning: SDK not fully initialized for storage.');
     return null;
   }
   return admin.storage().bucket();

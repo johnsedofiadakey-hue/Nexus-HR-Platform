@@ -161,6 +161,8 @@ export const login = async (req: Request, res: Response) => {
 };
 
 // ─── SSO LOGIN (Google / Microsoft via Identity Token) ─────────────────────
+import { admin } from '../services/firebase-admin';
+
 export const ssoLogin = async (req: Request, res: Response) => {
   try {
     const { idToken, provider } = req.body as { idToken?: string; provider?: string };
@@ -169,7 +171,6 @@ export const ssoLogin = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'OAuth ID token is required' });
     }
 
-    const admin = (await import('firebase-admin')).default;
     let decodedToken;
     try {
        decodedToken = await admin.auth().verifyIdToken(idToken);
