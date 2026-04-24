@@ -191,17 +191,20 @@ const runStartupTasks = async () => {
 
   try {
     // 1. Database Migrations
-    console.log('[Startup] 1/3: Running Prisma migrations...');
-    const { stdout, stderr } = await execAsync('npx prisma migrate deploy');
-    if (stdout) console.log(`[Migration] ${stdout}`);
-    if (stderr) console.warn(`[Migration-Warn] ${stderr}`);
+    console.log('[Startup] 1/4: Running Prisma migrations...');
+    try {
+      const { stdout } = await execAsync('npx prisma migrate deploy');
+      console.log(`[Startup] Migration Output: ${stdout || 'No new migrations'}`);
+    } catch (migErr: any) {
+      console.warn(`[Startup] Migration Warning (skipping): ${migErr.message}`);
+    }
     
     // 2. System Setup
-    console.log('[Startup] 2/3: Initializing system records...');
+    console.log('[Startup] 2/4: Initializing system records via setup script...');
     require('./scripts/setup'); 
     
     // 3. Role/Dept Updates
-    console.log('[Startup] 3/3: Running data optimization scripts...');
+    console.log('[Startup] 3/4: Running data optimization scripts...');
     require('./scripts/update_roles_and_depts');
     
     // 4. Internal Service Sync
@@ -211,9 +214,11 @@ const runStartupTasks = async () => {
     isBooted = true;
     console.log(`\n🎉 Nexus HR Platform Core fully operational at ${new Date().toISOString()}\n`);
   } catch (err: any) {
-    console.error('\n❌ [CRITICAL] Background Startup Failed:');
+    console.error('\n❌ [CRITICAL] Background Startup Stalled:');
     console.error(err.message);
-    console.error('The system will continue to run for diagnostics, but features may be degraded.\n');
+    // Force boot even on error to allow login for diagnostics
+    isBooted = true; 
+    console.warn('[Startup] FORCING BOOT for emergency diagnostics.');
   }
 };
 
