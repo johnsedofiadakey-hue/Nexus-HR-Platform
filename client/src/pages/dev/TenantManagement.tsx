@@ -263,6 +263,26 @@ const TenantManagement = () => {
                         className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold text-slate-900 outline-none focus:border-indigo-500"
                       />
                    </div>
+
+                   {/* DNS INTEGRATION GUIDE */}
+                   <div className="p-6 bg-indigo-50/50 border border-indigo-100 rounded-[2rem] space-y-4">
+                      <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                        <Globe size={14} /> Firebase DNS Guide
+                      </p>
+                      <div className="space-y-3">
+                         <div className="bg-white p-3 rounded-xl border border-indigo-100/50">
+                            <p className="text-[9px] font-black text-slate-400 uppercase mb-1">A Record (Value 1)</p>
+                            <p className="text-xs font-black text-slate-900 font-mono">199.36.158.100</p>
+                         </div>
+                         <div className="bg-white p-3 rounded-xl border border-indigo-100/50">
+                            <p className="text-[9px] font-black text-slate-400 uppercase mb-1">A Record (Value 2)</p>
+                            <p className="text-xs font-black text-slate-900 font-mono">151.101.1.195</p>
+                         </div>
+                         <p className="text-[9px] font-bold text-slate-400 italic leading-relaxed">
+                            Buy your domain (Namecheap/GoDaddy), then add these two A Records in the DNS settings. Once done, Firebase will issue a Secure Padlock (SSL) automatically.
+                         </p>
+                      </div>
+                   </div>
                 </div>
 
                 <button 
