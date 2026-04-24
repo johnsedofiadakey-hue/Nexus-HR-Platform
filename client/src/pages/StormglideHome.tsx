@@ -6,7 +6,7 @@ import {
   X, Check, Focus, ArrowRight, Star, ChevronDown, 
   CheckCircle2, Sparkles, CreditCard, Smile, 
   Phone, Mail, Globe, Menu, Server, Lock, 
-  Layout, Activity, Database, Terminal
+  Layout, Activity, Database, Terminal, Users
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -146,9 +146,9 @@ const StormglideHome = () => {
            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative">
               <div className="absolute inset-0 bg-blue-400/20 blur-[120px] rounded-full -z-10 animate-pulse" />
               <img 
-                src="/Users/truth/.gemini/antigravity/brain/5c7c5753-759f-47ca-9696-3f88fe723c1f/nexus_hrm_hero_visual_1777069955598.png" 
+                src="/nexus_hero.png" 
                 alt="Nexus Interface" 
-                className="w-full h-auto rounded-[3.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.1)] border-8 border-white group-hover:rotate-1 transition-all duration-700"
+                className="w-full h-auto rounded-[3.5rem] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.5)] transform hover:scale-[1.02] hover:-rotate-1 transition-all duration-700 pointer-events-none"
               />
               <div className="absolute -bottom-10 -right-10 p-8 bg-white/80 backdrop-blur-3xl border border-white rounded-[3rem] shadow-2xl hidden xl:block">
                  <div className="flex items-center gap-6">
