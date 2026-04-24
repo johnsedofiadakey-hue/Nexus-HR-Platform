@@ -617,10 +617,7 @@ export const deleteOrganization = async (req: Request, res: Response) => {
     const org = await prisma.organization.findUnique({ where: { id } });
     if (!org) return res.status(404).json({ error: 'Organization not found' });
 
-    // CAUTION: This is a nuclear option. 
-    // We should ideally use a transaction or rely on Cascade deletes in schema.
-    // Given the complexity of the schema, we'll do a hard delete of the organization 
-    // and rely on the database's foreign key constraints (or Prisma's cascade).
+    // Atomic wipe of the entire organization tree
     await prisma.organization.delete({ where: { id } });
 
     const user = (req as any).user;
@@ -633,10 +630,46 @@ export const deleteOrganization = async (req: Request, res: Response) => {
       userAgent: req.get('user-agent')
     });
 
-    res.json({ success: true, message: `Organization ${org.name} has been permanently erased.` });
+    res.json({ success: true, message: `Organization ${org.name} has been permanently deleted.` });
   } catch (error: any) {
     console.error('[deleteOrganization] Error:', error.message);
-    res.status(500).json({ error: 'Deletion failed. Some data might be locked or requires manual cleanup.' });
+    res.status(500).json({ error: 'Failed to delete. This organization might have sensitive locks or active payroll runs.' });
+  }
+};
+
+export const resetMDPassword = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // Organization ID
+    const { password } = req.body;
+    
+    if (!password) return res.status(400).json({ error: 'New password is required' });
+
+    const mdUser = await prisma.user.findFirst({
+      where: { organizationId: id, role: 'MD' }
+    });
+
+    if (!mdUser) return res.status(404).json({ error: 'Managing Director not found for this organization' });
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    await prisma.user.update({
+      where: { id: mdUser.id },
+      data: { passwordHash }
+    });
+
+    const operator = (req as any).user;
+    await logSystemAction({
+      action: 'RESET_MD_PASSWORD',
+      details: `Manually reset MD password for organization ID: ${id} (${mdUser.email})`,
+      operatorId: operator.id,
+      operatorEmail: operator.email,
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent')
+    });
+
+    res.json({ success: true, message: `Password for MD (${mdUser.email}) has been successfully updated.` });
+  } catch (error: any) {
+    console.error('[resetMDPassword] Error:', error.message);
+    res.status(500).json({ error: error.message });
   }
 };
 

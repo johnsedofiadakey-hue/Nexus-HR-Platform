@@ -20,6 +20,7 @@ import {
   getTenantAuditTrail,
   provisionClient,
   deleteOrganization,
+  resetMDPassword,
 } from '../controllers/dev.controller';
 import { devAuth, verifyDevPin, verifyGoogleIdentity } from '../middleware/devAuth.middleware';
 import { validate, DevPinSchema, ProvisionSchema, TenantFeatureToggleSchema, TrialExtensionSchema, BankAccessSchema } from '../middleware/validate.middleware';
@@ -53,5 +54,6 @@ router.get('/users', devAuth, listAllUsers);
 router.post('/tenant/seed-demo', devAuth, seedDemoTenant);
 router.post('/provision', devAuth, validate(ProvisionSchema), provisionClient);
 router.delete('/tenant/:id', devAuth, deleteOrganization);
+router.post('/tenant/:id/reset-password', devAuth, resetMDPassword);
 
 export default router;
