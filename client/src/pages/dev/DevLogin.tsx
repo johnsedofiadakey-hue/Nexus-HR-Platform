@@ -137,31 +137,12 @@ const DevLogin = () => {
                             onClick={async () => {
                                 try {
                                     setLoading(true);
-                                    const { signInWithPopup, signInWithRedirect } = await import('firebase/auth');
+                                    const { signInWithRedirect } = await import('firebase/auth');
                                     const { auth, googleProvider } = await import('../../services/firebase');
                                     
-                                    if (useRedirect) {
-                                        await signInWithRedirect(auth, googleProvider);
-                                        return;
-                                    }
-
-                                    try {
-                                        const result = await signInWithPopup(auth, googleProvider);
-                                        const idToken = await result.user.getIdToken();
-                                        
-                                        const res = await api.post('/dev/verify-google', { idToken });
-                                        const { token } = res.data;
-                                        
-                                        storage.setItem(StorageKey.DEV_TOKEN, token);
-                                        storage.setItem(StorageKey.DEV_MODE, 'true');
-                                        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                                        
-                                        navigate('/nexus-master-console');
-                                    } catch (popupErr: any) {
-                                        console.warn('[DevAuth] Popup blocked or failed. Switching to redirect mode.', popupErr);
-                                        setUseRedirect(true);
-                                        setError('Popups blocked by browser. Click again to use Redirect Mode.');
-                                    }
+                                    // FORCE REDIRECT MODE (Nuclear Option)
+                                    // This bypasses all Cross-Origin-Opener-Policy popup window issues
+                                    await signInWithRedirect(auth, googleProvider);
                                 } catch (err: any) {
                                     setError(err.response?.data?.error || 'Google Identity Verification Failed');
                                 } finally {
