@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { 
   Building2, Users, Search, Plus, Filter, MoreHorizontal, 
   ChevronRight, Globe, Shield, RefreshCw, X, CheckCircle,
-  Mail, Phone, ExternalLink, Zap, CreditCard, Layout, Copy, Trash2, Key, Settings
+  Mail, Phone, ExternalLink, Zap, CreditCard, Layout, Copy, Trash2, Key, Settings, ArrowLeft
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils/cn';
 import api from '../../services/api';
 import { toast } from '../../utils/toast';
 
 const TenantManagement = () => {
+  const navigate = useNavigate();
   const [tenants, setTenants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,6 +101,17 @@ const TenantManagement = () => {
     <div className="min-h-screen bg-slate-50/50 p-8 font-sans selection:bg-blue-100 transition-colors">
       <div className="max-w-7xl mx-auto space-y-10">
         
+        {/* Navigation Return */}
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate('/nexus-master-console')}
+            className="group flex items-center gap-3 px-6 py-3 bg-white hover:bg-slate-900 border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all shadow-sm"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+            Back to Overview
+          </button>
+        </div>
+
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
           <div>

@@ -60,6 +60,17 @@ const Login = () => {
                 transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full max-w-[520px] px-6 relative z-10"
             >
+                {/* Navigation Return */}
+                <div className="flex justify-center mb-10">
+                    <button 
+                        onClick={() => navigate('/home')}
+                        className="group flex items-center gap-3 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-white transition-all shadow-sm"
+                    >
+                        <ArrowRight size={14} className="rotate-180 group-hover:-translate-x-1 transition-transform" /> 
+                        Back to Website
+                    </button>
+                </div>
+
                 {/* Branding Core */}
                 <div className="flex flex-col items-center mb-12">
                     <motion.div
