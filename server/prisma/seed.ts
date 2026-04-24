@@ -14,11 +14,11 @@ async function main() {
   // 1. SYSTEM ADMIN (DEV MASTER)
   console.log('👤 Synchronizing System Developer (DEV)...');
   await prisma.user.upsert({
-    where: { email: 'dev@nexus-system.com' },
+    where: { email: 'johnsedofiadakey@gmail.com' },
     update: {},
     create: {
-      fullName: 'System Developer',
-      email: 'dev@nexus-system.com',
+      fullName: 'John Sedofiadakey',
+      email: 'johnsedofiadakey@gmail.com',
       passwordHash: devPasswordHash,
       jobTitle: 'System Architect',
       role: 'DEV',
