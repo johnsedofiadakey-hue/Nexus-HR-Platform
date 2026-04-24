@@ -6,7 +6,7 @@ import {
   ArrowUpRight, Monitor, Building, 
   Briefcase, Database, Terminal, CheckCircle2, Mail, Phone,
   ChevronDown, Cpu, Sparkles, Fingerprint, CreditCard,
-  Target, GraduationCap, LayoutPanelLeft, BoxSelect
+  Target, GraduationCap, LayoutPanelLeft, BoxSelect, ArrowRight, Star, Clock, Heart, Workflow, Rocket, Smile
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -34,252 +34,278 @@ const StormglideHome = () => {
     } catch (err) { navigate('/login'); }
   };
 
-  const capabilities = [
-    { 
-      id: 'payroll', 
-      name: 'Nuclear Payroll', 
-      icon: CreditCard, 
-      desc: 'Automated tax localizations, bank-direct disbursements, and instant payslip generation.',
-      details: ['Multi-currency support', 'One-click tax filing', 'Compliance Guard']
+  const featureCards = [
+    {
+      title: "Simple Payroll",
+      icon: <CreditCard className="text-blue-600" />,
+      desc: "Pay your staff in seconds. We handle taxes, bank transfers, and payslips automatically.",
+      color: "bg-blue-50",
+      accent: "text-blue-600"
     },
-    { 
-      id: 'attendance', 
-      name: 'Biometric Presence', 
-      icon: Fingerprint, 
-      desc: 'Real-time floor tracking via biometric hardware sync and geo-fenced mobile check-ins.',
-      details: ['Shift auto-rotation', 'Overtime calculation', 'Late-arrival analytics']
+    {
+      title: "Staff Attendance",
+      icon: <Fingerprint className="text-emerald-600" />,
+      desc: "See who is at work right now. Use mobile check-ins or biometric sync in real-time.",
+      color: "bg-emerald-50",
+      accent: "text-emerald-600"
     },
-    { 
-      id: 'appraisal', 
-      name: 'Performance Cortex', 
-      icon: Target, 
-      desc: 'AI-driven appraisals that measure output, potential, and cultural alignment recursively.',
-      details: ['360 feedback loops', 'OKR visual tracking', 'Promotion readiness']
+    {
+      title: "AI Appraisals",
+      icon: <Star className="text-amber-600" />,
+      desc: "Track staff performance with smart AI. No more boring paperwork, just growth.",
+      color: "bg-amber-50",
+      accent: "text-amber-600"
     },
-    { 
-      id: 'onboarding', 
-      name: 'Quantum Onboarding', 
-      icon: Sparkles, 
-      desc: 'Digital contract signing, automated hardware provisioning, and structured training paths.',
-      details: ['e-Sign integration', 'Buddy system assignment', 'Progress tracking']
+    {
+      title: "Smart Onboarding",
+      icon: <Smile className="text-purple-600" />,
+      desc: "Hire and onboard new people easily. Contracts, training, and equipment—all in one place.",
+      color: "bg-purple-50",
+      accent: "text-purple-600"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans overflow-x-hidden selection:bg-indigo-500/30 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 font-sans overflow-x-hidden selection:bg-blue-600/10 selection:text-blue-700">
       
-      {/* ── Navbar ── */}
+      {/* ── Top Header Info ── */}
+      <div className="bg-blue-600 text-white py-2.5 px-6 text-center">
+         <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3">
+           <Sparkles size={14} className="animate-pulse" /> 
+           <span>Nexus v5.0 is now live for all organizations</span>
+           <button onClick={handleDemoLaunch} className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full border border-white/20 transition-all font-black ml-2 uppercase">Try the Demo</button>
+         </p>
+      </div>
+
+      {/* ── Navigation ── */}
       <nav className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6",
-        scrolled ? "py-4 bg-black/80 backdrop-blur-2xl border-b border-white/5" : "py-8 bg-transparent"
+        "fixed top-[37px] left-0 right-0 z-50 transition-all duration-500 px-6",
+        scrolled ? "py-4 bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-sm" : "py-8 bg-transparent"
       )}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-2xl shadow-indigo-500/20 group-hover:rotate-12 transition-transform">
-               <Zap size={20} className="fill-white" />
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xl shadow-blue-200 group-hover:-rotate-3 transition-transform">
+               <Shield size={20} className="fill-white/20" />
             </div>
-            <span className="font-black text-2xl tracking-tighter uppercase italic">Nexus<span className="text-indigo-500">.</span></span>
+            <span className="font-black text-2xl tracking-tighter text-slate-900">Nexus<span className="text-blue-600">.</span></span>
           </div>
           
-          <div className="hidden md:flex items-center gap-10">
-             {['Platform', 'Intelligence', 'Enterprise', 'Security'].map(l => (
-               <button key={l} className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 hover:text-white transition-colors">{l}</button>
+          <div className="hidden lg:flex items-center gap-12">
+             {['How it Works', 'Pricing', 'Company', 'Security'].map(l => (
+               <button key={l} className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors">{l}</button>
              ))}
           </div>
 
-          <div className="flex items-center gap-4">
-             <button onClick={() => navigate('/login')} className="hidden sm:block text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white px-6">Terminal Login</button>
-             <button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })} className="px-6 py-3 rounded-xl bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-500/20">Initialize Sync</button>
+          <div className="flex items-center gap-6">
+             <button onClick={() => navigate('/login')} className="hidden sm:block text-xs font-black uppercase tracking-widest text-slate-500 hover:text-blue-600 transition-all px-4">Login</button>
+             <button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })} className="px-8 py-4 rounded-2xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">Get Started</button>
           </div>
         </div>
       </nav>
 
-      {/* ── Hero Section ── */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-            <div className="absolute top-[10%] left-[-10%] w-[1000px] h-[1000px] bg-indigo-600/10 blur-[180px] rounded-full animate-pulse" />
-            <div className="absolute bottom-[20%] right-[-10%] w-[800px] h-[800px] bg-blue-600/5 blur-[160px] rounded-full" />
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` }} />
+      {/* ── Lively Hero Section ── */}
+      <section className="relative pt-48 pb-32 px-6 overflow-hidden bg-slate-50">
+        <div className="absolute inset-0 pointer-events-none">
+           <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-100/50 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
+           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-50 blur-[100px] rounded-full -translate-x-1/2 translate-y-1/2" />
         </div>
 
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center relative z-10">
-           <div className="text-left">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-3xl text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em] mb-8"
-              >
-                <Cpu size={14} /> Nexus Platform Core v4.1.6
-              </motion.div>
-              <motion.h1 
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8 uppercase italic"
-              >
-                The Operating <br />
-                System for <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-blue-400 to-indigo-600 animate-gradient-x">Human Potential.</span>
-              </motion.h1>
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.1 }}
-                className="max-w-xl text-lg text-slate-400 font-medium leading-relaxed mb-12"
-              >
-                Nexus redefines human resource management with recursive intelligence. Transition from fragmented spreadsheets to a singular, unified enterprise brain.
-              </motion.p>
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="flex flex-col sm:flex-row items-center gap-6"
-              >
-                 <button onClick={handleDemoLaunch} className="w-full sm:w-auto px-10 py-6 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-100 transition-all shadow-2xl shadow-white/5 flex items-center justify-center gap-4 group">
-                    Launch Demo Hub <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                 </button>
-                 <button onClick={() => document.getElementById('capabilities')?.scrollIntoView({ behavior: 'smooth' })} className="w-full sm:w-auto px-10 py-6 bg-white/5 border border-white/10 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/10 transition-all text-white">
-                    Core Capabilities
-                 </button>
-              </motion.div>
-           </div>
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="inline-flex items-center gap-4 px-6 py-2.5 bg-white border border-slate-200 rounded-full shadow-sm mb-12"
+           >
+              <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-ping" />
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">The Human Resource Suite for Modern Teams</p>
+           </motion.div>
+
+           <motion.h1 
+             initial={{ opacity: 0, scale: 0.95 }}
+             animate={{ opacity: 1, scale: 1 }}
+             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+             className="text-6xl md:text-8xl font-black text-slate-900 leading-[1.05] tracking-tighter mb-10"
+           >
+             The Smartest Way to <br />
+             <span className="text-blue-600 px-4 inline-block bg-blue-50 border-b-8 border-blue-100 italic">Manage Your People.</span>
+           </motion.h1>
+
+           <motion.p 
+             initial={{ opacity: 0 }}
+             animate={{ opacity: 1 }}
+             transition={{ delay: 0.3 }}
+             className="max-w-2xl mx-auto text-lg md:text-xl text-slate-500 font-medium leading-relaxed mb-16"
+           >
+             Build a world-class team with the simplest HR software. 
+             Nexus automates payroll, attendance, and reviews so you can focus on growing your business.
+           </motion.p>
 
            <motion.div 
-             initial={{ opacity: 0, scale: 0.9, rotate: 2 }}
-             animate={{ opacity: 1, scale: 1, rotate: 0 }}
-             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-             className="relative pt-10"
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.4 }}
+             className="flex flex-col sm:flex-row items-center justify-center gap-8"
            >
-              <div className="absolute inset-0 bg-indigo-500/20 blur-[100px] rounded-full -z-10" />
-              <img 
-                src="/Users/truth/.gemini/antigravity/brain/5c7c5753-759f-47ca-9696-3f88fe723c1f/nexus_hrm_hero_visual_1777069955598.png" 
-                alt="Nexus Interface" 
-                className="w-full h-auto rounded-[3.5rem] border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.5)] transform hover:scale-[1.02] hover:-rotate-1 transition-all duration-700 pointer-events-none"
-              />
-              <div className="absolute -bottom-10 -right-10 p-8 bg-black/80 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl hidden xl:block">
+              <button 
+                onClick={handleDemoLaunch}
+                className="w-full sm:w-auto px-12 py-7 bg-blue-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 flex items-center justify-center gap-4 group"
+              >
+                 Launch Live Demo <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+              </button>
+              <button 
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                className="w-full sm:w-auto px-12 py-7 bg-white border-2 border-slate-100 text-slate-900 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-4"
+              >
+                 See All Features <ChevronDown size={18} />
+              </button>
+           </motion.div>
+
+           <motion.div
+             initial={{ opacity: 0, scale: 0.9, y: 40 }}
+             animate={{ opacity: 1, scale: 1, y: 0 }}
+             transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+             className="mt-24 relative"
+           >
+              <div className="absolute inset-0 bg-blue-600/10 blur-[100px] rounded-full -z-10" />
+              <div className="bg-white p-4 rounded-[4rem] border border-white shadow-[0_50px_100px_rgba(0,0,0,0.08)] overflow-hidden">
+                 <img 
+                   src="/Users/truth/.gemini/antigravity/brain/5c7c5753-759f-47ca-9696-3f88fe723c1f/nexus_hrm_hero_visual_1777069955598.png" 
+                   alt="Nexus Platform Preview" 
+                   className="w-full h-auto rounded-[3rem] border border-slate-50 shadow-sm"
+                 />
+              </div>
+              <div className="absolute top-1/2 -left-12 p-8 bg-white border border-slate-100 rounded-3xl shadow-2xl hidden xl:block animate-bounce-slow">
                  <div className="flex items-center gap-4">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">All Modules Synchronized</span>
+                    <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600"><CheckCircle2 size={24}/></div>
+                    <div className="text-left">
+                       <p className="text-[10px] font-black text-slate-400 uppercase">Payroll Success</p>
+                       <p className="text-sm font-black text-slate-900">1,240 Staff Paid</p>
+                    </div>
                  </div>
               </div>
            </motion.div>
         </div>
       </section>
 
-      {/* ── Capabilities Exhibition ── */}
-      <section id="capabilities" className="py-32 px-6 bg-[#080808]">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-end justify-between mb-24 gap-8">
-             <div className="max-w-2xl">
-                <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-indigo-500 mb-6 px-1">Atomic Architecture</h2>
-                <p className="text-4xl md:text-6xl font-black tracking-tight leading-tight uppercase italic">Every Module is a <br />Strategic Advantage.</p>
-             </div>
-             <p className="text-slate-500 font-medium max-w-sm mb-2">Designed for elite organizations that require absolute precision in workforce orchestration.</p>
-          </div>
+      {/* ── Feature Grid ── */}
+      <section id="features" className="py-32 px-6">
+         <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-24">
+               <h2 className="text-xs font-black uppercase tracking-[0.5em] text-blue-600 mb-6">Built for Success</h2>
+               <p className="text-5xl font-black text-slate-900 tracking-tight uppercase italic mb-8">Everything you need <br /> to run a great company.</p>
+               <p className="text-lg text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">We took the complex world of HR and simplified it into a single, beautiful experience. No more spreadsheets, no more stress.</p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-             {capabilities.map((cap, idx) => (
-                <motion.div 
-                  key={cap.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  viewport={{ once: true }}
-                  className="group p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all relative overflow-hidden"
-                >
-                   <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[40px] -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/10 transition-all" />
-                   <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-indigo-400 mb-8 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-2xl">
-                      <cap.icon size={28} />
-                   </div>
-                   <h3 className="text-xl font-black mb-4 uppercase italic">{cap.name}</h3>
-                   <p className="text-sm text-slate-400 font-medium leading-relaxed mb-8">{cap.desc}</p>
-                   <div className="space-y-3">
-                      {cap.details.map((d, i) => (
-                        <div key={i} className="flex items-center gap-3">
-                           <CheckCircle2 size={12} className="text-emerald-500" />
-                           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{d}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+               {featureCards.map((card, idx) => (
+                  <motion.div
+                    key={idx}
+                    whileHover={{ y: -10 }}
+                    className="p-10 bg-white border border-slate-100 rounded-[3rem] shadow-sm hover:shadow-xl hover:shadow-blue-900/5 transition-all group border-b-8 hover:border-blue-500"
+                  >
+                     <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mb-10 transition-transform group-hover:rotate-6", card.color)}>
+                        {React.cloneElement(card.icon as React.ReactElement, { size: 40 })}
+                     </div>
+                     <h3 className="text-2xl font-black text-slate-900 uppercase italic mb-4">{card.title}</h3>
+                     <p className="text-slate-500 font-medium leading-relaxed mb-8">{card.desc}</p>
+                     <div className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-widest cursor-pointer hover:gap-4 transition-all">
+                        Learn More <ArrowRight size={14} />
+                     </div>
+                  </motion.div>
+               ))}
+            </div>
+         </div>
+      </section>
+
+      {/* ── Product Differentiation ── */}
+      <section className="py-32 px-6 bg-slate-50 relative overflow-hidden">
+         <div className="max-w-7xl mx-auto relative z-10">
+            <div className="grid lg:grid-cols-2 gap-20 items-center">
+               <div className="space-y-12">
+                  <div>
+                     <h2 className="text-xs font-black uppercase tracking-[0.5em] text-emerald-600 mb-6">Why Choose Nexus?</h2>
+                     <p className="text-5xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight">Better Features, <br /> Zero Maintenance.</p>
+                  </div>
+
+                  <div className="space-y-10">
+                     {[
+                        { title: "Ultra Fast Speed", desc: "Our system runs at 60FPS. Navigate records, payroll, and charts instantly without ever hitting refresh.", icon: <Zap size={24} className="text-amber-500" /> },
+                        { title: "Bank-Direct Payroll", desc: "No second steps. Pay all your staff directly through the platform with automatic tax calculations.", icon: <Building size={24} className="text-blue-500" /> },
+                        { title: "AI Assistance", desc: "Your HR assistant is available 24/7. Ask questions, generate reports, or find staff records using simple English.", icon: <Cpu size={24} className="text-purple-500" /> }
+                     ].map((item, i) => (
+                        <div key={i} className="flex gap-8">
+                           <div className="w-16 h-16 shrink-0 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm">{item.icon}</div>
+                           <div className="space-y-2">
+                              <h4 className="text-xl font-black text-slate-900 uppercase italic">{item.title}</h4>
+                              <p className="text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+                           </div>
                         </div>
-                      ))}
-                   </div>
-                </motion.div>
-             ))}
-          </div>
-        </div>
+                     ))}
+                  </div>
+               </div>
+
+               <div className="relative">
+                  <div className="absolute inset-0 bg-emerald-500/10 blur-[120px] rounded-full translate-x-1/2" />
+                  <div className="bg-white p-12 rounded-[4rem] border border-slate-200 shadow-2xl space-y-10 relative">
+                     <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 text-center mb-4">Nexus Advantage vs Others</p>
+                     
+                     <div className="space-y-6">
+                        {[
+                           { label: "Payroll Speed", nexus: 98, other: 30 },
+                           { label: "Ease of Use", nexus: 100, other: 45 },
+                           { label: "AI Capabilities", nexus: 95, other: 15 },
+                           { label: "Staff Engagement", nexus: 88, other: 40 }
+                        ].map((stat, i) => (
+                           <div key={i} className="space-y-3">
+                              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                                 <span>{stat.label}</span>
+                                 <span className="text-blue-600">Nexus: {stat.nexus}%</span>
+                              </div>
+                              <div className="h-4 bg-slate-50 border border-slate-100 rounded-full overflow-hidden relative">
+                                 <motion.div 
+                                   initial={{ width: 0 }}
+                                   whileInView={{ width: `${stat.nexus}%` }}
+                                   transition={{ duration: 1.5, delay: i * 0.1 }}
+                                   className="absolute h-full left-0 top-0 bg-blue-600 rounded-full z-10 shadow-lg shadow-blue-200"
+                                 />
+                                 <motion.div 
+                                   initial={{ width: 0 }}
+                                   whileInView={{ width: `${stat.other}%` }}
+                                   transition={{ duration: 1.5, delay: i * 0.2 }}
+                                   className="absolute h-full left-0 top-0 bg-slate-200 rounded-full"
+                                 />
+                              </div>
+                           </div>
+                        ))}
+                     </div>
+
+                     <div className="p-8 bg-blue-50 border border-blue-100 rounded-3xl flex items-center justify-between">
+                        <div>
+                           <p className="text-[10px] font-black text-blue-400 uppercase mb-1">Estimated Savings</p>
+                           <p className="text-3xl font-black text-blue-900 tracking-tighter">40 Hours / Month</p>
+                        </div>
+                        <Activity className="text-blue-500 animate-pulse" size={40} />
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
       </section>
 
-      {/* ── The Nexus Edge (Comparison) ── */}
-      <section className="py-32 px-6 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto bg-white/[0.02] border border-white/10 rounded-[4rem] p-12 md:p-24 relative z-10 overflow-hidden">
-           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
-           
-           <div className="text-center mb-20">
-              <h2 className="text-xs font-black uppercase tracking-[0.5em] text-indigo-500 mb-6">Strategic Benchmark</h2>
-              <p className="text-4xl md:text-5xl font-black text-white tracking-tight uppercase italic">Nexus vs. The Legacy Stack</p>
-           </div>
-
-           <div className="grid md:grid-cols-2 gap-12">
-              <div className="p-10 rounded-[3rem] bg-indigo-600 text-white shadow-2xl shadow-indigo-600/20 group hover:scale-[1.02] transition-all">
-                 <h3 className="text-2xl font-black mb-8 flex items-center gap-4">
-                    <LayoutPanelLeft size={32} /> THE NEXUS CORE
-                 </h3>
-                 <div className="space-y-10">
-                    {[
-                      { l: 'Latency', v: '0.04ms (Instantaneous Sync)' },
-                      { l: 'Identity', v: 'Global Multi-Domain Handshake' },
-                      { l: 'Assistance', v: 'Recursive AI Cortex Integrated' },
-                      { l: 'Deployment', v: 'Atomic Multi-Tenant Cloud' }
-                    ].map((item, i) => (
-                      <div key={i} className="border-b border-white/10 pb-6 last:border-0">
-                         <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-1">{item.l}</p>
-                         <p className="text-xl font-black tracking-tight">{item.v}</p>
-                      </div>
-                    ))}
-                 </div>
-              </div>
-
-              <div className="p-10 rounded-[3rem] bg-white text-black hover:scale-[1.02] transition-all">
-                 <h3 className="text-2xl font-black mb-8 flex items-center gap-4 text-slate-400">
-                    <BoxSelect size={32} /> LEGACY HR SOFTWARE
-                 </h3>
-                 <div className="space-y-10">
-                    {[
-                      { l: 'Latency', v: 'Fragile (Manual Refresh Required)' },
-                      { l: 'Identity', v: 'Siloed Per-Company Accounts' },
-                      { l: 'Assistance', v: 'Static Dropdowns & Templates' },
-                      { l: 'Deployment', v: 'Monolithic Single-Server' }
-                    ].map((item, i) => (
-                      <div key={i} className="border-b border-slate-100 pb-6 last:border-0">
-                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{item.l}</p>
-                         <p className="text-xl font-black text-slate-300 line-through">{item.v}</p>
-                      </div>
-                    ))}
-                 </div>
-              </div>
-           </div>
-        </div>
-      </section>
-
-      {/* ── Contact Protocol ── */}
+      {/* ── Simple Contact Section ── */}
       <section id="contact" className="py-32 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-             <h2 className="text-xs font-black uppercase tracking-[0.5em] text-indigo-500 mb-6">Transition Protocol</h2>
-             <p className="text-5xl md:text-7xl font-black tracking-tighter uppercase italic mb-6">Scale Without Limits.</p>
-             <p className="text-slate-500 font-medium text-lg">Ready to migrate your organization into the Nexus Intelligence Grid?</p>
-          </div>
-
-          <div className="bg-white/[0.03] backdrop-blur-3xl p-10 md:p-16 rounded-[4rem] border border-white/10 shadow-2xl relative group">
-             <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 blur-[60px] rounded-full -translate-x-1/2 translate-y-1/2" />
-             
-             {formStatus === 'SUCCESS' ? (
-                <div className="text-center py-20">
-                   <div className="w-20 h-20 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8 border border-emerald-500/30">
-                      <CheckCircle2 size={40} />
-                   </div>
-                   <h3 className="text-4xl font-black uppercase italic mb-4">Link Established.</h3>
-                   <p className="text-slate-400 font-medium">A Nexus architect will initialize contact shortly.</p>
-                </div>
-             ) : (
+         <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-xs font-black uppercase tracking-[0.5em] text-blue-600 mb-6">Let's Get Started</h2>
+            <p className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter uppercase italic leading-[1] mb-12">Take Your Team to <br /> <span className="bg-emerald-50 text-emerald-600 px-6 rounded-[2rem] border-b-8 border-emerald-100 italic">the Next Level.</span></p>
+            
+            <div className="bg-white border-2 border-slate-100 p-12 md:p-20 rounded-[4rem] shadow-2xl relative">
+              {formStatus === 'SUCCESS' ? (
+                 <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="py-20 text-center space-y-6">
+                    <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-xl"><CheckCircle2 size={48}/></div>
+                    <h3 className="text-4xl font-black uppercase italic">We'll be in touch!</h3>
+                    <p className="text-slate-500 font-medium max-w-xs mx-auto italic">Thank you for choosing Nexus. One of our specialists will reach out to you within the next hour.</p>
+                 </motion.div>
+              ) : (
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   setFormStatus('SENDING');
@@ -287,74 +313,89 @@ const StormglideHome = () => {
                     await axios.post('/api/support/leads', formData);
                     setFormStatus('SUCCESS');
                   } catch { setFormStatus('IDLE'); }
-                }} className="grid md:grid-cols-2 gap-8">
-                   <div className="space-y-6">
+                }} className="space-y-10 text-left">
+                   <div className="grid md:grid-cols-2 gap-8">
                       <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Commander Name</label>
-                         <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="John Dow" className="w-full h-16 bg-black/40 border border-white/5 rounded-2xl px-6 text-white outline-none focus:border-indigo-500 transition-all font-bold" />
+                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">Your Full Name</label>
+                         <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="John Dow" className="w-full h-16 bg-slate-50 border border-slate-100 rounded-3xl px-8 text-slate-900 outline-none focus:border-blue-600 transition-all font-bold placeholder:text-slate-300" />
                       </div>
                       <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Identity Email</label>
-                         <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="md@company.com" className="w-full h-16 bg-black/40 border border-white/5 rounded-2xl px-6 text-white outline-none focus:border-indigo-500 transition-all font-bold" />
+                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">Work Email</label>
+                         <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="md@company.com" className="w-full h-16 bg-slate-50 border border-slate-100 rounded-3xl px-8 text-slate-900 outline-none focus:border-blue-600 transition-all font-bold placeholder:text-slate-300" />
                       </div>
-                      <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Organization</label>
-                         <input required value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} placeholder="Company Name" className="w-full h-16 bg-black/40 border border-white/5 rounded-2xl px-6 text-white outline-none focus:border-indigo-500 transition-all font-bold" />
+                      <div className="space-y-2 md:col-span-2">
+                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">Company Name</label>
+                         <input required value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} placeholder="e.g. MC Bauchemie" className="w-full h-16 bg-slate-50 border border-slate-100 rounded-3xl px-8 text-slate-900 outline-none focus:border-blue-600 transition-all font-bold placeholder:text-slate-300" />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">How can we help you?</label>
+                         <textarea required value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} placeholder="Tell us about your team size and HR goals..." className="w-full h-40 bg-slate-50 border border-slate-100 rounded-3xl p-8 text-slate-900 outline-none focus:border-blue-600 transition-all font-bold resize-none placeholder:text-slate-300" />
                       </div>
                    </div>
-                   <div className="space-y-6 flex flex-col">
-                      <div className="space-y-2 flex-grow">
-                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Strategic Objectives</label>
-                         <textarea required value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} placeholder="Tell us about your organization goals..." className="w-full h-[calc(100%-30px)] bg-black/40 border border-white/5 rounded-3xl p-6 text-white outline-none focus:border-indigo-500 transition-all font-bold resize-none" />
-                      </div>
-                      <button disabled={formStatus === 'SENDING'} className="w-full h-20 bg-indigo-600 hover:bg-indigo-500 text-white rounded-3xl font-black uppercase tracking-[0.4em] text-[10px] shadow-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-4">
-                        {formStatus === 'SENDING' ? 'Synchronizing...' : <>Initialize Connection <ArrowUpRight size={16}/></>}
-                      </button>
-                   </div>
+                   <button 
+                     disabled={formStatus === 'SENDING'}
+                     className="w-full py-8 bg-blue-600 text-white rounded-[2.5rem] font-black uppercase tracking-[0.4em] text-xs shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-4"
+                   >
+                     {formStatus === 'SENDING' ? 'Processing...' : <>Contact Sales <ArrowRight/></>}
+                   </button>
                 </form>
-             )}
-          </div>
-        </div>
+              )}
+            </div>
+         </div>
       </section>
 
       {/* ── Footer ── */}
-      <footer className="py-20 px-6 border-t border-white/5">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 text-center md:text-left">
-           <div>
-              <div className="flex items-center gap-3 mb-6 justify-center md:justify-start">
-                 <Zap size={24} className="text-indigo-500" />
-                 <span className="font-black text-2xl uppercase italic tracking-tighter">Nexus<span className="text-indigo-500">.</span>Platform</span>
-              </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-600 max-w-xs leading-loose">The Singular Architecture for Global Workforce Empowerment and Administrative Absolute.</p>
-           </div>
-           
-           <div className="flex gap-12">
-              <div className="space-y-4">
-                 <p className="text-[10px] font-black uppercase tracking-widest text-white">Infrastructure</p>
-                 <ul className="space-y-2 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
-                    <li className="hover:text-indigo-400 cursor-pointer transition-colors">Quantum Security</li>
-                    <li className="hover:text-indigo-400 cursor-pointer transition-colors">Global Domains</li>
-                    <li className="hover:text-indigo-400 cursor-pointer transition-colors">API Reference</li>
-                 </ul>
-              </div>
-              <div className="space-y-4">
-                 <p className="text-[10px] font-black uppercase tracking-widest text-white">Nexus Hubs</p>
-                 <ul className="space-y-2 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
-                    <li onClick={() => navigate('/login')} className="hover:text-indigo-400 cursor-pointer transition-colors">Client Login</li>
-                    <li onClick={() => navigate('/vault')} className="hover:text-indigo-400 cursor-pointer transition-colors">Master Cluster</li>
-                    <li className="hover:text-indigo-400 cursor-pointer transition-colors">Status Core</li>
-                 </ul>
-              </div>
-           </div>
-        </div>
-        <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-           <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-700">© 2026 Nexus Protocol. All Rights Reserved.</p>
-           <div className="flex gap-4">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20" />
-           </div>
-        </div>
+      <footer className="py-20 px-6 border-t border-slate-100 bg-white">
+         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-16">
+            <div className="max-w-sm space-y-8">
+               <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white"><Shield size={24}/></div>
+                  <span className="font-black text-2xl tracking-tighter text-slate-900 italic">NEXUS.</span>
+               </div>
+               <p className="text-slate-400 font-medium leading-relaxed">
+                 The best human resource software for growing companies. Manage people, payroll, and growth in one simple app.
+               </p>
+               <div className="flex gap-4">
+                  {[Phone, Mail, Globe].map((Icon, i) => (
+                    <div key={i} className="w-10 h-10 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-100 transition-all cursor-pointer"><Icon size={20}/></div>
+                  ))}
+               </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-12 sm:gap-20">
+               <div className="space-y-6">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900 italic">Company</p>
+                  <ul className="space-y-4 text-xs font-black uppercase tracking-widest text-slate-400">
+                     <li className="hover:text-blue-600 cursor-pointer">About Us</li>
+                     <li className="hover:text-blue-600 cursor-pointer">Careers</li>
+                     <li className="hover:text-blue-600 cursor-pointer">Privacy</li>
+                  </ul>
+               </div>
+               <div className="space-y-6">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900 italic">Product</p>
+                  <ul className="space-y-4 text-xs font-black uppercase tracking-widest text-slate-400">
+                     <li onClick={handleDemoLaunch} className="hover:text-blue-600 cursor-pointer">Live Demo</li>
+                     <li onClick={() => navigate('/login')} className="hover:text-blue-600 cursor-pointer">Login</li>
+                     <li className="hover:text-blue-600 cursor-pointer">Pricing</li>
+                  </ul>
+               </div>
+               <div className="space-y-6 hidden sm:block">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900 italic">Security</p>
+                  <ul className="space-y-4 text-xs font-black uppercase tracking-widest text-slate-400">
+                     <li className="hover:text-blue-600 cursor-pointer">ISO 27001</li>
+                     <li className="hover:text-blue-600 cursor-pointer">GDPR</li>
+                     <li className="hover:text-blue-600 cursor-pointer">Uptime</li>
+                  </ul>
+               </div>
+            </div>
+         </div>
+         <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic">© 2026 NEXUS CORE. ALL RIGHTS RESERVED.</p>
+            <div className="flex items-center gap-2">
+               <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm" />
+               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 italic">System Status: Operational</span>
+            </div>
+         </div>
       </footer>
     </div>
   );
