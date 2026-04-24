@@ -2,388 +2,210 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { storage, StorageKey } from '../services/storage';
-import { Lock, Mail, ArrowRight, Loader2, Eye, EyeOff, Shield, AlertCircle } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Loader2, Eye, EyeOff, Shield, AlertCircle, Fingerprint, Command } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from '../utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { getLogoUrl } from '../utils/logo';
 
 const Login = () => {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const { settings } = useTheme();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+    const navigate = useNavigate();
+    const { t } = useTranslation();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const { settings } = useTheme();
+    const [formData, setFormData] = useState({ email: '', password: '' });
 
-  useEffect(() => {
-    if (storage.getItem(StorageKey.AUTH_TOKEN, null)) navigate('/dashboard');
-  }, []);
+    useEffect(() => {
+        if (storage.getItem(StorageKey.AUTH_TOKEN, null)) navigate('/dashboard');
+    }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const res = await api.post('/auth/login', formData);
-      const { token, refreshToken, user } = res.data;
-      
-      storage.setItem(StorageKey.AUTH_TOKEN, token);
-      if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
-      storage.setItem(StorageKey.USER, user || {});
-
-      // --- PINNACLE WARMUP: Fetch and cache theme before redirect ---
-      try {
-        const settingsRes = await api.get('/settings');
-        const s = settingsRes.data;
-        const orgId = user?.organizationId || 'default';
-        
-        // Extract core tokens for the early-boot script
-        const tokens = {
-          'primary': s.primaryColor,
-          'bg-main': s.bgMain,
-          'bg-card': s.bgCard,
-          'bg-sidebar': s.sidebarBg,
-          'text-primary': s.textPrimary,
-          'text-secondary': s.textSecondary
-        };
-        
-        // Save Scoped Identity Data (v1.4 Perfect Scoping)
-        localStorage.setItem(`nexus_theme_custom_colors_${orgId}`, JSON.stringify(tokens));
-        localStorage.setItem(`nexus_theme_preference_${orgId}`, s.themePreset || 'premium-monolith');
-        
-        // Save legacy global keys for login page stability
-        storage.setItem(StorageKey.BRANDING_CACHE, tokens);
-        storage.setItem(StorageKey.THEME_PREFERENCE, s.themePreset || 'premium-monolith');
-      } catch (warmupErr) {
-        console.warn('[Warmup] Theme pre-fetch failed, falling back to defaults', warmupErr);
-      }
-
-      if (user?.role === 'DEV') {
-        navigate('/dev/dashboard');
-      } else {
-        navigate('/dashboard');
-      }
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Authentication failure. Check credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[var(--bg-main)] relative overflow-hidden font-sans">
-      {/* ── Dynamic Atmospheric Background ──────────────────────────────────── */}
-      <div className="absolute inset-0 z-0">
-        <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [0, 90, 180, 270, 360],
-            x: [0, 100, 0],
-            y: [0, 50, 0]
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] rounded-full bg-[var(--primary)]/5 blur-[120px] pointer-events-none"
-        />
-        <motion.div
-          animate={{
-            scale: [1.2, 1, 1.2],
-            rotate: [360, 270, 180, 90, 0],
-            x: [0, -100, 0],
-            y: [0, -50, 0]
-          }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[var(--accent)]/5 blur-[100px] pointer-events-none"
-        />
-        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E")`, backgroundRepeat: 'repeat', backgroundSize: '200px' }} />
-      </div>
-
-      {/* ── Login Architecture ──────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[480px] px-6 relative z-10"
-      >
-        {/* Logo Branding */}
-        <div className="flex flex-col items-center mb-10">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="w-20 h-20 rounded-[2.5rem] bg-gradient-to-br from-[var(--primary)] via-[var(--primary)] to-[var(--accent)] p-[2px] shadow-lg mb-6"
-          >
-            <div className="w-full h-full rounded-[2.4rem] bg-white flex items-center justify-center overflow-hidden shadow-inner">
-              {getLogoUrl(settings?.logoUrl || settings?.companyLogoUrl) ? (
-                <img 
-                  src={getLogoUrl(settings?.logoUrl || settings?.companyLogoUrl) as string} 
-                  key={settings?.logoUrl || settings?.companyLogoUrl}
-                  alt="Logo" 
-                  className="w-12 h-12 object-contain" 
-                />
-              ) : (
-                <Shield size={32} className="text-[var(--primary)]" />
-              )}
-            </div>
-          </motion.div>
-
-          <h1 className="text-4xl font-black text-[var(--text-primary)] font-display tracking-tight text-center leading-none">
-            {settings?.companyName || 'Enterprise HR System'}
-          </h1>
-          <div className="mt-3 flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-card)] border border-[var(--border-subtle)] backdrop-blur-md">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">{settings?.subtitle || 'Secure Authentication'}</span>
-          </div>
-        </div>
-
-        {/* Auth Card */}
-        <div className="nx-card p-8 md:p-12 border-[var(--border-subtle)] relative">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-[var(--primary)]/10 blur-[50px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2" />
-
-          <div className="mb-10 text-center">
-            <h2 className="text-2xl font-black text-[var(--text-primary)] font-display tracking-tight mb-2">{t('login.welcome')}</h2>
-            <p className="text-sm font-medium text-[var(--text-muted)]">{t('login.subtitle')}</p>
-          </div>
-
-          <AnimatePresence mode="wait">
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mb-8 p-4 rounded-2xl bg-[var(--error)]/10 border border-rose-500/20 flex items-center gap-4 text-rose-400 overflow-hidden"
-              >
-                <AlertCircle size={18} className="flex-shrink-0" />
-                <span className="text-[11px] font-black uppercase tracking-widest leading-relaxed">{error}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <form onSubmit={handleLogin} className="space-y-6">
-            {/* Email Field */}
-            <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.25em] text-[var(--text-muted)] ml-1">{t('login.email_label')}</label>
-              <div className="relative group">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary)] transition-all duration-300">
-                  <Mail size={18} strokeWidth={2.5} />
-                </div>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={e => setFormData(f => ({ ...f, email: e.target.value }))}
-                  className="nx-input nx-input-l py-5 border-[var(--border-subtle)] bg-[var(--bg-main)] focus:bg-[var(--bg-card)] focus:ring-2 focus:ring-[var(--primary)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 transition-all font-medium"
-                  placeholder="name@organization.com"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Password Field */}
-            <div className="space-y-3">
-              <div className="flex justify-between items-center ml-1">
-                <label className="text-[10px] font-black uppercase tracking-[0.25em] text-[var(--text-muted)]">{t('login.password_label')}</label>
-                <button type="button" onClick={() => toast.info(t('login.forgot_help'))} className="text-[10px] font-black uppercase tracking-widest text-[var(--primary)] hover:brightness-110 transition-colors">{t('login.forgot')}</button>
-              </div>
-              <div className="relative group">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary)] transition-all duration-300">
-                  <Lock size={18} strokeWidth={2.5} />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={e => setFormData(f => ({ ...f, password: e.target.value }))}
-                   className="nx-input nx-input-lr py-5 border-[var(--border-subtle)] bg-[var(--bg-main)] focus:bg-[var(--bg-card)] focus:ring-2 focus:ring-[var(--primary)]/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 transition-all font-medium tracking-[0.3em]"
-                  placeholder="••••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="space-y-4">
-              <motion.button
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98, y: 0 }}
-                type="submit"
-                disabled={loading}
-                className="w-full relative group overflow-hidden bg-[var(--primary)] py-5 rounded-2xl flex items-center justify-center font-black uppercase tracking-[0.3em] text-[11px] text-[var(--text-inverse)] shadow-lg transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                {loading ? (
-                  <div className="flex items-center gap-3">
-                    <Loader2 size={18} className="animate-spin" />
-                    <span>{t('login.loading')}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <span>{t('login.button')}</span>
-                    <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
-                  </div>
-                )}
-              </motion.button>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    setLoading(true);
-                    const res = await api.post('/auth/sandbox');
-                    const { token, refreshToken, user } = res.data;
-                    storage.setItem(StorageKey.AUTH_TOKEN, token);
-                    if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
-                    storage.setItem(StorageKey.USER, user || {});
-                    storage.setItem(StorageKey.IS_SANDBOX, 'true');
-                    navigate('/dashboard');
-                    toast.success('Entering Sandbox Environment - Simulation Active');
-                  } catch (err: any) {
-                    toast.error('Sandbox engine busy. Please try again.');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                className="w-full py-4 rounded-xl border border-[var(--primary)]/20 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all flex items-center justify-center gap-3 group"
-              >
-                <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-pulse" />
-                Explore Sandbox Demo
-              </button>
-            </div>
-          </form>
-
-          {/* Social Identity Providers (SSO) */}
-          <div className="mt-8 flex flex-col gap-4">
-            <div className="relative flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--border-subtle)]"></div></div>
-              <div className="relative bg-[var(--bg-card)] px-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Or Continue With</div>
-            </div>
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        try {
+            const res = await api.post('/auth/login', formData);
+            const { token, refreshToken, user } = res.data;
             
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                disabled={loading}
-                onClick={async () => {
-                  try {
-                    setLoading(true);
-                    const { signInWithPopup } = await import('firebase/auth');
-                    const { auth, googleProvider } = await import('../services/firebase');
-                    const result = await signInWithPopup(auth, googleProvider);
-                    const idToken = await result.user.getIdToken();
-                    
-                    const res = await api.post('/auth/sso', { idToken, provider: 'google' });
-                    const { token, refreshToken, user } = res.data;
-                    
-                    storage.setItem(StorageKey.AUTH_TOKEN, token);
-                    if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
-                    storage.setItem(StorageKey.USER, user || {});
-                    navigate('/dashboard');
-                  } catch (err: any) {
-                    setError(err?.response?.data?.error || 'Google SSO failed.');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                className="w-full flex items-center justify-center gap-3 py-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-main)] hover:bg-[var(--bg-elevated)] transition-colors text-[10px] font-bold text-[var(--text-primary)]"
-              >
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
-                Google
-              </button>
-              
-              <button
-                type="button"
-                disabled={loading}
-                onClick={async () => {
-                  try {
-                    setLoading(true);
-                    const { signInWithPopup } = await import('firebase/auth');
-                    const { auth, microsoftProvider } = await import('../services/firebase');
-                    const result = await signInWithPopup(auth, microsoftProvider);
-                    const idToken = await result.user.getIdToken();
-                    
-                    const res = await api.post('/auth/sso', { idToken, provider: 'microsoft' });
-                    const { token, refreshToken, user } = res.data;
-                    
-                    storage.setItem(StorageKey.AUTH_TOKEN, token);
-                    if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
-                    storage.setItem(StorageKey.USER, user || {});
-                    navigate('/dashboard');
-                  } catch (err: any) {
-                    setError(err?.response?.data?.error || 'Microsoft SSO failed.');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                className="w-full flex items-center justify-center gap-3 py-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-main)] hover:bg-[var(--bg-elevated)] transition-colors text-[10px] font-bold text-[var(--text-primary)]"
-              >
-                <img src="https://www.svgrepo.com/show/475668/microsoft-color.svg" className="w-4 h-4 grayscale opacity-80" alt="Microsoft" />
-                Microsoft
-              </button>
+            storage.setItem(StorageKey.AUTH_TOKEN, token);
+            if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
+            storage.setItem(StorageKey.USER, user || {});
+
+            if (user?.role === 'DEV') navigate('/dev/dashboard');
+            else navigate('/dashboard');
+            
+            toast.success('System Access Granted');
+        } catch (err: any) {
+            setError(err?.response?.data?.error || 'Access Denied. Check credentials.');
+            toast.error('Identity Verification Failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen w-full flex items-center justify-center bg-[#050505] relative overflow-hidden font-sans selection:bg-indigo-500/30">
+            {/* ── High-Fidelity Atmospheric Effects ────────────────────────────────── */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute top-[-10%] left-[-10%] w-[1000px] h-[1000px] rounded-full bg-indigo-600/10 blur-[160px] animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[800px] h-[800px] rounded-full bg-blue-600/5 blur-[140px]" />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-50 mix-blend-overlay pointer-events-none" />
             </div>
-          </div>
 
-          {/* IT Support Recovery Hint */}
-          <div className="mt-8 pt-8 border-t border-[var(--border-subtle)] text-center">
-            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">
-              {t('login.having_trouble', 'Cannot access your account?')}
-            </p>
-            <button 
-              onClick={() => toast.info(`${t('login.contact_it', 'Please contact the IT Manager or HR to manually reset your access.')}`)}
-              className="mt-2 flex items-center justify-center gap-2 mx-auto text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all group"
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-[520px] px-6 relative z-10"
             >
-              <Shield size={12} className="group-hover:rotate-12 transition-transform" />
-              <span>Contact IT Support</span>
-            </button>
-            <button 
-              onClick={() => navigate('/vault')}
-              className="mt-6 flex items-center justify-center gap-2 mx-auto text-[9px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]/30 hover:text-[var(--primary)] transition-all group"
-            >
-              <Lock size={10} className="group-hover:scale-110 transition-transform" />
-              <span>Master Portal</span>
-            </button>
-          </div>
-        </div>
+                {/* Branding Core */}
+                <div className="flex flex-col items-center mb-12">
+                    <motion.div
+                        whileHover={{ rotate: 10, scale: 1.1 }}
+                        className="w-24 h-24 rounded-[3rem] bg-gradient-to-tr from-indigo-600 to-blue-500 p-[1px] shadow-2xl shadow-indigo-500/20 mb-8"
+                    >
+                        <div className="w-full h-full rounded-[2.9rem] bg-black flex items-center justify-center">
+                            <Command size={40} className="text-white" />
+                        </div>
+                    </motion.div>
 
-        {/* Footer Info */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="mt-12 text-center space-y-4"
-        >
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--text-muted)]">
-            {settings?.companyName || 'HR'} Operating System
-          </p>
-          <div className="flex items-center justify-center gap-6">
-            <a href="#" className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">Privacy Policy</a>
-            <div className="w-1 h-1 rounded-full bg-[var(--border-subtle)]" />
-            <a href="#" className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">Terms of Service</a>
-          </div>
-        </motion.div>
-      </motion.div>
+                    <h1 className="text-5xl font-black text-white tracking-tighter text-center leading-none mb-4 italic uppercase">
+                        Nexus<span className="text-indigo-500">.</span>Platform
+                    </h1>
+                    
+                    <div className="flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-3xl">
+                        <Fingerprint size={14} className="text-emerald-500" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400">Identity Control Unit</span>
+                    </div>
+                </div>
 
-      {/* Decorative Branding Elements */}
-      <div className="hidden xl:block absolute left-12 bottom-12 z-10">
-        <div className="flex items-center gap-4 opacity-30 grayscale hover:grayscale-0 transition-all duration-700 cursor-default">
-          <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center">
-            <div className="text-[var(--primary)] font-black text-xl italic uppercase">
-              {(settings?.companyName || 'H')[0]}
-            </div>
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">{settings?.companyName || 'CORE HR'}</p>
-            <p className="text-[8px] font-medium text-[var(--text-muted)]">Personnel Operations Interface</p>
-          </div>
+                {/* Main Auth Terminal */}
+                <div className="bg-white/[0.03] backdrop-blur-2xl rounded-[3.5rem] border border-white/10 p-10 md:p-14 shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[40px] -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/20 transition-all duration-700" />
+                    
+                    <div className="mb-10">
+                        <h2 className="text-2xl font-black text-white tracking-tight leading-tight">Access Your Suite</h2>
+                        <p className="text-slate-400 text-sm font-medium mt-1">Enter your global credentials below.</p>
+                    </div>
+
+                    <AnimatePresence mode="wait">
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                className="mb-8 p-5 rounded-3xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-4 text-rose-400"
+                            >
+                                <AlertCircle size={20} className="flex-shrink-0" />
+                                <span className="text-xs font-bold uppercase tracking-widest">{error}</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <form onSubmit={handleLogin} className="space-y-8">
+                        {/* Email Input */}
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 ml-2">Enterprise Email</label>
+                            <div className="relative group/field">
+                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/field:text-indigo-400 transition-all duration-300">
+                                    <Mail size={20} strokeWidth={2.5} />
+                                </div>
+                                <input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={e => setFormData(f => ({ ...f, email: e.target.value }))}
+                                    className="w-full h-20 pl-16 pr-8 bg-black/40 border border-white/5 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 text-white font-bold transition-all placeholder:text-slate-700 text-lg"
+                                    placeholder="john@nexus.com"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        {/* Password Input */}
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center px-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Security Key</label>
+                                <button type="button" className="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-white transition-colors">Recover</button>
+                            </div>
+                            <div className="relative group/field">
+                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/field:text-indigo-400 transition-all duration-300">
+                                    <Lock size={20} strokeWidth={2.5} />
+                                </div>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={formData.password}
+                                    onChange={e => setFormData(f => ({ ...f, password: e.target.value }))}
+                                    className="w-full h-20 pl-16 pr-20 bg-black/40 border border-white/5 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 text-white font-bold transition-all placeholder:text-slate-700 text-lg tracking-[0.5em]"
+                                    placeholder="••••••••"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 hover:text-white transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Submission */}
+                        <motion.button
+                            whileHover={{ scale: 1.02, y: -2 }}
+                            whileTap={{ scale: 0.98, y: 0 }}
+                            type="submit"
+                            disabled={loading}
+                            className="w-full h-20 bg-indigo-600 hover:bg-indigo-500 rounded-[2rem] flex items-center justify-center font-black uppercase tracking-[0.5em] text-xs text-white shadow-[0_20px_50px_rgba(79,70,229,0.3)] transition-all disabled:opacity-50 group"
+                        >
+                            {loading ? (
+                                <Loader2 size={24} className="animate-spin" />
+                            ) : (
+                                <div className="flex items-center gap-4">
+                                    <span>Initialize Access</span>
+                                    <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+                                </div>
+                            )}
+                        </motion.button>
+                    </form>
+
+                    {/* Secondary Access Providers */}
+                    <div className="mt-12">
+                        <div className="relative flex items-center justify-center mb-8">
+                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
+                            <div className="relative bg-[#0d0d0d] px-6 text-[8px] font-black uppercase tracking-[0.3em] text-slate-600">Secure Network Links</div>
+                        </div>
+                        
+                        <div className="flex justify-center gap-6">
+                            <button className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group">
+                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all" alt="Google" />
+                            </button>
+                            <button className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group">
+                                <img src="https://www.svgrepo.com/show/475668/microsoft-color.svg" className="w-6 h-6 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all" alt="Microsoft" />
+                            </button>
+                            <button onClick={() => navigate('/vault')} className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group">
+                                <Shield className="w-6 h-6 text-slate-600 group-hover:text-indigo-400 transition-all" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer Hardware Metrics */}
+                <div className="mt-12 flex justify-between items-center px-4">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Nexus Core v4.1.1</span>
+                        <span className="text-[8px] font-bold text-slate-400/30 uppercase mt-0.5">SOC-2 Type II Certified</span>
+                    </div>
+                    <div className="flex gap-4">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
+                    </div>
+                </div>
+            </motion.div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Login;

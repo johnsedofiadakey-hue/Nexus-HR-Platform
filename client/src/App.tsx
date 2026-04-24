@@ -391,8 +391,9 @@ const AppContent = () => {
 
       <PageErrorBoundary>
         <Routes>
-          <Route path="/" element={<StormglideHome />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="/home" element={<StormglideHome />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/vault" element={<Suspense fallback={<PageLoader />}><DevLogin /></Suspense>} />
           <Route path="/force-logout" element={<ForceLogout />} />
