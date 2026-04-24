@@ -10,7 +10,35 @@ const DevLogin = () => {
     const [error, setError] = useState('');
     const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
+    const [useRedirect, setUseRedirect] = useState(false);
     const navigate = useNavigate();
+    
+    useEffect(() => {
+        const checkRedirect = async () => {
+            try {
+                const { getRedirectResult } = await import('firebase/auth');
+                const { auth } = await import('../../services/firebase');
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    setLoading(true);
+                    const idToken = await result.user.getIdToken();
+                    const res = await api.post('/dev/verify-google', { idToken });
+                    const { token } = res.data;
+                    
+                    storage.setItem(StorageKey.DEV_TOKEN, token);
+                    storage.setItem(StorageKey.DEV_MODE, 'true');
+                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    navigate('/nexus-master-console');
+                }
+            } catch (err: any) {
+                console.error('[DevAuth] Redirect result error:', err);
+                setError('Identity Sync Failed. Try again.');
+            } finally {
+                setLoading(false);
+            }
+        };
+        checkRedirect();
+    }, []);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -109,19 +137,31 @@ const DevLogin = () => {
                             onClick={async () => {
                                 try {
                                     setLoading(true);
-                                    const { signInWithPopup } = await import('firebase/auth');
+                                    const { signInWithPopup, signInWithRedirect } = await import('firebase/auth');
                                     const { auth, googleProvider } = await import('../../services/firebase');
-                                    const result = await signInWithPopup(auth, googleProvider);
-                                    const idToken = await result.user.getIdToken();
                                     
-                                    const res = await api.post('/dev/verify-google', { idToken });
-                                    const { token } = res.data;
-                                    
-                                    storage.setItem(StorageKey.DEV_TOKEN, token);
-                                    storage.setItem(StorageKey.DEV_MODE, 'true');
-                                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                                    
-                                    navigate('/nexus-master-console');
+                                    if (useRedirect) {
+                                        await signInWithRedirect(auth, googleProvider);
+                                        return;
+                                    }
+
+                                    try {
+                                        const result = await signInWithPopup(auth, googleProvider);
+                                        const idToken = await result.user.getIdToken();
+                                        
+                                        const res = await api.post('/dev/verify-google', { idToken });
+                                        const { token } = res.data;
+                                        
+                                        storage.setItem(StorageKey.DEV_TOKEN, token);
+                                        storage.setItem(StorageKey.DEV_MODE, 'true');
+                                        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                                        
+                                        navigate('/nexus-master-console');
+                                    } catch (popupErr: any) {
+                                        console.warn('[DevAuth] Popup blocked or failed. Switching to redirect mode.', popupErr);
+                                        setUseRedirect(true);
+                                        setError('Popups blocked by browser. Click again to use Redirect Mode.');
+                                    }
                                 } catch (err: any) {
                                     setError(err.response?.data?.error || 'Google Identity Verification Failed');
                                 } finally {
