@@ -167,9 +167,11 @@ cron.schedule('0 9 * * *', async () => {
   catch (e) { console.error('[CRON] Renewal check failed:', e); }
 });
 
-// ─── TELEMETRY ─────────────────────────────────────────────────────────────
+// ─── TELEMETRY & TENANT RESOLUTION ──────────────────────────────────────────
 import { apiUsageMiddleware } from './middleware/telemetry.middleware';
+import { resolveTenant } from './middleware/tenant.middleware';
 app.use(apiUsageMiddleware);
+app.use(resolveTenant);
 
 // ─── DEV ROUTES (bypass maintenance, high rate limit) ────────────────────────
 app.use('/api/dev', devLimiter, devRoutes);

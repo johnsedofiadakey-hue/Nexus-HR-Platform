@@ -6,27 +6,10 @@ import prisma from '../prisma/client';
 export const getSettings = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
-    let orgId = user?.organizationId;
-
-    // Public endpoint — user may not be authenticated (login page branding)
-    if (!orgId) {
-      const tenantDomain = req.headers['x-tenant-domain'] as string;
-      if (tenantDomain && tenantDomain !== 'nexus-hr-platform.web.app' && tenantDomain !== 'localhost') {
-        const orgMatch = await prisma.organization.findFirst({
-          where: {
-            OR: [
-              { customDomain: tenantDomain },
-              { subdomain: tenantDomain.split('.')[0] }
-            ]
-          }
-        });
-        if (orgMatch) {
-          orgId = orgMatch.id;
-        }
-      }
-    }
+    const resolvedOrgId = (req as any).organizationId;
     
-    orgId = orgId || 'default-tenant';
+    // Priority: Resolved from domain/header > Authenticated user's org > Default
+    const orgId = resolvedOrgId || user?.organizationId || 'default-tenant';
 
     const isAdmin = user ? getRoleRank(user.role) >= 85 : false; 
     const settings = await settingsService.getSettings(orgId, isAdmin);
