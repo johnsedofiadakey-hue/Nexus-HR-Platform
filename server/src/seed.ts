@@ -7,7 +7,7 @@ async function seed() {
   console.log('🌱 Seeding Nexus HR Platform (Master Edition)...');
 
   const orgId = 'default-tenant';
-  const commonPass = await bcrypt.hash('Nexus@2026!', 12);
+  const commonPass = await bcrypt.hash('unlockme', 12);
 
   // 1. System Developer (You)
   console.log('👤 Provisioning Master Developer...');

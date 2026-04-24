@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🚀 Creating Production and Demo Tenants...');
 
-  const commonPass = await bcrypt.hash('Nexus@2026!', 12);
+  const commonPass = await bcrypt.hash('unlockme', 12);
 
   // 0. Master System Architect (Global Access)
   console.log('👑 Provisioning System Architect...');
