@@ -54,24 +54,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: network-first for HTML, otherwise cache-first
-  if (url.pathname === '/' || url.pathname.endsWith('.html')) {
+  // SPA Routes and HTML: network-first to ensure fresh security headers
+  const isRoute = !url.pathname.includes('.') || url.pathname.endsWith('.html');
+  if (isRoute) {
     event.respondWith(
       fetch(request)
-        .catch(() => caches.match(request))
+        .catch(() => caches.match('/index.html') || caches.match('/'))
     );
     return;
   }
 
+  // Static assets: cache-first with network fallback
   event.respondWith(
     caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (response.ok && (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('.png'))) {
+      return cached || fetch(request).then((response) => {
+        if (response.ok && (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('.png') || url.pathname.endsWith('.svg'))) {
           const cloned = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned));
         }
         return response;
+      }).catch(() => {
+          // Fail gracefully for missing assets
+          if (request.destination === 'image') {
+              return new Response('', { status: 404 });
+          }
+          return null;
       });
     })
   );
