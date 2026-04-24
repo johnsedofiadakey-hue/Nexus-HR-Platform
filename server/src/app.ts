@@ -184,31 +184,12 @@ let isBooted = false;
 
 // ─── STARTUP PROTOCOL ───────────────────────────────────────────────────────
 const runStartupTasks = async () => {
-  console.log('[Startup] Executing background initialization...');
-  const { exec } = require('child_process');
-  const { promisify } = require('util');
-  const execAsync = promisify(exec);
-
+  console.log('[Startup] Nexus HR core initialization...');
   try {
-    // 1. Database Migrations
-    console.log('[Startup] 1/4: Running Prisma migrations...');
-    try {
-      const { stdout } = await execAsync('npx prisma migrate deploy');
-      console.log(`[Startup] Migration Output: ${stdout || 'No new migrations'}`);
-    } catch (migErr: any) {
-      console.warn(`[Startup] Migration Warning (skipping): ${migErr.message}`);
-    }
+    // We skip external exec calls (prisma, etc) here as they are handled by the Render StartCommand
+    // This prevents boot deadlocks.
     
-    // 2. System Setup
-    console.log('[Startup] 2/4: Initializing system records via setup script...');
-    require('./scripts/setup'); 
-    
-    // 3. Role/Dept Updates
-    console.log('[Startup] 3/4: Running data optimization scripts...');
-    require('./scripts/update_roles_and_depts');
-    
-    // 4. Internal Service Sync
-    console.log('[Startup] 4/4: Synchronizing target telemetry...');
+    console.log('[Startup] 1/1: Synchronizing internal telemetry...');
     await TargetService.syncAllTargets('default-tenant');
 
     isBooted = true;
@@ -216,9 +197,7 @@ const runStartupTasks = async () => {
   } catch (err: any) {
     console.error('\n❌ [CRITICAL] Background Startup Stalled:');
     console.error(err.message);
-    // Force boot even on error to allow login for diagnostics
-    isBooted = true; 
-    console.warn('[Startup] FORCING BOOT for emergency diagnostics.');
+    isBooted = true; // Still allow login
   }
 };
 
