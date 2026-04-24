@@ -130,7 +130,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // ─── SECURITY HEADERS ──────────────────────────────────────────────────────
 app.use(helmet({ 
   crossOriginResourcePolicy: { policy: 'cross-origin' },
-  crossOriginOpenerPolicy: false
+  crossOriginOpenerPolicy: false,
+  crossOriginEmbedderPolicy: false
 }));
 app.use(xssSanitizer);
 app.use(generalLimiter);
