@@ -119,12 +119,12 @@ const DevLogin = () => {
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-indigo-500/10 blur-[80px] rounded-full" />
                     
                     <div className="relative z-10">
-                        <div className="mb-10">
+                        <div className="mb-10 text-center">
                             <div className="flex items-center justify-center gap-3 mb-2">
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Security Active</span>
                             </div>
-                            <p className="text-slate-300 text-sm font-medium">Verify your administrative identity via the Nexus Identity Provider.</p>
+                            <p className="text-slate-300 text-sm font-medium">Verify your administrative identity.</p>
                         </div>
 
                         {error && (
@@ -133,15 +133,55 @@ const DevLogin = () => {
                             </div>
                         )}
 
+                        {/* ── Visual PIN Display ── */}
+                        <div className="flex justify-center gap-4 mb-12">
+                            {[...Array(8)].map((_, i) => (
+                                <motion.div
+                                    key={i}
+                                    animate={{ 
+                                        scale: pin.length > i ? 1.1 : 1,
+                                        backgroundColor: pin.length > i ? '#6366f1' : 'rgba(255,255,255,0.05)'
+                                    }}
+                                    className="w-4 h-12 rounded-full border border-white/5 shadow-inner"
+                                />
+                            ))}
+                        </div>
+
+                        {/* ── Numeric Keypad ── */}
+                        <div className="grid grid-cols-3 gap-6 mb-12 max-w-sm mx-auto">
+                            {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'enter'].map((key) => (
+                                <motion.button
+                                    key={key}
+                                    whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                        if (key === 'del') handleDelete();
+                                        else if (key === 'enter') handleSubmit();
+                                        else handleKeyPress(key);
+                                    }}
+                                    className={`h-20 rounded-3xl flex items-center justify-center text-xl font-bold transition-colors ${
+                                        key === 'enter' ? 'bg-indigo-600 text-white col-span-1' : 
+                                        key === 'del' ? 'text-rose-400' : 'text-slate-300 bg-white/5'
+                                    }`}
+                                >
+                                    {key === 'del' ? <Delete size={20} /> : 
+                                     key === 'enter' ? <ArrowRight size={24} /> : key}
+                                </motion.button>
+                            ))}
+                        </div>
+
+                        <div className="relative flex items-center gap-4 my-8 opacity-20">
+                            <div className="h-px flex-1 bg-slate-500" />
+                            <span className="text-[10px] font-black tracking-widest text-slate-400">OR</span>
+                            <div className="h-px flex-1 bg-slate-500" />
+                        </div>
+
                         <button
                             onClick={async () => {
                                 try {
                                     setLoading(true);
                                     const { signInWithRedirect } = await import('firebase/auth');
                                     const { auth, googleProvider } = await import('../../services/firebase');
-                                    
-                                    // FORCE REDIRECT MODE (Nuclear Option)
-                                    // This bypasses all Cross-Origin-Opener-Policy popup window issues
                                     await signInWithRedirect(auth, googleProvider);
                                 } catch (err: any) {
                                     setError(err.response?.data?.error || 'Google Identity Verification Failed');
@@ -162,7 +202,7 @@ const DevLogin = () => {
                             )}
                         </button>
                         
-                        <p className="mt-8 text-[9px] font-bold text-slate-600 uppercase tracking-widest">
+                        <p className="mt-10 text-[9px] font-bold text-slate-600 uppercase tracking-widest">
                             Authorized Personnel Only // Node ID: NS-772
                         </p>
                     </div>
