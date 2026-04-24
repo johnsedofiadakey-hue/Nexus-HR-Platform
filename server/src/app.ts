@@ -186,18 +186,15 @@ let isBooted = false;
 const runStartupTasks = async () => {
   console.log('[Startup] Nexus HR core initialization...');
   try {
-    // We skip external exec calls (prisma, etc) here as they are handled by the Render StartCommand
-    // This prevents boot deadlocks.
+    // We skip heavy tasks here to ensure stability on Render hardware.
+    // Telemetry and background syncs are handled by the live SchedulerService.
     
-    console.log('[Startup] 1/1: Synchronizing internal telemetry...');
-    await TargetService.syncAllTargets('default-tenant');
-
     isBooted = true;
     console.log(`\n🎉 Nexus HR Platform Core fully operational at ${new Date().toISOString()}\n`);
   } catch (err: any) {
     console.error('\n❌ [CRITICAL] Background Startup Stalled:');
     console.error(err.message);
-    isBooted = true; // Still allow login
+    isBooted = true; 
   }
 };
 
