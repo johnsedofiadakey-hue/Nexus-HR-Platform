@@ -33,7 +33,7 @@ const Login = () => {
             if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
             storage.setItem(StorageKey.USER, user || {});
 
-            if (user?.role === 'DEV') navigate('/dev/dashboard');
+            if (user?.role === 'DEV') navigate('/nexus-master-console');
             else navigate('/dashboard');
             
             toast.success('System Access Granted');

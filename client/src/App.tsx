@@ -95,12 +95,14 @@ const ProtectedRoute = () => {
 };
 
 const AdminGuard = () => {
+  const user = getStoredUser();
+  const token = storage.getItem(StorageKey.AUTH_TOKEN, null);
   const devToken = storage.getItem(StorageKey.DEV_TOKEN, null);
   const firebaseToken = storage.getItem(StorageKey.DEV_FIREBASE_TOKEN, null);
   const devMode = storage.getItem(StorageKey.DEV_MODE, 'false') === 'true';
 
-  // Server-issued dev JWT (from PIN verification) or Firebase Google Identity
-  const hasAccess = !!devToken || (firebaseToken && devMode);
+  // Allow access if user has standard Dev JWT or Admin Console PIN/Firebase token
+  const hasAccess = (user?.role === 'DEV' && !!token) || !!devToken || (firebaseToken && devMode);
 
   if (!hasAccess) return <Navigate to="/vault" replace />;
 
