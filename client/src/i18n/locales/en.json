@@ -205,7 +205,8 @@
     }
   },
   "leave": {
-    "title": "Leave",
+    "title": "Rest & Time Off",
+    "subtitle": "Manage your time off and team approvals",
     "subtitle": "Manage your leave and team approvals",
     "my_cycle": "My History",
     "team_hub": "Team Leave",
@@ -286,7 +287,7 @@
       "Unpaid": "Unpaid Leave"
     },
     "status": {
-      "SUBMITTED": "Awaiting Handover",
+      "SUBMITTED": "Waiting for Cover Team",
       "PENDING_RELIEVER": "Waiting for Cover",
       "RELIEVER_ACCEPTED": "Cover Accepted",
       "RELIEVER_DECLINED": "Cover Declined",
@@ -410,7 +411,7 @@
     "delete_confirm": "Delete this holiday?"
   },
   "payroll": {
-    "title": "Paying Staff",
+    "title": "Staff Pay",
     "subtitle": "Manage monthly pay and slips",
     "run_payroll": "Pay Everyone Now",
     "fiscal_cycles": "Pay Periods",
@@ -485,7 +486,7 @@
     "no_active_admin_desc": "No review cycles have started, or you are not included in this review.",
     "initiate_primary": "Start Main Review",
     "stages": {
-      "SELF_REVIEW": "Self Review",
+      "SELF_REVIEW": "My Own Review",
       "MANAGER_REVIEW": "Manager Review",
       "HR_REVIEW": "HR Review",
       "COMPLETED": "Completed"
@@ -637,7 +638,7 @@
     "strategic_gap": "Small Problem",
     "gap_description": "We are a bit behind on our targets.",
     "generate_report": "Get Full Report",
-    "org_health": "Company Health",
+    "org_health": "Company Well-being",
     "by_dept": "By Dept",
     "access_control": "Access",
     "identity_status": "Status",

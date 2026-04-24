@@ -15,9 +15,10 @@ import BillingControl from './components/BillingControl';
 import ProtocolSelector from './components/ProtocolSelector';
 import NetworkManager from './components/NetworkManager';
 import AuditTerminal from './components/AuditTerminal';
+import SiteManagement from './SiteManagement';
 
 // ── Types ────────────────────────────────────────────────────────────────────
-type NavSection = 'organizations' | 'revenue' | 'security' | 'audit';
+type NavSection = 'organizations' | 'revenue' | 'security' | 'audit' | 'site';
 
 // ── Stat Card ────────────────────────────────────────────────────────────────
 const StatCard = ({ label, value, icon: Icon, trend, color = 'blue' }: any) => {
@@ -304,6 +305,7 @@ const AdminConsole = () => {
         { id: 'organizations', label: 'Organizations', icon: Building2 },
         { id: 'revenue', label: 'Revenue & Pricing', icon: CreditCard },
         { id: 'security', label: 'System Control', icon: Shield },
+        { id: 'site', label: 'Showroom Control', icon: Layout },
         { id: 'audit', label: 'Audit Log', icon: Terminal },
     ];
 
@@ -735,6 +737,12 @@ const AdminConsole = () => {
                                     ))}
                                 </div>
                             </div>
+                        </div>
+                    )}
+                    {/* SITE MANAGEMENT SECTION */}
+                    {activeSection === 'site' && (
+                        <div className="p-10">
+                            <SiteManagement />
                         </div>
                     )}
                 </main>

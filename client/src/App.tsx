@@ -3,6 +3,7 @@ import StormglideHome from './pages/StormglideHome';
 import { motion } from 'framer-motion';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
+import DemoPersonaSwitcher from './components/DemoPersonaSwitcher';
 import CommandPalette from './components/layout/CommandPalette';
 import PageErrorBoundary from './components/layout/PageErrorBoundary';
 import ChunkErrorBoundary from './components/common/ChunkErrorBoundary';
@@ -227,6 +228,7 @@ const Layout = () => {
         </div>
       </div>
       <MobileNav />
+      <DemoPersonaSwitcher />
       <NexusAIInsight 
         isOpen={isAIOpen} 
         onClose={() => setIsAIOpen(false)} 
@@ -317,6 +319,7 @@ const AppContent = () => {
         debounceTimer = null;
       }, 2000); // Only re-calc timers every 2 seconds of activity
     };
+
 
     const handleGlobalLogout = () => {
       storage.clearSession();
