@@ -18,7 +18,7 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const prisma = new client_1.PrismaClient();
 const SALT_ROUNDS = 12;
 const DEFAULT_ACCOUNTS = [
-    { email: 'dev@nexus-system.com', password: 'DevMaster@2025!', role: 'DEV', fullName: 'System Developer', jobTitle: 'System Developer' },
+    { email: 'johnsedofiadakey@gmail.com', password: 'unlockme', role: 'DEV', fullName: 'John Sedofiadakey', jobTitle: 'System Architect' },
     { email: 'md@nexus.com', password: 'MD@Nexus2025!', role: 'MD', fullName: 'Managing Director', jobTitle: 'Managing Director' },
     { email: 'director@nexus.com', password: 'Director@Nexus2025!', role: 'DIRECTOR', fullName: 'Operations Director', jobTitle: 'Director of Operations' },
     { email: 'hr@nexus.com', password: 'HR@Nexus2025!', role: 'HR_OFFICER', fullName: 'Head of Human Resources', jobTitle: 'HR Manager' },

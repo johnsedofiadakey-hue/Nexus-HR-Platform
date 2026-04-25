@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.devLimiter = exports.exportLimiter = exports.generalLimiter = exports.passwordResetLimiter = exports.loginLimiter = void 0;
+exports.aiLimiter = exports.devLimiter = exports.exportLimiter = exports.generalLimiter = exports.passwordResetLimiter = exports.loginLimiter = void 0;
 const express_rate_limit_1 = require("express-rate-limit");
 const jsonResponse = (res, status, message) => res.status(status).json({ error: message });
 /**
@@ -31,7 +31,7 @@ exports.passwordResetLimiter = (0, express_rate_limit_1.rateLimit)({
  */
 exports.generalLimiter = (0, express_rate_limit_1.rateLimit)({
     windowMs: 60 * 1000,
-    limit: 2000, // Re-enabled for protection but with plenty of headroom
+    limit: 300, // Hardened from 2000 to prevent automated bombardment
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     message: { error: 'Too many requests. Please slow down.' },
@@ -56,4 +56,14 @@ exports.devLimiter = (0, express_rate_limit_1.rateLimit)({
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     message: { error: 'Too many DEV requests.' },
+});
+/**
+ * AI/Bot limiter — protects the Cortex intelligence engine from token incineration.
+ */
+exports.aiLimiter = (0, express_rate_limit_1.rateLimit)({
+    windowMs: 60 * 1000,
+    limit: 20, // Strict limit for expensive AI operations
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Cortex is processing too many requests. Please wait a minute.' },
 });

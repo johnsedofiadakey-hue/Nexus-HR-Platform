@@ -1,10 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.storageService = exports.FirebaseStorageService = void 0;
-const firebase_admin_1 = __importDefault(require("firebase-admin"));
+const firebase_admin_1 = require("./firebase-admin");
 const uuid_1 = require("uuid");
 /**
  * Service for handling permanent media storage via Firebase Storage.
@@ -13,23 +10,14 @@ const uuid_1 = require("uuid");
 class FirebaseStorageService {
     static init() {
         try {
-            if (firebase_admin_1.default.apps.length === 0) {
-                const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-                if (!privateKey || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PROJECT_ID) {
-                    console.warn('[FirebaseStorage] Warning: Missing credentials. Falling back to local/memory storage.');
-                    return;
-                }
-                firebase_admin_1.default.initializeApp({
-                    credential: firebase_admin_1.default.credential.cert({
-                        projectId: process.env.FIREBASE_PROJECT_ID,
-                        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                        privateKey: privateKey,
-                    }),
-                    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${process.env.FIREBASE_PROJECT_ID}.appspot.com`,
-                });
+            (0, firebase_admin_1.initializeFirebase)();
+            if (firebase_admin_1.admin.apps.length > 0) {
+                this.bucket = firebase_admin_1.admin.storage().bucket();
+                console.log('[FirebaseStorage] Connected to bucket:', this.bucket.name);
             }
-            this.bucket = firebase_admin_1.default.storage().bucket();
-            console.log('[FirebaseStorage] Initialized successfully.');
+            else {
+                console.warn('[FirebaseStorage] Skipping initialization: No Firebase app found.');
+            }
         }
         catch (error) {
             console.error('[FirebaseStorage] Initialization failed:', error);

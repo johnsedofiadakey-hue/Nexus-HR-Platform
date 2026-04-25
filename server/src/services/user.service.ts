@@ -125,7 +125,7 @@ export const createUser = async (organizationId: string, data: {
 
             // Compensation
             salary: (safeData.salary !== undefined && safeData.salary !== null) ? Number(safeData.salary) : null,
-            currency: safeData.currency || 'GNF',
+            currency: safeData.currency || 'GHS',
             leaveBalance: null,
             leaveAllowance: null,
             bankAccountEnc: maybeEncrypt(safeData.bankAccountNumber),

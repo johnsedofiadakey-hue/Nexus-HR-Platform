@@ -36,9 +36,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const expenseController = __importStar(require("../controllers/expense.controller"));
 const auth_middleware_1 = require("../middleware/auth.middleware");
+const validate_middleware_1 = require("../middleware/validate.middleware");
 const router = (0, express_1.Router)();
 // Employee endpoints
-router.post('/claims', auth_middleware_1.authenticate, expenseController.createExpenseClaim);
+router.post('/claims', auth_middleware_1.authenticate, (0, validate_middleware_1.validate)(validate_middleware_1.ExpenseClaimSchema), expenseController.createExpenseClaim);
 router.get('/my', auth_middleware_1.authenticate, expenseController.getMyExpenses);
 router.get('/my-claims', auth_middleware_1.authenticate, expenseController.getMyExpenses);
 // Manager / HR endpoints

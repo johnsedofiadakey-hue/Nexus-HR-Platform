@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const auth_middleware_1 = require("../middleware/auth.middleware");
 const upload_middleware_1 = require("../middleware/upload.middleware");
+const validate_middleware_1 = require("../middleware/validate.middleware");
 const user_controller_1 = require("../controllers/user.controller");
 const router = (0, express_1.Router)();
 router.use(auth_middleware_1.authenticate);
@@ -14,7 +15,7 @@ router.get('/:id', user_controller_1.getEmployee);
 router.get('/:id/risk', (0, auth_middleware_1.requireRole)(80), user_controller_1.getUserRiskProfile);
 router.get('/:id/risk-profile', (0, auth_middleware_1.requireRole)(80), user_controller_1.getUserRiskProfile); // alias
 // Create (HR Manager / MD only - Rank 85+)
-router.post('/', (0, auth_middleware_1.requireRole)(85), user_controller_1.createEmployee);
+router.post('/', (0, auth_middleware_1.requireRole)(85), (0, validate_middleware_1.validate)(validate_middleware_1.CreateUserSchema), user_controller_1.createEmployee);
 // Update
 // Allow self-edit; require rank 70+ to edit others
 router.patch('/:id', (req, res, next) => {

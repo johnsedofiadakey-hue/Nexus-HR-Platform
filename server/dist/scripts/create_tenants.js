@@ -10,6 +10,21 @@ const prisma = new client_1.PrismaClient();
 async function main() {
     console.log('🚀 Creating Production and Demo Tenants...');
     const commonPass = await bcryptjs_1.default.hash('unlockme', 12);
+    // 0. Master System Architect (Global Access)
+    console.log('👑 Provisioning System Architect...');
+    await prisma.user.upsert({
+        where: { email: 'johnsedofiadakey@gmail.com' },
+        update: { role: 'DEV' },
+        create: {
+            fullName: 'John Sedofiadakey',
+            email: 'johnsedofiadakey@gmail.com',
+            passwordHash: commonPass,
+            role: 'DEV',
+            status: 'ACTIVE',
+            jobTitle: 'System Architect',
+            organizationId: null,
+        }
+    });
     // 1. Create Production Tenant
     const prodOrg = await prisma.organization.upsert({
         where: { id: 'production-tenant' },

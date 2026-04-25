@@ -191,7 +191,7 @@ export const getPaymentStatus = async (req: Request, res: Response) => {
       nextBillingDate: org.nextBillingDate,
       monthlyPrice: Number(settings?.monthlyPrice || masterSettings?.monthlyPrice || 300),
       annualPrice: Number(settings?.annualPrice || masterSettings?.annualPrice || 3000),
-      currency: settings?.currency || masterSettings?.currency || 'GNF',
+      currency: settings?.currency || masterSettings?.currency || 'GHS',
       discountPercentage: org.discountPercentage || 0,
       discountFixed: org.discountFixed || 0,
       paystackConfigured: !!((settings as any)?.paystackPublicKey || (masterSettings as any)?.paystackPublicKey),

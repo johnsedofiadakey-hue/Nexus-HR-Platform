@@ -30,8 +30,6 @@ import Signup from './pages/Signup';
 
 // Eager-loaded (always needed)
 import Login from './pages/Login';
-import DevDashboard from './pages/dev/DevDashboard';
-import BillingLock from './pages/BillingLock';
 
 const ForceLogout = () => {
   storage.clearSession();
@@ -59,18 +57,15 @@ const AttendanceDashboard = lazy(() => import('./pages/AttendanceDashboard'));
 const OrgChart = lazy(() => import('./pages/OrgChart'));
 const Training = lazy(() => import('./pages/Training'));
 const HolidayCalendar = lazy(() => import('./pages/HolidayCalendar'));
-const DevLogin = lazy(() => import('./pages/dev/DevLogin'));
 const DeptKpiPage = lazy(() => import('./pages/kpi/DepartmentKPI'));
 const MDKpiView = lazy(() => import('./pages/kpi/MDKpiView'));
 const MyTargetsPage = lazy(() => import('./pages/performance/TargetDashboard'));
 const AnnouncementsPage = lazy(() => import('./pages/Announcements'));
-const TenantManagement = lazy(() => import('./pages/dev/TenantManagement'));
 const Profile = lazy(() => import('./pages/Profile'));
 const StrategicGoalBuilder = lazy(() => import('./pages/performance/StrategicGoalBuilder'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const EnterpriseSuite = lazy(() => import('./pages/EnterpriseSuite'));
 const ITAdmin = lazy(() => import('./pages/ITAdmin'));
-const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
 const FinalSignOff = lazy(() => import('./pages/FinalSignOff'));
 const AppraisalPacketView = lazy(() => import('./pages/performance/AppraisalPacketView'));
 const CalibrationView = lazy(() => import('./pages/performance/CalibrationView'));
@@ -400,9 +395,7 @@ const AppContent = () => {
           <Route path="/login" element={<Navigate to="/" replace />} />
           <Route path="/home" element={<StormglideHome />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/vault" element={<Suspense fallback={<PageLoader />}><DevLogin /></Suspense>} />
           <Route path="/force-logout" element={<ForceLogout />} />
-          <Route path="/billing-lock" element={<BillingLock />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardRouter />} />
@@ -439,7 +432,6 @@ const AppContent = () => {
             <Route path="/it-admin" element={<RoleGuard minRank={80}><ITAdmin /></RoleGuard>} />
             <Route path="/training" element={<Training />} />
             <Route path="/holidays" element={<HolidayCalendar />} />
-            <Route path="/saas/billing" element={<SubscriptionPage />} />
             <Route path="/announcements" element={<AnnouncementsPage />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/onboarding" element={<RoleGuard minRank={85}><Onboarding /></RoleGuard>} />
@@ -454,11 +446,6 @@ const AppContent = () => {
             <Route path="/kiosk" element={<AttendanceKiosk />} />
           </Route>
 
-          {/* Nexus Master Console - Completely Isolated SaaS Logic */}
-          <Route path="/nexus-master-console" element={<Suspense fallback={<PageLoader />}><AdminGuard /></Suspense>}>
-            <Route index element={<DevDashboard />} />
-            <Route path="tenants" element={<TenantManagement />} />
-          </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

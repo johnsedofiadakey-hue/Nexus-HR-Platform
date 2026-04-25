@@ -5,163 +5,108 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DemoSeederService = void 0;
 const client_1 = __importDefault(require("../prisma/client"));
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const encryption_1 = require("../utils/encryption");
+const bcryptjs_1 = require("bcryptjs");
 class DemoSeederService {
     /**
-     * Seeds a professional dataset for a given organization.
-     * Ensures absolute isolation by only operating on data within organizationId.
+     * Seeds a premium, high-end demonstration environment for a tenant.
+     * This provides potential clients with a realistic "wow" experience.
      */
     static async seedTenantData(organizationId) {
-        console.log(`[DemoSeeder] Initiating professional seed for Org: ${organizationId}`);
-        const hash = async (pw) => await bcryptjs_1.default.hash(pw, 12);
-        const commonPass = await hash('NexusDemo@2025');
-        // 1. Create Core Departments
-        const depts = [
-            { name: 'Executive Suite', description: 'Leadership and Strategy' },
-            { name: 'Human Resources', description: 'People and Culture' },
-            { name: 'Finance & Accounts', description: 'Financial Operations' },
-            { name: 'IT & Infrastructure', description: 'Technology and Security' },
-            { name: 'Operations', description: 'Core Business Logistics' },
-            { name: 'Sales & Marketing', description: 'Growth and Branding' },
+        console.log(`[DemoSeeder] Provisioning High-End Environment for ${organizationId}...`);
+        // 1. Create Professional Departments
+        const departments = [
+            { name: 'Executive Strategy' },
+            { name: 'Human Capital' },
+            { name: 'Financial Operations' },
+            { name: 'Product Engineering' },
+            { name: 'Global Sales' }
         ];
-        const createdDepts = await Promise.all(depts.map(d => client_1.default.department.create({
-            data: { name: d.name, organizationId }
-        })));
-        const getDeptId = (name) => createdDepts.find(d => d.name === name)?.id;
-        // 2. Create MD (Managing Director)
-        const md = await client_1.default.user.create({
-            data: {
-                organizationId,
-                fullName: 'Executive Director',
-                email: `md@demo-${organizationId.slice(0, 4)}.com`,
+        const createdDepts = [];
+        for (const d of departments) {
+            const dept = await client_1.default.department.upsert({
+                where: {
+                    name_organizationId: {
+                        name: d.name,
+                        organizationId
+                    }
+                },
+                update: {},
+                create: {
+                    name: d.name,
+                    organizationId
+                }
+            });
+            createdDepts.push(dept);
+        }
+        const commonPass = await (0, bcryptjs_1.hash)('NexusDemo@2025', 12);
+        // 2. Identify Strategy Dept for Executives
+        const execDeptId = createdDepts.find(d => d.name === 'Executive Strategy')?.id;
+        const hrDeptId = createdDepts.find(d => d.name === 'Human Capital')?.id;
+        // 3. Provision High-Level MD (The Master Account)
+        const mdEmail = `md@demo-sand.com`;
+        const mdUser = await client_1.default.user.upsert({
+            where: { email: mdEmail },
+            update: { organizationId }, // Relocate to this org
+            create: {
+                fullName: 'Sarah Montgomery',
+                email: mdEmail,
                 passwordHash: commonPass,
                 role: 'MD',
-                jobTitle: 'Managing Director',
-                employeeCode: 'DEMO-001',
-                departmentId: getDeptId('Executive Suite'),
                 status: 'ACTIVE',
-                joinDate: new Date('2023-01-01'),
-                leaveBalance: 30,
-                leaveAllowance: 30,
-                salary: 15000,
-                currency: 'USD',
-                salaryEnc: (0, encryption_1.maybeEncrypt)('15000')
-            }
-        });
-        // 3. Create Key Managers
-        const hrManager = await client_1.default.user.create({
-            data: {
                 organizationId,
-                fullName: 'Sarah Jenkins',
-                email: `hr@demo-${organizationId.slice(0, 4)}.com`,
-                passwordHash: commonPass,
-                role: 'HR_OFFICER',
-                jobTitle: 'HR Manager',
-                employeeCode: 'DEMO-002',
-                departmentId: getDeptId('Human Resources'),
-                supervisorId: md.id,
-                status: 'ACTIVE',
-                joinDate: new Date('2023-06-15'),
-                salary: 8500,
-                currency: 'USD',
-                salaryEnc: (0, encryption_1.maybeEncrypt)('8500')
+                jobTitle: 'Chief Executive Officer',
+                avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
+                departmentId: execDeptId
             }
         });
-        const itManager = await client_1.default.user.create({
-            data: {
-                organizationId,
-                fullName: 'David Tech',
-                email: `it@demo-${organizationId.slice(0, 4)}.com`,
-                passwordHash: commonPass,
-                role: 'IT_MANAGER',
-                jobTitle: 'IT Infrastructure Manager',
-                employeeCode: 'DEMO-003',
-                departmentId: getDeptId('IT & Infrastructure'),
-                supervisorId: md.id,
-                status: 'ACTIVE',
-                joinDate: new Date('2023-08-20'),
-                salary: 9000,
-                currency: 'USD',
-                salaryEnc: (0, encryption_1.maybeEncrypt)('9000')
-            }
-        });
-        // 4. Create Staff
-        const staffData = [
-            { name: 'Alice Wong', title: 'Senior Accountant', dept: 'Finance & Accounts', supervisor: md.id, role: 'MANAGER' },
-            { name: 'Bob Roberts', title: 'Operations Lead', dept: 'Operations', supervisor: md.id, role: 'MANAGER' },
-            { name: 'Charlie Dean', title: 'Fullstack Developer', dept: 'IT & Infrastructure', supervisor: itManager.id, role: 'STAFF' },
-            { name: 'Diana Prince', title: 'Social Media Strategist', dept: 'Sales & Marketing', supervisor: md.id, role: 'STAFF' },
+        // 4. Provision HR Manager and Staff
+        const staff = [
+            { name: 'Alice Thompson', role: 'MANAGER', dept: 'Human Capital', title: 'HR Director', email: 'hr@demo-sand.com' },
+            { name: 'Marcus Chen', role: 'MANAGER', dept: 'Product Engineering', title: 'Engineering Lead', email: 'eng@demo-sand.com' },
+            { name: 'Elena Rodriguez', role: 'STAFF', dept: 'Financial Operations', title: 'Senior Auditor', email: 'audit@demo-sand.com' }
         ];
-        for (const [i, s] of staffData.entries()) {
-            await client_1.default.user.create({
-                data: {
-                    organizationId,
+        for (const s of staff) {
+            const deptId = createdDepts.find(d => d.name === s.dept)?.id;
+            await client_1.default.user.upsert({
+                where: { email: s.email },
+                update: { organizationId },
+                create: {
                     fullName: s.name,
-                    email: `${s.name.split(' ')[0].toLowerCase()}@demo-${organizationId.slice(0, 4)}.com`,
+                    email: s.email,
                     passwordHash: commonPass,
                     role: s.role,
-                    jobTitle: s.title,
-                    employeeCode: `DEMO-10${i}`,
-                    departmentId: getDeptId(s.dept),
-                    supervisorId: s.supervisor,
                     status: 'ACTIVE',
-                    joinDate: new Date('2024-01-10'),
-                    salary: 5000,
-                    currency: 'USD',
-                    salaryEnc: (0, encryption_1.maybeEncrypt)('5000')
-                }
-            });
-        }
-        // 5. Create Sample Announcements
-        await client_1.default.announcement.create({
-            data: {
-                organizationId,
-                title: 'Welcome to the New HR Portal',
-                content: 'We are excited to launch Nexus HR Platform. Please update your profiles and review the employee handbook.',
-                priority: 'HIGH',
-                createdById: md.id,
-                targetAudience: 'EVERYONE',
-            }
-        });
-        await client_1.default.announcement.create({
-            data: {
-                organizationId,
-                title: 'Quarterly Town Hall',
-                content: 'Join us this Friday at 3:00 PM in the main conference room for our Q3 strategy update.',
-                priority: 'MEDIUM',
-                createdById: md.id,
-                targetAudience: 'EVERYONE',
-            }
-        });
-        await client_1.default.announcement.create({
-            data: {
-                organizationId,
-                title: 'Planned IT Maintenance',
-                content: 'The internal server will be down for maintenance this Sunday between 2:00 AM and 5:00 AM.',
-                priority: 'LOW',
-                createdById: itManager.id,
-                targetAudience: 'EVERYONE',
-            }
-        });
-        // 6. Create Initial Leave Context
-        const staffUser = await client_1.default.user.findFirst({ where: { organizationId, role: 'STAFF' } });
-        if (staffUser) {
-            await client_1.default.leaveRequest.create({
-                data: {
                     organizationId,
-                    employeeId: staffUser.id,
-                    leaveType: 'Annual',
-                    startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                    endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-                    reason: 'Family Vacation',
-                    status: 'SUBMITTED',
-                    leaveDays: 5
+                    jobTitle: s.title,
+                    departmentId: deptId,
+                    avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.name.split(' ')[0]}`
                 }
             });
         }
-        console.log(`[DemoSeeder] Seed successfully completed for Org: ${organizationId}`);
-        return { mdEmail: md.email, password: 'NexusDemo@2025' };
+        // 5. Populate Corporate Announcements
+        await client_1.default.announcement.createMany({
+            data: [
+                {
+                    title: 'Q2 Strategic Roadmap Unveiled',
+                    content: 'Our vision for the upcoming quarter focuses on global expansion and AI-driven efficiency.',
+                    priority: 'HIGH',
+                    organizationId,
+                    targetAudience: 'ALL',
+                    createdById: mdUser.id
+                },
+                {
+                    title: 'New Health & Wellness Initiative',
+                    content: 'Starting next month, all employees will have access to our subsidized premium health program.',
+                    priority: 'NORMAL',
+                    organizationId,
+                    targetAudience: 'ALL',
+                    createdById: mdUser.id
+                }
+            ],
+            skipDuplicates: true
+        });
+        console.log(`[DemoSeeder] Environment successfully provisioned.`);
+        return { mdEmail };
     }
 }
 exports.DemoSeederService = DemoSeederService;

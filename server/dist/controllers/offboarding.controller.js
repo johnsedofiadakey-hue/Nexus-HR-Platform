@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOffboardingDetails = exports.trackAssetReturn = exports.updateExitInterview = exports.completeClearanceTask = exports.completeOffboarding = exports.getOffboardingList = exports.initiateOffboarding = exports.createTemplate = exports.getTemplates = void 0;
+exports.deleteOffboarding = exports.getOffboardingDetails = exports.trackAssetReturn = exports.updateExitInterview = exports.completeClearanceTask = exports.completeOffboarding = exports.getOffboardingList = exports.initiateOffboarding = exports.createTemplate = exports.getTemplates = void 0;
 const client_1 = __importDefault(require("../prisma/client"));
 const audit_service_1 = require("../services/audit.service");
 const websocket_service_1 = require("../services/websocket.service");
@@ -228,3 +228,32 @@ const getOffboardingDetails = async (req, res) => {
     }
 };
 exports.getOffboardingDetails = getOffboardingDetails;
+/**
+ * DELETE OFFBOARDING PROCESS (MD ONLY)
+ */
+const deleteOffboarding = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const actorId = req.user?.id;
+        const rank = req.user?.rank || 0;
+        if (rank < 90) {
+            return res.status(403).json({ error: 'Unauthorized: Only the Managing Director can delete exit processes' });
+        }
+        const process = await client_1.default.offboardingProcess.findUnique({ where: { id } });
+        if (!process)
+            return res.status(404).json({ error: 'Process not found' });
+        // Delete associated relations manually since schema might not have cascade
+        await Promise.all([
+            client_1.default.offboardingItem.deleteMany({ where: { offboardingId: id } }),
+            client_1.default.exitInterview.deleteMany({ where: { offboardingId: id } }),
+            client_1.default.assetReturn.deleteMany({ where: { offboardingId: id } })
+        ]);
+        await client_1.default.offboardingProcess.delete({ where: { id } });
+        await (0, audit_service_1.logAction)(actorId, 'DELETE_OFFBOARDING_PROCESS', 'User', process.employeeId, { processId: id }, req.ip);
+        res.json({ success: true, message: 'Offboarding process and associated data deleted successfully' });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.deleteOffboarding = deleteOffboarding;

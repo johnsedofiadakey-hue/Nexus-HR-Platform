@@ -32,36 +32,16 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateSettings = exports.getSettings = void 0;
 const settingsService = __importStar(require("../services/settings.service"));
 const auth_middleware_1 = require("../middleware/auth.middleware");
-const client_1 = __importDefault(require("../prisma/client"));
 const getSettings = async (req, res) => {
     try {
         const user = req.user;
-        let orgId = user?.organizationId;
-        // Public endpoint — user may not be authenticated (login page branding)
-        if (!orgId) {
-            const tenantDomain = req.headers['x-tenant-domain'];
-            if (tenantDomain && tenantDomain !== 'nexus-hr-platform.web.app' && tenantDomain !== 'localhost') {
-                const orgMatch = await client_1.default.organization.findFirst({
-                    where: {
-                        OR: [
-                            { customDomain: tenantDomain },
-                            { subdomain: tenantDomain.split('.')[0] }
-                        ]
-                    }
-                });
-                if (orgMatch) {
-                    orgId = orgMatch.id;
-                }
-            }
-        }
-        orgId = orgId || 'default-tenant';
+        const resolvedOrgId = req.organizationId;
+        // Priority: Resolved from domain/header > Authenticated user's org > Default
+        const orgId = resolvedOrgId || user?.organizationId || 'default-tenant';
         const isAdmin = user ? (0, auth_middleware_1.getRoleRank)(user.role) >= 85 : false;
         const settings = await settingsService.getSettings(orgId, isAdmin);
         res.json(settings || {});

@@ -26,13 +26,52 @@ exports.getRoleRank = getRoleRank;
 const context_1 = require("../utils/context");
 const authenticate = async (req, res, next) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.warn(`[Auth Middleware] No bearer token provided for: ${req.method} ${req.path}`);
+    let token = '';
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    }
+    else if (req.query.token && typeof req.query.token === 'string') {
+        token = req.query.token;
+    }
+    if (!token) {
+        console.warn(`[Auth Middleware] No token provided for: ${req.method} ${req.path}`);
         return res.status(401).json({ error: 'No token provided' });
     }
-    const token = authHeader.split(' ')[1];
     try {
         const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
+        // ── DEMO SAFETY GUARD ──
+        // Intercept destructive actions for demo sessions
+        const isDestructive = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
+        if (decoded.isDemo && isDestructive) {
+            // Allow only essential paths (e.g., self-audit, UI preferences)
+            const allowedPaths = ['/api/audit/heartbeat', '/api/user/prefs'];
+            if (!allowedPaths.includes(req.path)) {
+                return res.status(403).json({
+                    error: 'Demo Mode: Modification restricted.',
+                    message: 'This action is disabled in the public showroom to maintain data integrity for other visitors.',
+                    isDemo: true
+                });
+            }
+        }
+        // ── SANDBOX RESILIENCE BYPASS ──
+        // If this is a sandbox token, we prioritize simulation stability over strict DB lookup
+        // This prevents "Ghost Logouts" if the database is in a cold-start state or the seeded user is being refreshed.
+        if (decoded.organizationId === 'sandbox-org-001') {
+            req.user = {
+                id: decoded.id,
+                role: decoded.role || 'MD',
+                name: decoded.name || 'Sandbox Operator',
+                organizationId: 'sandbox-org-001',
+                rank: (0, exports.getRoleRank)(decoded.role || 'MD'),
+            };
+            return context_1.tenantContext.run({
+                organizationId: 'sandbox-org-001',
+                userId: decoded.id,
+                role: decoded.role || 'MD'
+            }, () => {
+                next();
+            });
+        }
         const user = await client_1.default.user.findUnique({
             where: { id: decoded.id },
             select: { id: true, role: true, status: true, fullName: true, organizationId: true, departmentId: true },
@@ -59,6 +98,7 @@ const authenticate = async (req, res, next) => {
             organizationId: user.organizationId || null,
             rank: (0, exports.getRoleRank)(user.role),
             departmentId: user.departmentId || null,
+            isDemo: decoded.isDemo || false,
         };
         // Run the rest of the request within the tenant context
         context_1.tenantContext.run({

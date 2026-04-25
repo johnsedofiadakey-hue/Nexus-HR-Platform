@@ -31,7 +31,7 @@ const getAllAssets = async (organizationId) => {
     });
 };
 exports.getAllAssets = getAllAssets;
-const assignAsset = async (organizationId, assetId, userId, condition) => {
+const assignAsset = async (organizationId, assetId, userId, condition, signature) => {
     const asset = await client_1.default.asset.findFirst({
         where: { id: assetId, organizationId }
     });
@@ -45,7 +45,8 @@ const assignAsset = async (organizationId, assetId, userId, condition) => {
                 organizationId,
                 assetId,
                 userId,
-                conditionOnAssign: condition
+                conditionOnAssign: condition,
+                handoverSignature: signature
             }
         });
         await tx.asset.update({
@@ -56,7 +57,7 @@ const assignAsset = async (organizationId, assetId, userId, condition) => {
     });
 };
 exports.assignAsset = assignAsset;
-const returnAsset = async (organizationId, assetId, condition) => {
+const returnAsset = async (organizationId, assetId, condition, signature) => {
     const asset = await client_1.default.asset.findFirst({
         where: { id: assetId, organizationId },
         include: { assignments: { where: { returnedAt: null, organizationId } } }
@@ -71,7 +72,8 @@ const returnAsset = async (organizationId, assetId, condition) => {
             where: { id: assignmentId },
             data: {
                 returnedAt: new Date(),
-                conditionOnReturn: condition
+                conditionOnReturn: condition,
+                returnSignature: signature
             }
         });
         await tx.asset.update({

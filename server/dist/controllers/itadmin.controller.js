@@ -42,7 +42,7 @@ const userService = __importStar(require("../services/user.service"));
 const email_service_1 = require("../services/email.service");
 const audit_service_1 = require("../services/audit.service");
 const websocket_service_1 = require("../services/websocket.service");
-const google_drive_service_1 = require("../services/google-drive.service");
+const workspace_service_1 = require("../services/workspace.service");
 /**
  * IT Admin specific controller.
  * IT Admins can:
@@ -115,7 +115,7 @@ const itSystemOverview = async (_req, res) => {
             client_1.default.asset.count(),
             client_1.default.asset.count({ where: { status: 'AVAILABLE' } }),
             client_1.default.asset.count({ where: { status: 'ASSIGNED' } }),
-            google_drive_service_1.GoogleDriveService.checkHealth()
+            workspace_service_1.GoogleWorkspaceService.checkHealth()
         ]);
         const recentAccounts = await client_1.default.user.findMany({
             orderBy: { createdAt: 'desc' }, take: 10,

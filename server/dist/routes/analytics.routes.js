@@ -39,6 +39,7 @@ const auth_middleware_1 = require("../middleware/auth.middleware");
 const router = (0, express_1.Router)();
 router.use(auth_middleware_1.authenticate);
 router.get('/executive', (0, auth_middleware_1.requireRole)(70), analyticsController.getExecutiveStats); // Manager+
+router.get('/executive/board-report/pdf', (0, auth_middleware_1.requireRole)(80), analyticsController.downloadBoardReportPDF); // Director+
 router.get('/dept-growth', (0, auth_middleware_1.requireRole)(80), analyticsController.getDepartmentGrowth); // Director+
 router.get('/personal', analyticsController.getPersonalStats); // Any authenticated user (Staff)
 exports.default = router;

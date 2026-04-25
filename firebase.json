@@ -1,24 +1,14 @@
 {
   "hosting": {
-    "public": "combined_dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "/portal/**",
-        "destination": "/portal/index.html"
-      },
-      {
-        "source": "/login",
-        "destination": "/portal/index.html"
-      },
-      {
-        "source": "/dashboard",
-        "destination": "/portal/index.html"
-      }
-    ]
+    "public": "client/dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }],
+    "headers": [{
+      "source": "**",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }]
   }
 }

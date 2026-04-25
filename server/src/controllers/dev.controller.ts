@@ -53,7 +53,7 @@ export const getSystemStats = async (req: Request, res: Response) => {
         activeTrials,
         monthlyPrice: masterSettings?.monthlyPrice || 30000000,
         annualPrice: masterSettings?.annualPrice || 360000000,
-        currency: masterSettings?.currency || 'GNF',
+        currency: masterSettings?.currency || 'GHS',
         paystackPublicKey: masterSettings?.paystackPublicKey || '',
         paystackSecretKey: masterSettings?.paystackSecretKey || '',
         paystackPayLink: masterSettings?.paystackPayLink || '',
@@ -380,7 +380,7 @@ export const triggerBackup = async (req: Request, res: Response) => {
 // Manual Bank Transfer Override
 export const grantBankTransferAccess = async (req: Request, res: Response) => {
   try {
-    const { organizationId, plan, paymentReference, amount, currency = 'GNF', notes } = req.body;
+    const { organizationId, plan, paymentReference, amount, currency = 'GHS', notes } = req.body;
     const operator = (req as any).user;
 
     if (!organizationId || !plan) {
@@ -417,7 +417,7 @@ export const grantBankTransferAccess = async (req: Request, res: Response) => {
           clientId: mdUser.id,
           plan,
           price: amount || 0,
-          currency: currency || 'GNF',
+          currency: currency || 'GHS',
           status: 'ACTIVE',
           paystackRef: paymentReference ? `BANK_TRANSFER:${paymentReference}` : `MANUAL:${Date.now()}`,
           orgName: org.name,
@@ -431,7 +431,7 @@ export const grantBankTransferAccess = async (req: Request, res: Response) => {
     // 4. Log the action in the audit trail
     await logSystemAction({
       action: 'MANUAL_BANK_OVERRIDE',
-      details: `Granted ${plan} access to ${org.name}. Ref: ${paymentReference || 'N/A'}. Amount: ${currency || 'GNF'} ${amount || 'N/A'}. Notes: ${notes || 'None'}`,
+      details: `Granted ${plan} access to ${org.name}. Ref: ${paymentReference || 'N/A'}. Amount: ${currency || 'GHS'} ${amount || 'N/A'}. Notes: ${notes || 'None'}`,
       operatorId: operator.id,
       operatorEmail: operator.email,
       ipAddress: req.ip,
@@ -492,7 +492,7 @@ export const listOrganizations = async (req: Request, res: Response) => {
 
 export const createOrganization = async (req: Request, res: Response) => {
   try {
-    const { name, email, currency = 'GNF', subscriptionPlan = 'FREE', customDomain } = req.body;
+    const { name, email, currency = 'GHS', subscriptionPlan = 'FREE', customDomain } = req.body;
     if (!name) return res.status(400).json({ error: 'Organization name is required' });
 
     const org = await prisma.organization.create({
@@ -521,7 +521,7 @@ export const provisionClient = async (req: Request, res: Response) => {
   try {
     const {
       // Org fields
-      companyName, subdomain, currency = 'GNF', country, phone,
+      companyName, subdomain, currency = 'GHS', country, phone,
       // MD user fields
       adminFullName, adminEmail, adminPassword,
     } = req.body;

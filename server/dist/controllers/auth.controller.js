@@ -1,9 +1,42 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sandboxLogin = exports.impersonateTenant = exports.signup = exports.resetPassword = exports.forgotPassword = exports.changePassword = exports.getMe = exports.revokeRefreshToken = exports.refreshAccessToken = exports.login = void 0;
+exports.sandboxLogin = exports.impersonateTenant = exports.signup = exports.resetPassword = exports.forgotPassword = exports.changePassword = exports.getMe = exports.revokeRefreshToken = exports.refreshAccessToken = exports.ssoLogin = exports.login = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const crypto_1 = __importDefault(require("crypto"));
@@ -138,6 +171,78 @@ const login = async (req, res) => {
     }
 };
 exports.login = login;
+// ─── SSO LOGIN (Google / Microsoft via Identity Token) ─────────────────────
+const firebase_admin_1 = require("../services/firebase-admin");
+const ssoLogin = async (req, res) => {
+    try {
+        const { idToken, provider } = req.body;
+        if (!idToken) {
+            return res.status(400).json({ error: 'OAuth ID token is required' });
+        }
+        let decodedToken;
+        try {
+            decodedToken = await firebase_admin_1.admin.auth().verifyIdToken(idToken);
+        }
+        catch (firebaseErr) {
+            console.error('[Auth] SSO Firebase Token Verification failed:', firebaseErr);
+            return res.status(401).json({ error: 'Invalid or expired SSO identity token' });
+        }
+        const email = decodedToken.email;
+        if (!email) {
+            return res.status(401).json({ error: 'No email address embedded in SSO token.' });
+        }
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await client_1.default.user.findUnique({
+            where: { email: normalizedEmail },
+            select: { id: true, email: true, fullName: true, role: true, status: true,
+                avatarUrl: true, organizationId: true, jobTitle: true,
+                departmentId: true }
+        });
+        if (!user) {
+            await safeLogSecurityEvent({ email: normalizedEmail, success: false, organizationId: 'default-tenant', reason: 'SSO_USER_NOT_FOUND', req });
+            return res.status(401).json({ error: `The SSO email (${normalizedEmail}) is not registered in our HR records.` });
+        }
+        if (user.status === 'TERMINATED') {
+            await safeLogSecurityEvent({ email: normalizedEmail, success: false, organizationId: user.organizationId || 'default-tenant', reason: 'SSO_ACCOUNT_TERMINATED', req });
+            return res.status(403).json({ error: 'This account has been deactivated. Contact HR.' });
+        }
+        const orgId = user.organizationId || 'default-tenant';
+        const token = signAccessToken({
+            id: user.id,
+            role: user.role,
+            name: user.fullName,
+            status: user.status || 'ACTIVE',
+            organizationId: orgId
+        });
+        // In SSO, we also issue our Native Refresh token so they don't have to keep doing the OAuth popup.
+        const refreshToken = await issueRefreshToken(user.id, orgId, req);
+        await safeLogSecurityEvent({ email: normalizedEmail, success: true, organizationId: orgId, reason: `LOGIN_OK_${provider?.toUpperCase() || 'SSO'}`, req });
+        return res.status(200).json({
+            token,
+            refreshToken,
+            user: {
+                id: user.id,
+                name: user.fullName,
+                email: user.email,
+                role: user.role,
+                jobTitle: user.jobTitle,
+                rank: getRoleRank(user.role),
+                organizationId: orgId,
+                avatar: user.avatarUrl,
+                departmentId: user.departmentId,
+            },
+            tokenMeta: {
+                accessExpiresIn: ACCESS_TOKEN_TTL,
+                refreshExpiresInHours: REFRESH_TOKEN_WINDOW_HOURS,
+            },
+        });
+    }
+    catch (error) {
+        console.error('[Auth] SSO Login error:', error);
+        return res.status(500).json({ error: 'Internal Server Error during SSO authentication' });
+    }
+};
+exports.ssoLogin = ssoLogin;
 // ─── REFRESH ACCESS TOKEN ────────────────────────────────────────────────
 const refreshAccessToken = async (req, res) => {
     try {
@@ -465,12 +570,9 @@ exports.impersonateTenant = impersonateTenant;
 const sandboxLogin = async (req, res) => {
     try {
         // 1. Establish Sandbox Context
-        // We use a fixed ID for the shared corporate simulation
         const SANDBOX_ORG_ID = 'sandbox-org-001';
-        // Check if sandbox exists, if not, fallback to default or error
         let organization = await client_1.default.organization.findUnique({ where: { id: SANDBOX_ORG_ID } });
         if (!organization) {
-            // Create a minimal sandbox if it doesn't exist (First run)
             organization = await client_1.default.organization.create({
                 data: {
                     id: SANDBOX_ORG_ID,
@@ -481,32 +583,47 @@ const sandboxLogin = async (req, res) => {
                     themePreset: 'nexus-dark',
                     isAiEnabled: true,
                     billingStatus: 'ENTERPRISE',
+                    subscriptionPlan: 'ENTERPRISE',
                     primaryColor: '#00D2FF',
                     secondaryColor: '#004FF9'
                 }
             });
+            const { DemoSeederService } = await Promise.resolve().then(() => __importStar(require('../services/demo-seeder.service')));
+            await DemoSeederService.seedTenantData(SANDBOX_ORG_ID);
         }
-        // 2. Issue Token
-        // We simulate an 'MD' (Managing Director) session so they can see all HR features
+        // 2. Resolve a Real User from the Sandbox for the token
+        // We fetch the MD user seeded by DemoSeederService
+        const sandboxMD = await client_1.default.user.findFirst({
+            where: { organizationId: SANDBOX_ORG_ID, role: 'MD' }
+        });
+        if (!sandboxMD) {
+            // Fail-safe: if seeder somehow missed it, re-seed
+            const { DemoSeederService } = await Promise.resolve().then(() => __importStar(require('../services/demo-seeder.service')));
+            await DemoSeederService.seedTenantData(SANDBOX_ORG_ID);
+        }
+        const targetUser = sandboxMD || { id: 'fallback-md', fullName: 'Sandbox Director', role: 'MD', email: 'md@demo-sand.com' };
+        // 3. Issue Token using the REAL database ID
         const token = signAccessToken({
-            id: `sandbox-guest-${crypto_1.default.randomBytes(4).toString('hex')}`,
+            id: targetUser.id,
             role: 'MD',
-            name: 'Sandbox Operator',
+            name: targetUser.fullName || 'Sandbox Operator',
             status: 'ACTIVE',
             organizationId: SANDBOX_ORG_ID
         });
-        const refreshToken = await issueRefreshToken('sandbox-guest-root', SANDBOX_ORG_ID, req);
+        const refreshToken = await issueRefreshToken(targetUser.id, SANDBOX_ORG_ID, req);
         return res.status(200).json({
             token,
             refreshToken,
+            isSandbox: true,
             user: {
-                id: 'sandbox-guest-root',
-                name: 'Sandbox Operator',
-                email: 'demo@stormglide.io',
+                id: targetUser.id,
+                name: targetUser.fullName,
+                email: targetUser.email,
                 role: 'MD',
                 jobTitle: 'Simulation Lead',
                 rank: getRoleRank('MD'),
                 organizationId: SANDBOX_ORG_ID,
+                isSandbox: true,
                 avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sandbox',
             },
             tokenMeta: {

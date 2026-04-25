@@ -52,4 +52,6 @@ router.post('/task/complete', auth_middleware_1.authenticate, (0, auth_middlewar
 router.patch('/:offboardingId/interview', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(roles_1.RoleRank.HR_OFFICER), offboardingController.updateExitInterview);
 // Assets
 router.post('/assets/return', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(roles_1.RoleRank.HR_OFFICER), offboardingController.trackAssetReturn);
+// Administrative Deletion (MD Only)
+router.delete('/:id', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(85), offboardingController.deleteOffboarding);
 exports.default = router;

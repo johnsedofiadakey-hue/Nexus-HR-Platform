@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const google_drive_service_1 = require("./services/google-drive.service");
+const workspace_service_1 = require("./services/workspace.service");
 require("dotenv/config");
 async function verifyFolder() {
     const FOLDER_ID = '11RikvV1L_KlX4xOwHauMICx0dQUduQBQ';
     console.log(`--- Testing Connection to Folder: ${FOLDER_ID} ---`);
     try {
-        const drive = await google_drive_service_1.GoogleDriveService.getDriveClient();
+        const drive = await workspace_service_1.GoogleWorkspaceService.getDriveClient();
         console.log('1. Attempting to list files in folder...');
         const response = await drive.files.list({
             q: `'${FOLDER_ID}' in parents and trashed = false`,

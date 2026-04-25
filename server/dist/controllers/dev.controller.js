@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.seedDemoTenant = exports.listAllUsers = exports.provisionClient = exports.createOrganization = exports.listOrganizations = exports.getSecurityTelemetry = exports.grantBankTransferAccess = exports.triggerBackup = exports.getTenantAuditTrail = exports.updateTenantBilling = exports.updateTenantNetwork = exports.getTenantDetails = exports.getSystemLogs = exports.extendTrial = exports.toggleTenantFeature = exports.bulkTenantAction = exports.getApiUsageStats = exports.checkIntegrity = exports.getSystemStats = void 0;
+exports.seedDemoTenant = exports.listAllUsers = exports.resetMDPassword = exports.deleteOrganization = exports.provisionClient = exports.createOrganization = exports.listOrganizations = exports.getSecurityTelemetry = exports.grantBankTransferAccess = exports.triggerBackup = exports.getTenantAuditTrail = exports.updateTenantBilling = exports.updateTenantNetwork = exports.getTenantDetails = exports.getSystemLogs = exports.extendTrial = exports.toggleTenantFeature = exports.bulkTenantAction = exports.getApiUsageStats = exports.checkIntegrity = exports.getSystemStats = void 0;
 const client_1 = __importDefault(require("../prisma/client"));
 const os_1 = __importDefault(require("os"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -619,6 +619,64 @@ const provisionClient = async (req, res) => {
     }
 };
 exports.provisionClient = provisionClient;
+const deleteOrganization = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const org = await client_1.default.organization.findUnique({ where: { id } });
+        if (!org)
+            return res.status(404).json({ error: 'Organization not found' });
+        // Atomic wipe of the entire organization tree
+        await client_1.default.organization.delete({ where: { id } });
+        const user = req.user;
+        await (0, system_logger_1.logSystemAction)({
+            action: 'HARD_DELETE_ORGANIZATION',
+            details: `Permanently deleted organization: ${org.name} (${id})`,
+            operatorId: user.id,
+            operatorEmail: user.email,
+            ipAddress: req.ip,
+            userAgent: req.get('user-agent')
+        });
+        res.json({ success: true, message: `Organization ${org.name} has been permanently deleted.` });
+    }
+    catch (error) {
+        console.error('[deleteOrganization] Error:', error.message);
+        res.status(500).json({ error: 'Failed to delete. This organization might have sensitive locks or active payroll runs.' });
+    }
+};
+exports.deleteOrganization = deleteOrganization;
+const resetMDPassword = async (req, res) => {
+    try {
+        const { id } = req.params; // Organization ID
+        const { password } = req.body;
+        if (!password)
+            return res.status(400).json({ error: 'New password is required' });
+        const mdUser = await client_1.default.user.findFirst({
+            where: { organizationId: id, role: 'MD' }
+        });
+        if (!mdUser)
+            return res.status(404).json({ error: 'Managing Director not found for this organization' });
+        const passwordHash = await bcryptjs_1.default.hash(password, 12);
+        await client_1.default.user.update({
+            where: { id: mdUser.id },
+            data: { passwordHash }
+        });
+        const operator = req.user;
+        await (0, system_logger_1.logSystemAction)({
+            action: 'RESET_MD_PASSWORD',
+            details: `Manually reset MD password for organization ID: ${id} (${mdUser.email})`,
+            operatorId: operator.id,
+            operatorEmail: operator.email,
+            ipAddress: req.ip,
+            userAgent: req.get('user-agent')
+        });
+        res.json({ success: true, message: `Password for MD (${mdUser.email}) has been successfully updated.` });
+    }
+    catch (error) {
+        console.error('[resetMDPassword] Error:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.resetMDPassword = resetMDPassword;
 const listAllUsers = async (req, res) => {
     try {
         const { organizationId, page = 1, limit = 50 } = req.query;

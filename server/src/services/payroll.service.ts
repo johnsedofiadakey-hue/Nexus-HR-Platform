@@ -2,128 +2,56 @@ import prisma from '../prisma/client';
 import { sendPayslipEmail } from './email.service';
 import { notify } from './websocket.service';
 
-// ─── TAX ENGINES ──────────────────────────────────────────────────────────
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const DEFAULT_CURRENCY = 'GHS';
+const SSNIT_EMPLOYEE_RATE = 0.055;   // 5.5%
+const SSNIT_EMPLOYER_RATE = 0.13;    // 13%
 
-// Regional Tax Engine: West Africa (Annual Brackets)
-const calculateStandardTax = (grossMonthly: number): number => {
-  const annual = grossMonthly * 12;
-  const brackets = [
-    { limit: 4380, rate: 0.00 },
-    { limit: 1320, rate: 0.05 },
-    { limit: 1560, rate: 0.10 },
-    { limit: 38000, rate: 0.175 },
-    { limit: 192000, rate: 0.25 },
-    { limit: Infinity, rate: 0.30 },
-  ];
-  let remaining = annual, tax = 0;
-  for (const b of brackets) {
-    const taxable = Math.min(remaining, b.limit);
-    tax += taxable * b.rate;
-    remaining -= taxable;
-    if (remaining <= 0) break;
-  }
-  return Math.round((tax / 12) * 100) / 100;
-};
-
-/**
- * 2024 GHANAIAN PAYE TAX ENGINE (Monthly)
- * Based on GRA 2024 Income Tax Bands
- */
-const calculateGhanaPAYE = (taxableIncome: number): number => {
+// ── GHANA PAYE (2024 GRA Monthly Bands) ────────────────────────────────────────
+export const calculateGhanaPAYE = (taxableIncome: number): number => {
+  if (taxableIncome <= 0) return 0;
   const bands = [
-    { limit: 490, rate: 0.00 },
-    { limit: 110, rate: 0.05 },
-    { limit: 130, rate: 0.10 },
-    { limit: 3166.67, rate: 0.175 },
-    { limit: 16000, rate: 0.25 },
-    { limit: 30520, rate: 0.30 },
-    { limit: Infinity, rate: 0.35 },
+    { limit: 490,      rate: 0.00  },
+    { limit: 110,      rate: 0.05  },
+    { limit: 130,      rate: 0.10  },
+    { limit: 3166.67,  rate: 0.175 },
+    { limit: 16000,    rate: 0.25  },
+    { limit: 30520,    rate: 0.30  },
+    { limit: Infinity, rate: 0.35  },
   ];
-
-  let tax = 0;
-  let remaining = taxableIncome;
-
+  let tax = 0; let remaining = taxableIncome;
   for (const band of bands) {
-    const amountInBand = Math.min(remaining, band.limit);
-    tax += amountInBand * band.rate;
-    remaining -= amountInBand;
     if (remaining <= 0) break;
+    const amt = Math.min(remaining, band.limit);
+    tax += amt * band.rate; remaining -= amt;
   }
-
   return Math.round(tax * 100) / 100;
 };
 
-/**
- * GHANA SSNIT CALCULATIONS
- * Employee: 5.5% of Basic Salary
- * Employer: 13% of Basic Salary
- * Total: 18.5%
- */
-const calculateGhanaSSNIT = (basicSalary: number) => {
-  const employeeSSNIT = Math.round(basicSalary * 0.055 * 100) / 100;
-  const employerSSNIT = Math.round(basicSalary * 0.13 * 100) / 100;
+// ── GHANA SSNIT ─────────────────────────────────────────────────────────────────
+export const calculateGhanaSSNIT = (grossSalary: number) => {
+  const employeeSSNIT = Math.round(grossSalary * 0.055 * 100) / 100;
+  const employerSSNIT = Math.round(grossSalary * 0.13  * 100) / 100;
   return { employeeSSNIT, employerSSNIT };
 };
 
-// Guinea (GNF) — flat 5% for simplicity (customize as needed)
-const calculateGuineaTax = (gross: number) => Math.round(gross * 0.05 * 100) / 100;
-
-// Generic 20% for USD/EUR/GBP payrolls (international standard placeholder)
-const calculateGenericTax = (gross: number) => Math.round(gross * 0.20 * 100) / 100;
-
-// Social Security - Standard Percentage
-const calculateSocialSecurity = (gross: number) => Math.round(gross * 0.055 * 100) / 100;
-
-// CNSS Guinea — approx 2.5% employee share
-const calculateCNSS = (gross: number) => Math.round(gross * 0.025 * 100) / 100;
-
-type TaxResult = { tax: number; socialSecurity: number };
-
-const computeTaxes = async (organizationId: string, baseSalary: number, currency: string, grossPay: number): Promise<TaxResult> => {
-  // 1. Try to evaluate Custom DB-Driven Tax Rules first
-  const customRules = await prisma.taxRule.findMany({
-    where: { organizationId, isActive: true },
-    include: { brackets: { orderBy: { minAmount: 'asc' } } }
-  }) as any[];
-
-  if (customRules.length > 0) {
-    let totalTax = 0;
-    
-    for (const rule of customRules) {
-        let remaining = grossPay;
-        for (const band of rule.brackets) {
-            const min = Number(band.minAmount);
-            const max = band.maxAmount ? Number(band.maxAmount) : Infinity;
-            const rate = Number(band.rate);
-            
-            if (remaining <= 0) break;
-            
-            const limit = max - min; // band width
-            const taxable = Math.min(remaining, limit);
-            totalTax += taxable * rate;
-            remaining -= taxable;
-        }
-    }
-    // Simplistic social security if custom tax rules exist.
-    return { tax: Math.round(totalTax * 100) / 100, socialSecurity: calculateSocialSecurity(grossPay) };
-  }
-
-  // 2. Fallback to Hardcoded Regional Multi-Country Engines
-  switch (currency) {
-    case 'GHS': {
-      const { employeeSSNIT } = calculateGhanaSSNIT(baseSalary);
-      // Taxable Income in Ghana = Gross Pay - Employee SSNIT
-      const taxableIncome = grossPay - employeeSSNIT;
-      const tax = calculateGhanaPAYE(taxableIncome);
-      return { tax, socialSecurity: employeeSSNIT };
-    }
-    case 'GNF':
-      return { tax: calculateGuineaTax(grossPay), socialSecurity: calculateCNSS(grossPay) };
-    case 'USD': case 'EUR': case 'GBP':
-      return { tax: calculateGenericTax(grossPay), socialSecurity: 0 };
-    default:
-      return { tax: calculateStandardTax(grossPay), socialSecurity: calculateSocialSecurity(grossPay) };
-  }
+// ── MASTER CALCULATION (call this per employee per payroll run) ────────────────
+export const calculateGhanaPayroll = (params: {
+  grossSalary: number; bonus?: number; allowances?: number;
+  overtime?: number; loanDeductions?: number; otherDeductions?: number;
+}) => {
+  const { grossSalary, bonus=0, allowances=0, overtime=0,
+          loanDeductions=0, otherDeductions=0 } = params;
+  const totalGross = grossSalary + bonus + allowances + overtime;
+  const { employeeSSNIT, employerSSNIT } = calculateGhanaSSNIT(totalGross);
+  const taxableIncome = Math.max(0, totalGross - employeeSSNIT);
+  const payeTax = calculateGhanaPAYE(taxableIncome);
+  const totalDeductions = employeeSSNIT + payeTax + loanDeductions + otherDeductions;
+  const netPay = Math.max(0, Math.round((totalGross - totalDeductions) * 100) / 100);
+  return { grossPay: Math.round(totalGross*100)/100, employeeSSNIT,
+           employerSSNIT, taxableIncome: Math.round(taxableIncome*100)/100,
+           payeTax, loanDeductions, otherDeductions, netPay,
+           currency: DEFAULT_CURRENCY };
 };
 
 // ─── PAYROLL ADJUSTMENTS ─────────────────────────────────────────────────
@@ -195,7 +123,7 @@ export const createPayrollRun = async (
 
   for (const emp of employees) {
     const base = Number(emp.salary) || 0;
-    const currency = (emp.currency as string) || 'GNF';
+    const currency = (emp.currency as string) || 'GHS';
     const adj = adjMap.get(emp.id);
 
     const overtime = adj?.overtime ?? 0;
@@ -207,22 +135,26 @@ export const createPayrollRun = async (
     const allowances = (adj?.allowances ?? 0) + autoExpense;
     const otherDeductions = (adj?.otherDeductions ?? 0) + autoInstallment;
 
-    const grossPay = base + overtime + bonus + allowances;
-    const { tax, socialSecurity } = await computeTaxes(organizationId, base, currency, grossPay);
-    const socialSecurityValue = socialSecurity;
-    const netPay = Math.max(0, grossPay - tax - socialSecurityValue - otherDeductions);
+    const { employeeSSNIT, payeTax, netPay, grossPay: totalGrossPay } = calculateGhanaPayroll({
+      grossSalary: base,
+      bonus:          bonus,
+      allowances:     allowances,
+      overtime:       overtime,
+      loanDeductions: autoInstallment,
+      otherDeductions:adj?.otherDeductions ?? 0,
+    });
 
     const item = await prisma.payrollItem.create({
       data: {
         organizationId,
         runId: run.id, employeeId: emp.id,
-        baseSalary: base, currency, overtime, bonus, allowances, otherDeductions,
-        tax, ssnit: socialSecurityValue, grossPay, netPay,
+        baseSalary: base, currency: DEFAULT_CURRENCY, overtime, bonus, allowances, otherDeductions,
+        tax: payeTax, ssnit: employeeSSNIT, grossPay: totalGrossPay, netPay,
         notes: adj?.notes
       }
     });
     items.push({ ...item, employee: emp });
-    totalGross += grossPay;
+    totalGross += totalGrossPay;
     totalNet += netPay;
   }
 
@@ -385,13 +317,18 @@ export const updatePayrollItem = async (
   const bonus = data.bonus ?? Number(item.bonus);
   const allowances = data.allowances ?? Number(item.allowances);
   const otherDeductions = data.otherDeductions ?? Number(item.otherDeductions);
-  const grossPay = base + overtime + bonus + allowances;
-  const { tax, socialSecurity: socialSecurityValue } = await computeTaxes(organizationId, base, item.currency, grossPay);
-  const netPay = Math.max(0, grossPay - tax - socialSecurityValue - otherDeductions);
+  const { employeeSSNIT, payeTax, netPay, grossPay: totalGrossPay } = calculateGhanaPayroll({
+    grossSalary: base,
+    bonus,
+    allowances,
+    overtime,
+    loanDeductions: otherDeductions, // Assuming otherDeductions here includes loan installments as in createPayrollRun
+    otherDeductions: 0, 
+  });
 
   await prisma.payrollItem.updateMany({
     where: { id: itemId, organizationId },
-    data: { overtime, bonus, allowances, otherDeductions, grossPay, tax, ssnit: socialSecurityValue, netPay, notes: data.notes ?? item.notes }
+    data: { overtime, bonus, allowances, otherDeductions, grossPay: totalGrossPay, tax: payeTax, ssnit: employeeSSNIT, netPay, notes: data.notes ?? item.notes }
   });
 
   const updated = await prisma.payrollItem.findFirst({ where: { id: itemId, organizationId } });

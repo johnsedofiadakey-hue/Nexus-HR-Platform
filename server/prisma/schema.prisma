@@ -103,7 +103,7 @@ model TargetMetric {
   targetValue       Decimal?
   currentValue      Decimal        @default(0)
   unit              String?
-  currency          String?        @default("GNF")
+  currency          String?        @default("GHS")
   weight            Decimal        @default(1.0)
   qualitativePrompt String?
   target            Target         @relation(fields: [targetId], references: [id], onDelete: Cascade)
@@ -263,7 +263,7 @@ model User {
   createdAt               DateTime                @default(now())
   updatedAt               DateTime                @updatedAt
   salary                  Decimal?
-  currency                String                  @default("GNF")
+  currency                String                  @default("GHS")
   bankName                String?
   bankAccountNumber       String?
   bankBranch              String?
@@ -376,7 +376,7 @@ model CompensationHistory {
   type           String
   previousSalary Decimal
   newSalary      Decimal
-  currency       String   @default("GNF")
+  currency       String   @default("GHS")
   reason         String?
   effectiveDate  DateTime
   authorizedById String?
@@ -645,7 +645,7 @@ model Organization {
   address                String?
   city                   String?
   country                String?
-  currency               String               @default("GNF")
+  currency               String               @default("GHS")
   subscriptionPlan       String               @default("FREE")
   subscriptionAmount     Decimal              @default(0)
   billingStatus          String               @default("FREE")
@@ -725,7 +725,7 @@ model SystemSettings {
   paystackPayLink         String?
   securityLockdownMessage String?
   annualPrice             Decimal?
-  currency                String        @default("GNF")
+  currency                String        @default("GHS")
   monthlyPrice            Decimal?
   googleDriveFolderId     String?
   domainExpiryDate        DateTime?
@@ -773,7 +773,7 @@ model PayrollItem {
   runId           String
   employeeId      String
   baseSalary      Decimal
-  currency        String     @default("GNF")
+  currency        String     @default("GHS")
   overtime        Decimal    @default(0)
   bonus           Decimal    @default(0)
   allowances      Decimal    @default(0)
@@ -919,7 +919,7 @@ model Subscription {
   cancelledAt        DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
-  currency           String    @default("GNF")
+  currency           String    @default("GHS")
   price              Decimal?
   client             User      @relation("ClientSubscription", fields: [clientId], references: [id], onDelete: Cascade)
 
@@ -972,7 +972,7 @@ model ExpenseClaim {
   title           String
   description     String?
   amount          Decimal
-  currency        String    @default("GNF")
+  currency        String    @default("GHS")
   category        String
   receiptUrl      String?
   status          String    @default("PENDING")
@@ -1264,7 +1264,7 @@ model OfferLetter {
   candidateId    String    @unique
   fileUrl        String?
   salaryOffered  Decimal?
-  currency       String?   @default("GNF")
+  currency       String?   @default("GHS")
   status         String    @default("DRAFT")
   sentAt         DateTime?
   acceptedAt     DateTime?

@@ -40,4 +40,5 @@ const router = (0, express_1.Router)();
 // Only MD can view audit logs
 router.get('/', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(90), auditController.getLogs);
 router.get('/logs', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(90), auditController.getLogs); // client calls /logs
+router.get('/export', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(90), auditController.exportLogsCSV); // Compliance Export
 exports.default = router;

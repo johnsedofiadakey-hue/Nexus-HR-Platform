@@ -20,7 +20,7 @@ export const createExpenseClaim = async (req: Request, res: Response) => {
         title: title || 'Expense Claim',
         category: category || 'OTHER',
         amount,
-        currency: currency || 'GNF',
+        currency: currency || 'GHS',
         description,
         receiptUrl,
         status: 'PENDING'

@@ -1,39 +1,53 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPayrollSummaryByYear = exports.getMyPayslips = exports.getPayrollRunDetail = exports.getPayrollRuns = exports.updatePayrollItem = exports.deletePayrollRun = exports.voidPayrollRun = exports.approvePayrollRun = exports.createPayrollRun = void 0;
+exports.getPayrollSummaryByYear = exports.getMyPayslips = exports.getPayrollRunDetail = exports.getPayrollRuns = exports.updatePayrollItem = exports.deletePayrollRun = exports.voidPayrollRun = exports.approvePayrollRun = exports.createPayrollRun = exports.calculateGhanaPayroll = exports.calculateGhanaSSNIT = exports.calculateGhanaPAYE = void 0;
 const client_1 = __importDefault(require("../prisma/client"));
 const email_service_1 = require("./email.service");
 const websocket_service_1 = require("./websocket.service");
-// ─── TAX ENGINES ──────────────────────────────────────────────────────────
-// Regional Tax Engine: West Africa (Annual Brackets)
-const calculateStandardTax = (grossMonthly) => {
-    const annual = grossMonthly * 12;
-    const brackets = [
-        { limit: 4380, rate: 0.00 },
-        { limit: 1320, rate: 0.05 },
-        { limit: 1560, rate: 0.10 },
-        { limit: 38000, rate: 0.175 },
-        { limit: 192000, rate: 0.25 },
-        { limit: Infinity, rate: 0.30 },
-    ];
-    let remaining = annual, tax = 0;
-    for (const b of brackets) {
-        const taxable = Math.min(remaining, b.limit);
-        tax += taxable * b.rate;
-        remaining -= taxable;
-        if (remaining <= 0)
-            break;
-    }
-    return Math.round((tax / 12) * 100) / 100;
-};
-/**
- * 2024 GHANAIAN PAYE TAX ENGINE (Monthly)
- * Based on GRA 2024 Income Tax Bands
- */
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const DEFAULT_CURRENCY = 'GHS';
+const SSNIT_EMPLOYEE_RATE = 0.055; // 5.5%
+const SSNIT_EMPLOYER_RATE = 0.13; // 13%
+// ── GHANA PAYE (2024 GRA Monthly Bands) ────────────────────────────────────────
 const calculateGhanaPAYE = (taxableIncome) => {
+    if (taxableIncome <= 0)
+        return 0;
     const bands = [
         { limit: 490, rate: 0.00 },
         { limit: 110, rate: 0.05 },
@@ -46,52 +60,37 @@ const calculateGhanaPAYE = (taxableIncome) => {
     let tax = 0;
     let remaining = taxableIncome;
     for (const band of bands) {
-        const amountInBand = Math.min(remaining, band.limit);
-        tax += amountInBand * band.rate;
-        remaining -= amountInBand;
         if (remaining <= 0)
             break;
+        const amt = Math.min(remaining, band.limit);
+        tax += amt * band.rate;
+        remaining -= amt;
     }
     return Math.round(tax * 100) / 100;
 };
-/**
- * GHANA SSNIT CALCULATIONS
- * Employee: 5.5% of Basic Salary
- * Employer: 13% of Basic Salary
- * Total: 18.5%
- */
-const calculateGhanaSSNIT = (basicSalary) => {
-    const employeeSSNIT = Math.round(basicSalary * 0.055 * 100) / 100;
-    const employerSSNIT = Math.round(basicSalary * 0.13 * 100) / 100;
+exports.calculateGhanaPAYE = calculateGhanaPAYE;
+// ── GHANA SSNIT ─────────────────────────────────────────────────────────────────
+const calculateGhanaSSNIT = (grossSalary) => {
+    const employeeSSNIT = Math.round(grossSalary * 0.055 * 100) / 100;
+    const employerSSNIT = Math.round(grossSalary * 0.13 * 100) / 100;
     return { employeeSSNIT, employerSSNIT };
 };
-// Guinea (GNF) — flat 5% for simplicity (customize as needed)
-const calculateGuineaTax = (gross) => Math.round(gross * 0.05 * 100) / 100;
-// Generic 20% for USD/EUR/GBP payrolls (international standard placeholder)
-const calculateGenericTax = (gross) => Math.round(gross * 0.20 * 100) / 100;
-// Social Security - Standard Percentage
-const calculateSocialSecurity = (gross) => Math.round(gross * 0.055 * 100) / 100;
-// CNSS Guinea — approx 2.5% employee share
-const calculateCNSS = (gross) => Math.round(gross * 0.025 * 100) / 100;
-const computeTaxes = (baseSalary, currency, grossPay) => {
-    switch (currency) {
-        case 'GHS': {
-            const { employeeSSNIT } = calculateGhanaSSNIT(baseSalary);
-            // Taxable Income in Ghana = Gross Pay - Employee SSNIT
-            const taxableIncome = grossPay - employeeSSNIT;
-            const tax = calculateGhanaPAYE(taxableIncome);
-            return { tax, socialSecurity: employeeSSNIT };
-        }
-        case 'GNF':
-            return { tax: calculateGuineaTax(grossPay), socialSecurity: calculateCNSS(grossPay) };
-        case 'USD':
-        case 'EUR':
-        case 'GBP':
-            return { tax: calculateGenericTax(grossPay), socialSecurity: 0 };
-        default:
-            return { tax: calculateStandardTax(grossPay), socialSecurity: calculateSocialSecurity(grossPay) };
-    }
+exports.calculateGhanaSSNIT = calculateGhanaSSNIT;
+// ── MASTER CALCULATION (call this per employee per payroll run) ────────────────
+const calculateGhanaPayroll = (params) => {
+    const { grossSalary, bonus = 0, allowances = 0, overtime = 0, loanDeductions = 0, otherDeductions = 0 } = params;
+    const totalGross = grossSalary + bonus + allowances + overtime;
+    const { employeeSSNIT, employerSSNIT } = (0, exports.calculateGhanaSSNIT)(totalGross);
+    const taxableIncome = Math.max(0, totalGross - employeeSSNIT);
+    const payeTax = (0, exports.calculateGhanaPAYE)(taxableIncome);
+    const totalDeductions = employeeSSNIT + payeTax + loanDeductions + otherDeductions;
+    const netPay = Math.max(0, Math.round((totalGross - totalDeductions) * 100) / 100);
+    return { grossPay: Math.round(totalGross * 100) / 100, employeeSSNIT,
+        employerSSNIT, taxableIncome: Math.round(taxableIncome * 100) / 100,
+        payeTax, loanDeductions, otherDeductions, netPay,
+        currency: DEFAULT_CURRENCY };
 };
+exports.calculateGhanaPayroll = calculateGhanaPayroll;
 const createPayrollRun = async (organizationId, month, year, employeeIds, adjustments) => {
     const period = `${year}-${String(month).padStart(2, '0')}`;
     const existing = await client_1.default.payrollRun.findFirst({ where: { period, organizationId } });
@@ -150,20 +149,25 @@ const createPayrollRun = async (organizationId, month, year, employeeIds, adjust
         const autoInstallment = installmentMap.get(emp.id) || 0;
         const allowances = (adj?.allowances ?? 0) + autoExpense;
         const otherDeductions = (adj?.otherDeductions ?? 0) + autoInstallment;
-        const grossPay = base + overtime + bonus + allowances;
-        const { tax, socialSecurity: socialSecurityValue } = computeTaxes(base, currency, grossPay);
-        const netPay = Math.max(0, grossPay - tax - socialSecurityValue - otherDeductions);
+        const { employeeSSNIT, payeTax, netPay, grossPay: totalGrossPay } = (0, exports.calculateGhanaPayroll)({
+            grossSalary: base,
+            bonus: bonus,
+            allowances: allowances,
+            overtime: overtime,
+            loanDeductions: autoInstallment,
+            otherDeductions: adj?.otherDeductions ?? 0,
+        });
         const item = await client_1.default.payrollItem.create({
             data: {
                 organizationId,
                 runId: run.id, employeeId: emp.id,
-                baseSalary: base, currency, overtime, bonus, allowances, otherDeductions,
-                tax, ssnit: socialSecurityValue, grossPay, netPay,
+                baseSalary: base, currency: DEFAULT_CURRENCY, overtime, bonus, allowances, otherDeductions,
+                tax: payeTax, ssnit: employeeSSNIT, grossPay: totalGrossPay, netPay,
                 notes: adj?.notes
             }
         });
         items.push({ ...item, employee: emp });
-        totalGross += grossPay;
+        totalGross += totalGrossPay;
         totalNet += netPay;
     }
     await client_1.default.payrollRun.updateMany({
@@ -206,6 +210,14 @@ const approvePayrollRun = async (organizationId, runId, approverId) => {
         where: { paidInRunId: runId, organizationId },
         data: { status: 'PAID' }
     });
+    // Trigger Enterprise Webhook
+    try {
+        const { triggerWebhook } = await Promise.resolve().then(() => __importStar(require('./webhook.service')));
+        await triggerWebhook(organizationId, 'PAYROLL_RUN_COMPLETED', run);
+    }
+    catch (err) {
+        console.error('Failed to trigger webhook:', err);
+    }
     await client_1.default.loanInstallment.updateMany({
         where: { deductedRunId: runId, organizationId },
         data: { status: 'PAID', paidAt: new Date() }
@@ -293,12 +305,17 @@ const updatePayrollItem = async (organizationId, itemId, data) => {
     const bonus = data.bonus ?? Number(item.bonus);
     const allowances = data.allowances ?? Number(item.allowances);
     const otherDeductions = data.otherDeductions ?? Number(item.otherDeductions);
-    const grossPay = base + overtime + bonus + allowances;
-    const { tax, socialSecurity: socialSecurityValue } = computeTaxes(base, item.currency, grossPay);
-    const netPay = Math.max(0, grossPay - tax - socialSecurityValue - otherDeductions);
+    const { employeeSSNIT, payeTax, netPay, grossPay: totalGrossPay } = (0, exports.calculateGhanaPayroll)({
+        grossSalary: base,
+        bonus,
+        allowances,
+        overtime,
+        loanDeductions: otherDeductions, // Assuming otherDeductions here includes loan installments as in createPayrollRun
+        otherDeductions: 0,
+    });
     await client_1.default.payrollItem.updateMany({
         where: { id: itemId, organizationId },
-        data: { overtime, bonus, allowances, otherDeductions, grossPay, tax, ssnit: socialSecurityValue, netPay, notes: data.notes ?? item.notes }
+        data: { overtime, bonus, allowances, otherDeductions, grossPay: totalGrossPay, tax: payeTax, ssnit: employeeSSNIT, netPay, notes: data.notes ?? item.notes }
     });
     const updated = await client_1.default.payrollItem.findFirst({ where: { id: itemId, organizationId } });
     // Recalculate run totals

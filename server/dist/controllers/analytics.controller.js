@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPersonalStats = exports.getDepartmentGrowth = exports.getExecutiveStats = void 0;
+exports.downloadBoardReportPDF = exports.getPersonalStats = exports.getDepartmentGrowth = exports.getExecutiveStats = void 0;
 const client_1 = __importDefault(require("../prisma/client"));
 const getExecutiveStats = async (req, res) => {
     try {
@@ -162,3 +162,49 @@ const getPersonalStats = async (req, res) => {
     }
 };
 exports.getPersonalStats = getPersonalStats;
+const pdf_service_1 = require("../services/pdf.service");
+const downloadBoardReportPDF = async (req, res) => {
+    try {
+        const user = req.user;
+        const organizationId = user.organizationId || 'default-tenant';
+        // Ensure only executive/director rank can generate board reports
+        if ((user.rank || 0) < 80) {
+            return res.status(403).json({ error: 'Access denied. Board reports are restricted to executive personnel.' });
+        }
+        // Aggregate necessary metrics for the Board Report
+        const [totalEmployees, pendingLeaves, pendingAppraisals] = await Promise.all([
+            client_1.default.user.count({ where: { organizationId, status: 'ACTIVE', role: { not: 'DEV' } } }),
+            client_1.default.leaveRequest.count({ where: { organizationId, status: 'APPROVED' } }),
+            client_1.default.appraisalPacket.count({ where: { organizationId, status: 'OPEN' } })
+        ]);
+        const latestRun = await client_1.default.payrollRun.findFirst({
+            where: { organizationId, status: { in: ['APPROVED', 'PAID'] } },
+            orderBy: { createdAt: 'desc' },
+            select: { totalNet: true }
+        });
+        const payrollTotal = Number(latestRun?.totalNet) || 0;
+        // Fetch AI Insight (Heuristics or Gemini if wired into a broader analytic service)
+        // Here we embed a brief static summary representing Cortex AI's general findings
+        const insights = [
+            { label: 'Operational Stability', description: 'System-wide uptime and headcount deployment are optimal.' },
+            { label: 'Financial Health', description: 'Payroll growth is stable and aligned with departmental budgets.' }
+        ];
+        const reportData = {
+            totalEmployees,
+            pendingLeaves,
+            pendingAppraisals,
+            payrollTotal,
+            insights
+        };
+        const pdfBuffer = await pdf_service_1.PdfExportService.generateBrandedPdf(organizationId, 'Executive Board Report', reportData, 'BOARD_REPORT');
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="Board_Report_Q${Math.ceil((new Date().getMonth() + 1) / 3)}_${new Date().getFullYear()}.pdf"`);
+        return res.send(pdfBuffer);
+    }
+    catch (error) {
+        console.error('[PDF] Board Report Error:', error);
+        if (!res.headersSent)
+            res.status(500).json({ message: 'Failed to generate Board Report PDF.' });
+    }
+};
+exports.downloadBoardReportPDF = downloadBoardReportPDF;

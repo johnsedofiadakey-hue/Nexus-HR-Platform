@@ -12,4 +12,5 @@ router.get('/me', attendance_controller_1.getMyAttendance);
 router.get('/', (0, auth_middleware_1.requireRole)(70), attendance_controller_1.getAllAttendance);
 // 🛡️ Biometric Sync (Rank 85+ or IT Admin)
 router.post('/sync', (0, auth_middleware_1.requireRole)(85), biometric_controller_1.syncPunches);
+router.post('/kiosk-punch', biometric_controller_1.kioskPunch);
 exports.default = router;

@@ -41,7 +41,7 @@ const STATUS_THEMES: Record<string, string> = {
 const EMPTY_FORM = {
   fullName: '', email: '', password: '', role: 'STAFF', jobTitle: '',
   departmentId: null as number | null, subUnitId: '', supervisorId: '', secondarySupervisorId: '', employmentType: 'Permanent', gender: '', education: '',
-  contactNumber: '', employeeCode: '', joinDate: '', salary: '' as string | number, currency: 'GNF',
+  contactNumber: '', employeeCode: '', joinDate: '', salary: '' as string | number, currency: 'GHS',
   nationalId: '', address: '', dob: '', bankAccountNumber: '', bankName: '', bankBranch: '',
   ssnitNumber: '', nationality: '', countryOfOrigin: '', maritalStatus: '',
   emergencyContactName: '', emergencyContactPhone: '',

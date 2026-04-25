@@ -36,7 +36,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-console.log(`[Startup] ${new Date().toISOString()} - Nexus HR Platform Core Initializing...`);
+const APP_VERSION = require('../package.json').version || '4.0.0';
+console.log(`[Startup] ${new Date().toISOString()} - Nexus HR Platform v${APP_VERSION} Initializing...`);
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const helmet_1 = __importDefault(require("helmet"));
@@ -50,8 +51,10 @@ const leave_balance_service_1 = require("./services/leave-balance.service");
 const reminder_service_1 = require("./services/reminder.service");
 const renewal_service_1 = require("./services/renewal.service");
 const websocket_service_1 = require("./services/websocket.service");
-const target_service_1 = require("./services/target.service");
 const scheduler_service_1 = require("./services/scheduler.service");
+const firebase_admin_1 = require("./services/firebase-admin");
+// Initialize Firebase Admin before routes
+(0, firebase_admin_1.initializeFirebase)();
 const rate_limit_middleware_1 = require("./middleware/rate-limit.middleware");
 const xss_sanitizer_middleware_1 = require("./middleware/xss-sanitizer.middleware");
 // Routes
@@ -98,6 +101,11 @@ const expense_routes_1 = __importDefault(require("./routes/expense.routes"));
 const support_routes_1 = __importDefault(require("./routes/support.routes"));
 const offboarding_routes_1 = __importDefault(require("./routes/offboarding.routes"));
 const hrFeatures_routes_1 = __importDefault(require("./routes/hrFeatures.routes"));
+const public_api_routes_1 = __importDefault(require("./routes/public-api.routes"));
+const integrations_routes_1 = __importDefault(require("./routes/integrations.routes"));
+const bot_routes_1 = __importDefault(require("./routes/bot.routes"));
+const settings_routes_1 = __importDefault(require("./routes/settings.routes"));
+const maintenance_routes_1 = __importDefault(require("./routes/maintenance.routes"));
 // Config already loaded at top level
 const validateConfig = () => {
     const required = ['JWT_SECRET', 'DATABASE_URL'];
@@ -121,12 +129,11 @@ const server = http_1.default.createServer(app);
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     const allowed = [
-        'https://nexus-hr-platform.web.app',
-        'https://nexus-hr-platform.firebaseapp.com',
-        'https://mcbauchemieguinea.com',
-        'https://www.mcbauchemieguinea.com',
+        'https://mcbauchemie-hrm-gh.web.app',
+        'https://mcbauchemie-hrm-gh.firebaseapp.com',
+        // Add custom domain later: 'https://hrm.mc-bauchemie.com.gh',
         'http://localhost:3000',
-        'http://localhost:5173'
+        'http://localhost:5173',
     ];
     if (origin && (allowed.includes(origin) || allowed.some(a => origin.startsWith(a)))) {
         res.setHeader('Access-Control-Allow-Origin', origin);
@@ -143,7 +150,8 @@ app.use((req, res, next) => {
 // ─── SECURITY HEADERS ──────────────────────────────────────────────────────
 app.use((0, helmet_1.default)({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
-    crossOriginOpenerPolicy: false
+    crossOriginOpenerPolicy: false,
+    crossOriginEmbedderPolicy: false
 }));
 app.use(xss_sanitizer_middleware_1.xssSanitizer);
 app.use(rate_limit_middleware_1.generalLimiter);
@@ -189,44 +197,44 @@ node_cron_1.default.schedule('0 9 * * *', async () => {
         await renewal_service_1.RenewalService.checkExpirations();
     }
     catch (e) {
-        console.error('[CRON] Renewal check failed:', e);
+        console.error('[Cron] Renewal check failed:', e);
     }
 });
-// ─── TELEMETRY ─────────────────────────────────────────────────────────────
+node_cron_1.default.schedule('0 2 * * *', async () => {
+    try {
+        const { resetDemoTenant } = await Promise.resolve().then(() => __importStar(require('./scripts/reset-demo-tenant')));
+        await resetDemoTenant();
+    }
+    catch (e) {
+        console.error('[Cron] Demo reset failed:', e);
+    }
+});
+// ─── TELEMETRY & TENANT RESOLUTION ──────────────────────────────────────────
 const telemetry_middleware_1 = require("./middleware/telemetry.middleware");
+const tenant_middleware_1 = require("./middleware/tenant.middleware");
 app.use(telemetry_middleware_1.apiUsageMiddleware);
+app.use(tenant_middleware_1.resolveTenant);
 // ─── DEV ROUTES (bypass maintenance, high rate limit) ────────────────────────
 app.use('/api/dev', rate_limit_middleware_1.devLimiter, dev_routes_1.default);
 // ─── MAINTENANCE GUARD ──────────────────────────────────────────────────────
 const maintenance_middleware_1 = require("./middleware/maintenance.middleware");
-const subscription_middleware_1 = require("./middleware/subscription.middleware");
 app.use(maintenance_middleware_1.maintenanceMiddleware);
-app.use(subscription_middleware_1.subscriptionGuard);
+// MC-Bauchemie Ghana is a licensed deployment. No billing lock.
+app.use((_req, _res, next) => next());
 let isBooted = false;
 // ─── STARTUP PROTOCOL ───────────────────────────────────────────────────────
 const runStartupTasks = async () => {
-    console.log('[Startup] Executing background initialization...');
+    console.log('[Startup] Nexus HR core initialization...');
     try {
-        const { execSync } = require('child_process');
-        // 1. Database Migrations
-        console.log('[Startup] 1/3: Running Prisma migrations...');
-        execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-        // 2. System Setup
-        console.log('[Startup] 2/3: Initializing system records...');
-        require('./scripts/setup'); // Assuming it exports a function or runs on import
-        // 3. Role/Dept Updates
-        console.log('[Startup] 3/3: Running data optimization scripts...');
-        require('./scripts/update_roles_and_depts');
-        // 4. Internal Service Sync
-        console.log('[Startup] 4/4: Synchronizing target telemetry...');
-        await target_service_1.TargetService.syncAllTargets('default-tenant');
+        // We skip heavy tasks here to ensure stability on Render hardware.
+        // Telemetry and background syncs are handled by the live SchedulerService.
         isBooted = true;
         console.log(`\n🎉 Nexus HR Platform Core fully operational at ${new Date().toISOString()}\n`);
     }
     catch (err) {
-        console.error('\n❌ [CRITICAL] Background Startup Failed:');
+        console.error('\n❌ [CRITICAL] Background Startup Stalled:');
         console.error(err.message);
-        console.error('The system will continue to run for diagnostics, but features may be degraded.\n');
+        isBooted = true;
     }
 };
 // ─── ROUTES ─────────────────────────────────────────────────────────────────
@@ -236,7 +244,8 @@ app.get('/api/health', async (req, res) => {
         return res.json({
             status: isBooted ? 'UP' : 'BOOTING',
             database: 'CONNECTED',
-            version: '3.4.1-STABLE',
+            version: '1.0.0-MCB-GH',
+            client: 'MC-Bauchemie Ghana',
             bootComplete: isBooted,
             nodeEnv: process.env.NODE_ENV
         });
@@ -246,6 +255,7 @@ app.get('/api/health', async (req, res) => {
         return res.status(503).json({
             status: 'DEGRADED',
             database: 'DISCONNECTED',
+            version: APP_VERSION,
             error: err.message
         });
     }
@@ -263,9 +273,14 @@ app.get('/api/routes', (req, res) => {
     app._router.stack.forEach((l) => print('', l));
     res.json(routes.filter(r => r.path !== ''));
 });
-app.get('/', (_req, res) => res.json({ message: '🚀 HRM Core Engine Running', version: '2.0.1', status: isBooted ? 'READY' : 'BOOTING' }));
-const debug_routes_1 = __importDefault(require("./routes/debug.routes"));
-app.use('/api/debug-env', debug_routes_1.default);
+app.get('/', (_req, res) => res.json({ message: '🚀 Nexus HR Platform Core Running', version: APP_VERSION, status: isBooted ? 'READY' : 'BOOTING' }));
+// Debug routes — development only
+if (process.env.NODE_ENV !== 'production') {
+    Promise.resolve().then(() => __importStar(require('./routes/debug.routes'))).then(m => {
+        app.use('/api/debug-env', m.default);
+        console.log('[Config] Debug routes enabled (non-production)');
+    });
+}
 // Startup Sync deferred to after port binding to ensure deploy stability
 app.use('/api/auth', auth_routes_1.default);
 app.use('/api/announcements', announcement_routes_1.default);
@@ -299,8 +314,8 @@ app.use('/api/export', rate_limit_middleware_1.exportLimiter, export_routes_1.de
 app.use('/api/it', itadmin_routes_1.default);
 app.use('/api/payment', payment_routes_1.default);
 app.use('/api/privacy', privacy_routes_1.default);
-app.use('/api/settings', require('./routes/settings.routes').default);
-app.use('/api/maintenance', require('./routes/maintenance.routes').default);
+app.use('/api/settings', settings_routes_1.default);
+app.use('/api/maintenance', maintenance_routes_1.default);
 app.use('/api/compensation', compensation_routes_1.default);
 app.use('/api/enterprise', enterprise_routes_1.default);
 app.use('/api/performance-v2', performance_v2_routes_1.default);
@@ -313,43 +328,56 @@ app.use('/api/expenses', expense_routes_1.default);
 app.use('/api/support', support_routes_1.default);
 app.use('/api/offboarding', offboarding_routes_1.default);
 app.use('/api/hr', hrFeatures_routes_1.default);
-// ─── DEBUG ROUTE ────────────────────────────────────────────────────────────
-app.get('/api/debug-routes', (req, res) => {
-    const routes = [];
-    app._router.stack.forEach((middleware) => {
-        if (middleware.route) {
-            routes.push({ path: middleware.route.path, methods: Object.keys(middleware.route.methods) });
-        }
-        else if (middleware.name === 'router') {
-            middleware.handle.stack.forEach((handler) => {
-                if (handler.route) {
-                    const path = middleware.regexp.toString().replace('/^', '').replace('\\/?(?=\\/|$)/i', '') + handler.route.path;
-                    routes.push({ path: path.replace(/\\\//g, '/'), methods: Object.keys(handler.route.methods) });
-                }
-            });
-        }
+app.use('/api/public/v1', public_api_routes_1.default);
+app.use('/api/integrations', integrations_routes_1.default);
+app.use('/api/bot', rate_limit_middleware_1.aiLimiter, bot_routes_1.default);
+const ai_routes_1 = __importDefault(require("./routes/ai.routes"));
+app.use('/api/ai', rate_limit_middleware_1.aiLimiter, ai_routes_1.default);
+// ─── DEBUG ROUTE (Development Only) ─────────────────────────────────────────
+if (process.env.NODE_ENV !== 'production') {
+    app.get('/api/debug-routes', (req, res) => {
+        const routes = [];
+        app._router.stack.forEach((middleware) => {
+            if (middleware.route) {
+                routes.push({ path: middleware.route.path, methods: Object.keys(middleware.route.methods) });
+            }
+            else if (middleware.name === 'router') {
+                middleware.handle.stack.forEach((handler) => {
+                    if (handler.route) {
+                        const path = middleware.regexp.toString().replace('/^', '').replace('\\/?(?=\\/|$)/i', '') + handler.route.path;
+                        routes.push({ path: path.replace(/\\\//g, '/'), methods: Object.keys(handler.route.methods) });
+                    }
+                });
+            }
+        });
+        res.json(routes);
     });
-    res.json(routes);
-});
-// ─── 404 HANDLER (DEBUG) ──────────────────────────────────────────────────
+}
+// ─── 404 HANDLER ──────────────────────────────────────────────────────────
 app.use((req, res) => {
-    console.log(`[404] ${req.method} ${req.path}`);
+    if (process.env.NODE_ENV !== 'production') {
+        console.log(`[404] ${req.method} ${req.path}`);
+    }
     res.status(404).json({
         error: 'Route not found',
         requestedPath: req.path,
         requestedMethod: req.method,
-        version: '2.1.2'
+        version: APP_VERSION
     });
 });
 // ─── ERROR HANDLER ──────────────────────────────────────────────────────────
 const error_log_service_1 = require("./services/error-log.service");
 app.use((err, req, res, next) => {
     error_log_service_1.errorLogger.log('GlobalErrorHandler', err);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    res.status(500).json({
+        success: false,
+        message: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
 });
 // ─── START ──────────────────────────────────────────────────────────────────
 server.listen(PORT, '0.0.0.0', async () => {
-    console.log(`\n🚀 Nexus HR Platform v2.0 listening on http://0.0.0.0:${PORT}`);
+    console.log(`\n🚀 Nexus HR Platform v${APP_VERSION} listening on http://0.0.0.0:${PORT}`);
     // Initialize internal services
     scheduler_service_1.SchedulerService.init();
     // Trigger background startup tasks

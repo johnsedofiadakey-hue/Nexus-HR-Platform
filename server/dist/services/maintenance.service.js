@@ -65,8 +65,8 @@ const runBackup = () => {
             }
             // ─── CLOUD SYNC ENGINE ───────────────────────────────────────────
             try {
-                const { GoogleDriveService } = await Promise.resolve().then(() => __importStar(require('./google-drive.service')));
-                cloudId = await GoogleDriveService.syncFileToCloud(filepath);
+                const { GoogleWorkspaceService } = await Promise.resolve().then(() => __importStar(require('./workspace.service')));
+                cloudId = await GoogleWorkspaceService.syncFileToCloud(filepath);
                 console.log(`[Lifecycle] Backup synced to cloud: ${cloudId}`);
             }
             catch (err) {

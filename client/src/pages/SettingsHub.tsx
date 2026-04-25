@@ -98,7 +98,7 @@ const SettingsHub = () => {
     sidebarActive: '',
     sidebarText: '',
     defaultLanguage: 'fr',
-    currency: 'GNF',
+    currency: 'GHS',
     successColor: '#10b981',
     warningColor: '#f59e0b',
     errorColor: '#ef4444',

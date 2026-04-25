@@ -191,8 +191,12 @@ class LeaveService {
         });
         if (!leave)
             throw new Error('Leave request not found');
-        if (leave.status !== 'MD_REVIEW') {
-            throw new Error(`Invalid stage: Leave is currently in ${leave.status} status. Final approval requires MD_REVIEW status.`);
+        if (!leave)
+            throw new Error('Leave request not found');
+        const intermediateStages = ['MANAGER_REVIEW', 'RELIEVER_ACCEPTED', 'SUBMITTED', 'MANAGER_APPROVED'];
+        const isAtCorrectStage = leave.status === 'MD_REVIEW' || (approve && intermediateStages.includes(leave.status));
+        if (!isAtCorrectStage) {
+            throw new Error(`Invalid stage: Leave is currently in ${leave.status} status.`);
         }
         const actor = await client_1.default.user.findUnique({
             where: { id: mdId },
@@ -221,7 +225,11 @@ class LeaveService {
                 data: {
                     status: nextStatus,
                     hrComment: comment,
-                    hrReviewerId: mdId
+                    hrReviewerId: mdId,
+                    // Clear any intermediate comments if we are bypassing
+                    ...(approve && leave.status !== 'MD_REVIEW' && {
+                        managerComment: comment || 'Direct HR/MD Approval Override'
+                    })
                 }
             });
             if (approve) {

@@ -36,18 +36,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const recruitmentController = __importStar(require("../controllers/recruitment.controller"));
 const auth_middleware_1 = require("../middleware/auth.middleware");
+const validate_middleware_1 = require("../middleware/validate.middleware");
 const roles_1 = require("../types/roles");
 const router = (0, express_1.Router)();
 // Public / Internal Job Board (Anyone authenticated can view)
 router.get('/jobs', auth_middleware_1.authenticate, recruitmentController.getJobPositions);
-// Public Application (Consider if this should be completely public or handled via a public route file)
-// For now, keeping it behind auth or expecting a specific bypass for recruiter forms
-router.post('/apply', recruitmentController.applyForJob);
+// Public Application
+router.post('/apply', (0, validate_middleware_1.validate)(validate_middleware_1.CandidateApplicationSchema), recruitmentController.applyForJob);
 // Admin / HR Management (Rank 70+ like HR Manager, MD)
-router.post('/jobs', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(roles_1.RoleRank.HR_OFFICER), recruitmentController.createJobPosition);
+router.post('/jobs', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(roles_1.RoleRank.HR_OFFICER), (0, validate_middleware_1.validate)(validate_middleware_1.JobPositionSchema), recruitmentController.createJobPosition);
 router.patch('/jobs/:id', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(roles_1.RoleRank.HR_OFFICER), recruitmentController.updateJobPosition);
 router.get('/candidates', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(roles_1.RoleRank.HR_OFFICER), recruitmentController.getCandidates);
 router.patch('/candidates/:id/status', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(roles_1.RoleRank.HR_OFFICER), recruitmentController.updateCandidateStatus);
-router.post('/interviews/schedule', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(roles_1.RoleRank.HR_OFFICER), recruitmentController.scheduleInterview);
+router.post('/interviews/schedule', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(roles_1.RoleRank.HR_OFFICER), (0, validate_middleware_1.validate)(validate_middleware_1.InterviewScheduleSchema), recruitmentController.scheduleInterview);
 router.post('/interviews/feedback', auth_middleware_1.authenticate, recruitmentController.submitInterviewFeedback);
 exports.default = router;

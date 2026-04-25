@@ -77,9 +77,9 @@ const assignAsset = async (req, res) => {
     try {
         const userReq = req.user;
         const organizationId = userReq.organizationId || 'default-tenant';
-        const { assetId, userId, condition } = req.body;
-        const assignment = await assetService.assignAsset(organizationId, assetId, userId, condition);
-        await (0, audit_service_1.logAction)(userReq.id, 'ASSIGN_ASSET', 'Asset', assetId, { assignedTo: userId }, req.ip);
+        const { assetId, userId, condition, signature } = req.body;
+        const assignment = await assetService.assignAsset(organizationId, assetId, userId, condition, signature);
+        await (0, audit_service_1.logAction)(userReq.id, 'ASSIGN_ASSET', 'Asset', assetId, { assignedTo: userId, signed: !!signature }, req.ip);
         res.json(assignment);
     }
     catch (error) {
@@ -91,9 +91,9 @@ const returnAsset = async (req, res) => {
     try {
         const userReq = req.user;
         const organizationId = userReq.organizationId || 'default-tenant';
-        const { assetId, condition } = req.body;
-        const result = await assetService.returnAsset(organizationId, assetId, condition);
-        await (0, audit_service_1.logAction)(userReq.id, 'RETURN_ASSET', 'Asset', assetId, { condition }, req.ip);
+        const { assetId, condition, signature } = req.body;
+        const result = await assetService.returnAsset(organizationId, assetId, condition, signature);
+        await (0, audit_service_1.logAction)(userReq.id, 'RETURN_ASSET', 'Asset', assetId, { condition, signed: !!signature }, req.ip);
         res.json(result);
     }
     catch (error) {

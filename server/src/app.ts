@@ -102,13 +102,11 @@ const server = http.createServer(app);
 app.use((req: Request, res: Response, next: NextFunction) => {
   const origin = req.headers.origin;
   const allowed = [
-    'https://nexus-hr-platform.web.app',
-    'https://nexus-hr-platform.firebaseapp.com',
-    'https://nexus-hr-platform-client.onrender.com', // Added Render Production
-    'https://mcbauchemieguinea.com',
-    'https://www.mcbauchemieguinea.com',
+    'https://mcbauchemie-hrm-gh.web.app',
+    'https://mcbauchemie-hrm-gh.firebaseapp.com',
+    // Add custom domain later: 'https://hrm.mc-bauchemie.com.gh',
     'http://localhost:3000',
-    'http://localhost:5173'
+    'http://localhost:5173',
   ];
 
   if (origin && (allowed.includes(origin) || allowed.some(a => origin.startsWith(a)))) {
@@ -187,7 +185,8 @@ app.use('/api/dev', devLimiter, devRoutes);
 import { maintenanceMiddleware } from './middleware/maintenance.middleware';
 import { subscriptionGuard } from './middleware/subscription.middleware';
 app.use(maintenanceMiddleware);
-app.use(subscriptionGuard);
+// MC-Bauchemie Ghana is a licensed deployment. No billing lock.
+app.use((_req, _res, next) => next());
 
 let isBooted = false;
 
@@ -214,7 +213,8 @@ app.get('/api/health', async (req, res) => {
     return res.json({ 
       status: isBooted ? 'UP' : 'BOOTING', 
       database: 'CONNECTED',
-      version: APP_VERSION, 
+      version: '1.0.0-MCB-GH',
+      client: 'MC-Bauchemie Ghana',
       bootComplete: isBooted,
       nodeEnv: process.env.NODE_ENV 
     });
@@ -229,27 +229,13 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-app.get('/api/routes', (req, res) => {
-  const routes: any[] = [];
-  function print(path: any, layer: any) {
-    if (layer.route) {
-      layer.route.stack.forEach((s: any) => routes.push({ path: path + layer.route.path, method: s.method.toUpperCase() }));
-    } else if (layer.name === 'router' && layer.handle.stack) {
-      layer.handle.stack.forEach((s: any) => print(path + (layer.regexp.source.replace('\\/?(?=\\/|$)', '').replace('^', '').replace('\\/', '/')), s));
-    }
-  }
-  app._router.stack.forEach((l: any) => print('', l));
-  res.json(routes.filter(r => r.path !== ''));
-});
 
 app.get('/', (_req: Request, res: Response) => res.json({ message: '🚀 Nexus HR Platform Core Running', version: APP_VERSION, status: isBooted ? 'READY' : 'BOOTING' }));
 
 // Debug routes — development only
 if (process.env.NODE_ENV !== 'production') {
-  import('./routes/debug.routes').then(m => {
-    app.use('/api/debug-env', m.default);
-    console.log('[Config] Debug routes enabled (non-production)');
-  });
+  const debugRoutes = require('./routes/debug.routes').default;
+  app.use('/api/debug-env', debugRoutes);
 }
 
 // Startup Sync deferred to after port binding to ensure deploy stability

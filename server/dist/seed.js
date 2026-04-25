@@ -1,86 +1,69 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const prisma = new client_1.PrismaClient();
 async function seed() {
-    console.log('🌱 Seeding database...');
+    console.log('🌱 Seeding Nexus HR Platform (Master Edition)...');
     const orgId = 'default-tenant';
-    // 1. Ensure Organization exists
+    const commonPass = await bcryptjs_1.default.hash('unlockme', 12);
+    // 1. System Developer (You)
+    console.log('👤 Provisioning Master Developer...');
+    await prisma.user.upsert({
+        where: { email: 'johnsedofiadakey@gmail.com' },
+        update: {},
+        create: {
+            fullName: 'John Sedofiadakey',
+            email: 'johnsedofiadakey@gmail.com',
+            passwordHash: commonPass,
+            role: 'DEV',
+            status: 'ACTIVE',
+            jobTitle: 'System Architect',
+            organizationId: null, // Global System Admin
+        },
+    });
+    // 2. Organization Branding
+    console.log('🏢 Provisioning Default Organization...');
     await prisma.organization.upsert({
         where: { id: orgId },
         update: {},
-        create: { id: orgId, name: 'Nexus Default Tenant' }
-    });
-    // 2. Fetch or create MD
-    const md = await prisma.user.findFirst({ where: { email: 'md@nexus.com' } });
-    if (!md) {
-        console.log('MD user not found, skipping relative seeds');
-        return;
-    }
-    // 3. Departments
-    const hrDept = await prisma.department.create({
-        data: { name: 'Human Resources', organizationId: orgId, managerId: md.id }
-    });
-    const techDept = await prisma.department.create({
-        data: { name: 'Technology', organizationId: orgId, managerId: md.id }
-    });
-    // 4. Test Employees
-    const emp1 = await prisma.user.create({
-        data: {
-            email: 'john.doe@nexus.test',
-            fullName: 'John Doe',
-            passwordHash: md.passwordHash, // reuse MD password for test
-            role: 'STAFF',
-            jobTitle: 'HR Specialist',
-            organizationId: orgId,
-            departmentId: hrDept.id,
-            supervisorId: md.id
+        create: {
+            id: orgId,
+            name: 'Nexus HR Corporation',
+            email: 'contact@nexus-platform.com',
+            billingStatus: 'ACTIVE',
+            subscriptionPlan: 'PRO',
+            primaryColor: '#6366f1',
+            themePreset: 'premium-monolith',
+            isAiEnabled: true
         }
     });
-    const emp2 = await prisma.user.create({
-        data: {
-            email: 'jane.smith@nexus.test',
-            fullName: 'Jane Smith',
-            passwordHash: md.passwordHash,
-            role: 'MANAGER',
-            jobTitle: 'Engineering Manager',
-            organizationId: orgId,
-            departmentId: techDept.id,
-            supervisorId: md.id
-        }
-    });
-    // 5. KPIs
-    await prisma.departmentKPI.create({
-        data: {
-            organizationId: orgId,
-            departmentId: techDept.id,
-            title: 'System Uptime',
-            metricType: 'PERCENT',
-            targetValue: 99.9,
-            measurementPeriod: 'Q1-2026',
-            assignedById: md.id,
-            status: 'ACTIVE'
-        }
-    });
-    // 6. KPI Sheets
-    await prisma.kpiSheet.create({
-        data: {
-            organizationId: orgId,
-            employeeId: emp1.id,
-            reviewerId: md.id,
-            month: 3,
-            year: 2026,
-            title: 'Q1 Performance Goal',
+    // 3. Managing Director (MD / Admin)
+    console.log('👤 Provisioning MD Account...');
+    const md = await prisma.user.upsert({
+        where: { email: 'md@nexus.com' },
+        update: {},
+        create: {
+            fullName: 'Chief Operations Officer',
+            email: 'md@nexus.com',
+            passwordHash: commonPass,
+            role: 'MD',
             status: 'ACTIVE',
-            items: {
-                create: [
-                    { organizationId: orgId, name: 'Employee Retention', weight: 50, targetValue: 90, actualValue: 0, score: 0 },
-                    { organizationId: orgId, name: 'Training Completion', weight: 50, targetValue: 100, actualValue: 0, score: 0 }
-                ]
-            }
-        }
+            jobTitle: 'MD',
+            organizationId: orgId,
+        },
     });
-    console.log('✅ Seeding complete.');
+    // 4. Operational Data (Departments)
+    console.log('📂 Provisioning Departments...');
+    const techDept = await prisma.department.upsert({
+        where: { name_organizationId: { name: 'Technology', organizationId: orgId } },
+        update: {},
+        create: { name: 'Technology', organizationId: orgId, managerId: md.id }
+    });
+    console.log('✅ Seeding complete. Site is live and ready for login.');
 }
 seed()
     .catch(e => {

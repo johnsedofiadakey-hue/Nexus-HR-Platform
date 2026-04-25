@@ -2,12 +2,12 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB-WmQMEOpGVb2kpwK5yxAHRuuSlqP6RLE",
-  authDomain: "nexus-hr-platform.firebaseapp.com",
-  projectId: "nexus-hr-platform",
-  storageBucket: "nexus-hr-platform.firebasestorage.app",
-  messagingSenderId: "461790778294",
-  appId: "1:461790778294:web:43777898ddaae6d6092717"
+  apiKey: "AIzaSyAL20uzqPnXWbJNGmqgHZ2-UsEmMdbrAGw",
+  authDomain: "mcb-hrm-ghana.firebaseapp.com",
+  projectId: "mcb-hrm-ghana",
+  storageBucket: "mcb-hrm-ghana.firebasestorage.app",
+  messagingSenderId: "709525010185",
+  appId: "1:709525010185:web:1b3ba1e1ddf82307a6c5d8"
 };
 
 const app = initializeApp(firebaseConfig);

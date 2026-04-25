@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.syncPunches = void 0;
+exports.kioskPunch = exports.syncPunches = void 0;
 const client_1 = __importDefault(require("../prisma/client"));
 /**
  * Biometric Synchronization Controller
@@ -100,3 +100,64 @@ const syncPunches = async (req, res) => {
     }
 };
 exports.syncPunches = syncPunches;
+const kioskPunch = async (req, res) => {
+    try {
+        const { employeeCode, type } = req.body;
+        // We let the frontend pass the organizationId of the kiosk
+        const organizationId = req.body.organizationId || 'default-tenant';
+        if (!employeeCode || !type) {
+            return res.status(400).json({ error: 'employeeCode and type (CHECKIN/CHECKOUT) are required.' });
+        }
+        const employee = await client_1.default.user.findFirst({
+            where: { employeeCode, organizationId, status: 'ACTIVE' }
+        });
+        if (!employee) {
+            return res.status(404).json({ error: 'Invalid Employee Code.' });
+        }
+        const punchDate = new Date();
+        const normalizedDate = new Date(punchDate);
+        normalizedDate.setHours(0, 0, 0, 0);
+        const existingLog = await client_1.default.attendanceLog.findUnique({
+            where: {
+                employeeId_date: {
+                    employeeId: employee.id,
+                    date: normalizedDate
+                }
+            }
+        });
+        if (!existingLog) {
+            if (type === 'CHECKOUT') {
+                return res.status(400).json({ error: 'Cannot checkout without an active clock-in today.' });
+            }
+            await client_1.default.attendanceLog.create({
+                data: {
+                    organizationId,
+                    employeeId: employee.id,
+                    date: normalizedDate,
+                    clockIn: punchDate,
+                    source: 'KIOSK',
+                    status: 'PRESENT'
+                }
+            });
+            return res.json({ message: 'Successfully Clocked In', user: employee.fullName, timestamp: punchDate });
+        }
+        else {
+            if (type === 'CHECKIN') {
+                return res.status(400).json({ error: 'You are already clocked in for today.' });
+            }
+            if (existingLog.clockOut) {
+                return res.status(400).json({ error: 'You have already clocked out for today.' });
+            }
+            await client_1.default.attendanceLog.update({
+                where: { id: existingLog.id },
+                data: { clockOut: punchDate, source: 'KIOSK' }
+            });
+            return res.json({ message: 'Successfully Clocked Out', user: employee.fullName, timestamp: punchDate, durationMinutes: Math.round((punchDate.getTime() - existingLog.clockIn.getTime()) / 60000) });
+        }
+    }
+    catch (error) {
+        console.error('[KioskPunch] error:', error);
+        return res.status(500).json({ error: 'Kiosk malfunction.' });
+    }
+};
+exports.kioskPunch = kioskPunch;

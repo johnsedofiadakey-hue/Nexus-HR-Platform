@@ -35,9 +35,10 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const auth_middleware_1 = require("../middleware/auth.middleware");
+const validate_middleware_1 = require("../middleware/validate.middleware");
 const AnnouncementController = __importStar(require("../controllers/announcement.controller"));
 const router = (0, express_1.Router)();
-router.post('/', auth_middleware_1.authenticate, AnnouncementController.createAnnouncement);
+router.post('/', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(70), (0, validate_middleware_1.validate)(validate_middleware_1.AnnouncementSchema), AnnouncementController.createAnnouncement);
 router.get('/', auth_middleware_1.authenticate, AnnouncementController.listAnnouncements);
-router.delete('/:id', auth_middleware_1.authenticate, AnnouncementController.deleteAnnouncement);
+router.delete('/:id', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)(70), AnnouncementController.deleteAnnouncement);
 exports.default = router;
