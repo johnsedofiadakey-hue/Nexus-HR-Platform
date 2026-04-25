@@ -119,6 +119,7 @@ const Layout = () => {
   const user = React.useMemo(() => {
     return storage.getItem(StorageKey.USER, null);
   }, []);
+  const rank = React.useMemo(() => getRankFromRole(user?.role), [user?.role]);
   const isImpersonating = user?.isImpersonating;
 
   const handleExitImpersonation = () => {
