@@ -6,7 +6,7 @@ import {
   X, Check, Focus, ArrowRight, Star, ChevronDown, 
   CheckCircle2, Sparkles, CreditCard, Smile, 
   Phone, Mail, Globe, Menu, Server, Lock, 
-  Layout, Activity, Database, Terminal, Users
+  LayoutDashboard, Activity, Database, Terminal, Users
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -184,7 +184,7 @@ const StormglideHome = () => {
                    step: "02", 
                    title: "Unified Shell Control", 
                    desc: "Manage payroll, leave, performance reviews, and biometric attendance from a single administrative hub.",
-                   icon: <Layout size={24}/>
+                   icon: <LayoutDashboard size={24}/>
                  },
                  { 
                    step: "03", 

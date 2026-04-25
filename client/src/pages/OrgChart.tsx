@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User as UserIcon, ChevronRight, ChevronDown, Layout, List, ShieldCheck } from 'lucide-react';
+import { User as UserIcon, ChevronRight, ChevronDown, LayoutDashboard, List, ShieldCheck } from 'lucide-react';
 import api from '../services/api';
 import { cn } from '../utils/cn';
 
@@ -377,7 +377,7 @@ const OrgChart = () => {
                  viewType === 'hierarchical' ? "bg-[var(--primary)] text-white shadow-xl" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                )}
              >
-               <Layout size={14} /> {t('org_chart.hierarchical')}
+               <LayoutDashboard size={14} /> {t('org_chart.hierarchical')}
              </button>
              <button
                onClick={() => setViewType('linear')}

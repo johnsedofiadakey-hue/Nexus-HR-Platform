@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Building2, Users, Search, Plus, Filter, MoreHorizontal, 
   ChevronRight, Globe, Shield, RefreshCw, X, CheckCircle,
-  Mail, Phone, ExternalLink, Zap, CreditCard, Layout, Copy, Trash2, Key, Settings, ArrowLeft, ArrowUpRight, HelpCircle
+  Mail, Phone, ExternalLink, Zap, CreditCard, LayoutDashboard, Copy, Trash2, Key, Settings, ArrowLeft, ArrowUpRight, HelpCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';

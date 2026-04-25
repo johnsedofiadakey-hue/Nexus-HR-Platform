@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Building2, Users, CreditCard, BarChart3, Shield, Settings,
+    Building2, Users, CreditCard, BarChart3, Shield, Settings, LayoutDashboard,
     Search, Plus, LogOut, ChevronRight, MoreHorizontal, Eye,
     EyeOff, Copy, CheckCircle, AlertCircle, Clock, Ban,
     RefreshCw, Database, Activity, Globe, Zap, Calendar,
@@ -305,7 +305,7 @@ const AdminConsole = () => {
         { id: 'organizations', label: 'Organizations', icon: Building2 },
         { id: 'revenue', label: 'Revenue & Pricing', icon: CreditCard },
         { id: 'security', label: 'System Control', icon: Shield },
-        { id: 'site', label: 'Showroom Control', icon: Layout },
+        { id: 'site', label: 'Showroom Control', icon: LayoutDashboard },
         { id: 'audit', label: 'Audit Log', icon: Terminal },
     ];
 

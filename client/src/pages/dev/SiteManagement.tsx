@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Layout, Save, Eye, RefreshCw, Sparkles, 
+  LayoutDashboard, Save, Eye, RefreshCw, Sparkles, 
   Shield, Zap, Globe, MessageSquare, Image,
   Type, ArrowRight, CheckCircle2, AlertCircle
 } from 'lucide-react';
@@ -53,7 +53,7 @@ const SiteManagement = () => {
            {/* Tab Switcher */}
            <div className="flex gap-2 p-1 bg-slate-100/50 rounded-2xl w-fit">
               {[
-                { id: 'hero', label: 'Hero Display', icon: Layout },
+                { id: 'hero', label: 'Hero Display', icon: LayoutDashboard },
                 { id: 'features', label: 'Feature Exhibits', icon: Zap },
                 { id: 'security', label: 'Security Protocols', icon: Shield },
                 { id: 'pricing', label: 'Pricing Strategy', icon: Globe }
