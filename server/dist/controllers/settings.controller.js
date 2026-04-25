@@ -54,7 +54,7 @@ exports.getSettings = getSettings;
 const updateSettings = async (req, res) => {
     try {
         const user = req.user;
-        if ((0, auth_middleware_1.getRoleRank)(user.role) < 90) {
+        if ((0, auth_middleware_1.getRoleRank)(user.role) < 95) {
             return res.status(403).json({ error: 'Only MD can update admin settings' });
         }
         const orgId = user?.organizationId || 'default-tenant';

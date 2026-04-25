@@ -49,9 +49,9 @@ router.get('/my-packets', appraisalController.getMyPackets);
 // Get packets where I am a reviewer
 router.get('/team-packets', (0, auth_middleware_1.requireRole)(70), appraisalController.getTeamPackets);
 // Get packets awaiting final executive verdict (MD/Director)
-router.get('/final-verdict-list', (0, auth_middleware_1.requireRole)(80), appraisalController.getFinalVerdictList);
+router.get('/final-sign-off-list', (0, auth_middleware_1.requireRole)(80), appraisalController.getFinalVerdictList);
 // Provide final executive sign-off
-router.post('/final-verdict', (0, auth_middleware_1.requireRole)(80), appraisalController.finalSignOff);
+router.post('/final-sign-off', (0, auth_middleware_1.requireRole)(80), appraisalController.finalSignOff);
 // Permanent Delete a packet (Director+)
 router.delete('/:packetId', (0, auth_middleware_1.requireRole)(80), appraisalController.deleteAppraisalPacket);
 // Appraisal Cycle Management (Director+)

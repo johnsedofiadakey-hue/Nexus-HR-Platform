@@ -39,9 +39,9 @@ const aiController = __importStar(require("../controllers/ai.controller"));
 const router = (0, express_1.Router)();
 router.use(auth_middleware_1.authenticate);
 // Generate insight verdicts based on context
-router.post('/insight', (0, auth_middleware_1.requireRole)(60), aiController.generateInsight);
+router.post('/insight', (0, auth_middleware_1.requireRole)(70), aiController.generateInsight);
 // Conversational HR Assistant
-router.post('/chat', (0, auth_middleware_1.requireRole)(40), aiController.chat);
+router.post('/chat', (0, auth_middleware_1.requireRole)(70), aiController.chat);
 // ATS Resume Parsing Endpoint
 router.post('/parse-resume', (0, auth_middleware_1.requireRole)(70), aiController.parseResumeViaAI);
 exports.default = router;

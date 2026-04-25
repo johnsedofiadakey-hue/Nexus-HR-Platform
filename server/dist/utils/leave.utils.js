@@ -4,7 +4,7 @@
  * Standardizes hierarchical inheritance for leave allowance and balance.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getEffectiveLeaveMetrics = void 0;
+exports.canBorrowLeave = exports.getEffectiveLeaveMetrics = void 0;
 /**
  * Calculates effective leave allowance and balance for a user.
  * Hierarchy:
@@ -16,14 +16,31 @@ exports.getEffectiveLeaveMetrics = void 0;
  * @returns Object containing effective allowance and balance as numbers
  */
 const getEffectiveLeaveMetrics = (user) => {
+    const org = user.organization || {};
     // 1. Allowance: User Specific -> Org Default -> System Fallback (30)
     const allowance = Number(user.leaveAllowance ??
-        user.organization?.defaultLeaveAllowance ??
+        org.defaultLeaveAllowance ??
         30);
-    // 2. Balance: User Specific -> Allowance (Dynamic)
-    // If leaveBalance is null, it defaults to the full current allowance
-    const balance = Number(user.leaveBalance ??
-        allowance);
+    // 2. Balance Logic
+    let balance = Number(user.leaveBalance ?? allowance);
+    // Apply Carry Forward Logic if enabled
+    if (org.allowLeaveCarryForward) {
+        const limit = Number(org.carryForwardLimit || 0);
+        // This is a simplified check; in a full system we'd track last year's leftover
+        // For now, we assume current balance can include up to 'limit' carry forward
+    }
     return { allowance, balance };
 };
 exports.getEffectiveLeaveMetrics = getEffectiveLeaveMetrics;
+/**
+ * Checks if a user is allowed to borrow leave based on organization settings.
+ */
+const canBorrowLeave = (user, requestedDays, availableBalance) => {
+    const org = user.organization || {};
+    if (!org.allowLeaveBorrowing)
+        return false;
+    const limit = Number(org.borrowingLimit || 0);
+    const negativeBalanceAllowed = limit;
+    return (availableBalance + negativeBalanceAllowed) >= requestedDays;
+};
+exports.canBorrowLeave = canBorrowLeave;

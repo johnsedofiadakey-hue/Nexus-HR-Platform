@@ -154,7 +154,7 @@ const getSettings = async (organizationId = 'default-tenant', isAdmin = false) =
             defaultLeaveAllowance: 24,
             language: 'en',
             plan: 'ENTERPRISE',
-            currency: 'GNF',
+            currency: 'GHS',
             isAiEnabled: true
         };
     }
@@ -162,7 +162,7 @@ const getSettings = async (organizationId = 'default-tenant', isAdmin = false) =
     let pricing = {
         monthlyPriceGHS: org.settings?.monthlyPriceGHS,
         annualPriceGHS: org.settings?.annualPriceGHS,
-        currency: org.settings?.currency || 'GNF',
+        currency: org.settings?.currency || 'GHS',
         monthlyPrice: org.settings?.monthlyPrice,
         annualPrice: org.settings?.annualPrice,
         trialDays: org.settings?.trialDays,

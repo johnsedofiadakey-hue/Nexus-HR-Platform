@@ -64,8 +64,19 @@ exports.createRun = createRun;
 const approveRun = async (req, res) => {
     try {
         const userReq = req.user;
-        if ((0, auth_middleware_1.getRoleRank)(userReq.role) < 90) {
-            return res.status(403).json({ error: 'Only MD can approve payroll runs' });
+        const currentRun = await client_1.default.payrollRun.findUnique({ where: { id: req.params.id } });
+        if (!currentRun)
+            return res.status(404).json({ error: 'Run not found' });
+        const userRank = (0, auth_middleware_1.getRoleRank)(userReq.role);
+        // Authorization Matrix
+        if (currentRun.status === 'DRAFT' && userRank < 87) {
+            return res.status(403).json({ error: 'Requires Finance Manager rank to request review' });
+        }
+        if (currentRun.status === 'PENDING_HR' && userRank < 88) {
+            return res.status(403).json({ error: 'Requires HR Manager rank to approve HR review' });
+        }
+        if (currentRun.status === 'PENDING_MD' && userRank < 95) {
+            return res.status(403).json({ error: 'Requires Managing Director rank for final approval' });
         }
         const orgId = (0, enterprise_controller_1.getOrgId)(req);
         const organizationId = orgId || 'default-tenant';

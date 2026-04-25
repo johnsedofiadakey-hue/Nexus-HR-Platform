@@ -26,18 +26,24 @@ const generateInsight = async (req, res) => {
             delete sanitizedData.bankAccountNumber;
         if (sanitizedData.pin)
             delete sanitizedData.pin;
+        const user = req.user;
         const prompt = `
-You are an expert HR Analyst for "Nexus HR". 
+You are "Cortex", the Senior HR Strategy Advisor for MC-Bauchemie Ghana. 
+You are providing a high-level briefing to ${user.fullName} (${user.jobTitle || user.role}).
+
 Analyze the following context representing an "${contextType}".
 Return STRICTLY a JSON object matching this schema:
 {
-  "title": "A punchy title",
-  "summary": "1-2 sentence overview",
-  "recommendation": "Actionable HR advice",
+  "title": "A punchy, executive title",
+  "summary": "1-2 sentence executive summary specifically for ${user.fullName}",
+  "recommendation": "Deep, actionable HR advice based on your institutional knowledge",
   "confidence": number,
   "insights": [{ "id": "uuid", "type": "SUCCESS|WARNING|CRITICAL|NEUTRAL", "label": "string", "description": "string", "impact": number }],
   "suggestedTargets": [{ "title": "string", "description": "string", "priority": "LOW|MEDIUM|HIGH" }]
 }
+
+Your tone must be elite, direct, and insightful. Do not state the obvious—give ${user.fullName} the "Why" and the "How".
+
 Context Data:
 ${JSON.stringify(sanitizedData, null, 2)}
 `;
@@ -71,32 +77,49 @@ const chat = async (req, res) => {
             client_1.default.user.count({ where: { organizationId: orgId, isArchived: false, role: { not: 'DEV' } } }),
             client_1.default.department.findMany({ where: { organizationId: orgId }, select: { name: true } })
         ]);
-        const sysPrompt = `You are "Cortex", the Nexus HR Agent for an org with ${empCount} employees. 
-Assistant to: ${user.fullName} (Rank: ${user.rank}, Role: ${user.role}).
-You have autonomous tools to search employees, check metrics, and request leave. 
-Be concise, elite, and proactive. If a user asks to do something you have a tool for, USE THE TOOL.`;
-        // 2. Initialize Model with Tools
+        const sysPrompt = `You are "Cortex", the elite AI Intelligence Officer for MC-Bauchemie Ghana. 
+Current User Context:
+- Name: ${user.fullName}
+- Position: ${user.jobTitle || user.role}
+- Authority Rank: ${user.rank}
+- Org Context: ${empCount} total personnel across ${depts.map(d => d.name).join(', ')} departments.
+
+Operational Directives:
+1. Speak naturally and professionally. Avoid robotic "As an AI..." phrases. Speak directly to ${user.fullName}.
+2. Be highly intelligent and proactive. Answer complex HR, strategic, and operational questions with depth.
+3. You have autonomous tools to search employees, check metrics, and request leave. Use them whenever it helps provide a "Real" answer.
+4. If asked about organizational health, use your data tools to give factual insights.
+5. Your tone should be that of a trusted Chief of Staff—sophisticated, discreet, and extremely capable.
+
+Always refer to the user by name if appropriate and make them feel like they are talking to a human partner who knows their business inside out.`;
+        // 2. Initialize Model with Tools & System Instruction
         const model = ai.getGenerativeModel({
             model: 'gemini-1.5-flash',
             tools: [{ functionDeclarations: ai_tools_service_1.functionDeclarations }],
+            systemInstruction: sysPrompt,
         });
-        // 3. Prepare Chat History
-        const formattedHistory = history?.map((h) => ({
+        // 3. Prepare Chat History (Exclude any previous system prompts to avoid conflicts)
+        const formattedHistory = history?.filter((h) => h.role !== 'system').map((h) => ({
             role: h.role === 'user' ? 'user' : 'model',
             parts: [{ text: h.text }]
         })) || [];
-        // Ensure system prompt is known
-        if (formattedHistory.length === 0) {
-            formattedHistory.push({ role: 'user', parts: [{ text: `System Instruction: ${sysPrompt}` }] });
-            formattedHistory.push({ role: 'model', parts: [{ text: "Acknowledged. Cortex is online and ready to assist with institutional operations." }] });
-        }
         const chatSession = model.startChat({ history: formattedHistory });
         // 4. Send Message & Handle Tool Execution Loop
-        let result = await chatSession.sendMessage(message);
+        let result;
+        try {
+            result = await chatSession.sendMessage(message);
+        }
+        catch (sendErr) {
+            console.error('[Cortex Agent] Initial Send Error:', sendErr.message);
+            return res.status(500).json({ error: 'Cortex was unable to process the initial signal. Possible API overload.' });
+        }
         let response = result.response;
         let calls = response.functionCalls();
-        // Iterate until AI stops calling functions
-        while (calls && calls.length > 0) {
+        let iterationCount = 0;
+        const MAX_ITERATIONS = 5;
+        // Iterate until AI stops calling functions or we hit limit
+        while (calls && calls.length > 0 && iterationCount < MAX_ITERATIONS) {
+            iterationCount++;
             const toolResults = await Promise.all(calls.map(async (call) => {
                 try {
                     const data = await (0, ai_tools_service_1.executeTool)(call.name, call.args, user);
@@ -108,6 +131,7 @@ Be concise, elite, and proactive. If a user asks to do something you have a tool
                     };
                 }
                 catch (error) {
+                    console.error(`[Cortex Tool Error] ${call.name}:`, error.message);
                     return {
                         functionResponse: {
                             name: call.name,
@@ -117,15 +141,24 @@ Be concise, elite, and proactive. If a user asks to do something you have a tool
                 }
             }));
             // Send tool results back to model
-            result = await chatSession.sendMessage(toolResults);
-            response = result.response;
-            calls = response.functionCalls();
+            try {
+                result = await chatSession.sendMessage(toolResults);
+                response = result.response;
+                calls = response.functionCalls();
+            }
+            catch (loopErr) {
+                console.error('[Cortex Agent] Tool Feedback Loop Error:', loopErr.message);
+                break; // Exit loop and return what we have or an error
+            }
         }
         res.json({ reply: response.text() });
     }
     catch (err) {
-        console.error('[Cortex Agent] Chat Error:', err.message);
-        res.status(500).json({ error: 'Elite Intelligence layer experienced a synchronization fault.' });
+        console.error('[Cortex Agent] Critical synchronization fault:', err.stack || err.message);
+        res.status(500).json({
+            error: 'Elite Intelligence layer experienced a synchronization fault.',
+            details: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
     }
 };
 exports.chat = chat;

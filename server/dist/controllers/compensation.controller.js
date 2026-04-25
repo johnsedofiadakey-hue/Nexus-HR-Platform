@@ -19,7 +19,7 @@ const getCompensationHistory = async (req, res) => {
             where: { id: employeeId, organizationId },
             select: { salary: true, currency: true }
         });
-        res.json({ currentSalary: user?.salary || 0, currency: user?.currency || 'GNF', history });
+        res.json({ currentSalary: user?.salary || 0, currency: user?.currency || 'GHS', history });
     }
     catch (error) {
         console.error('[Get Compensation]', error);
@@ -42,7 +42,7 @@ const addCompensationRecord = async (req, res) => {
             // 1. Update the user's current salary
             const updatedUser = await tx.user.updateMany({
                 where: { id: employeeId, organizationId },
-                data: { salary: newSalary, currency: currency || 'GNF' }
+                data: { salary: newSalary, currency: currency || 'GHS' }
             });
             // 2. Create the historical ledger record
             const record = await tx.compensationHistory.create({
@@ -52,7 +52,7 @@ const addCompensationRecord = async (req, res) => {
                     type,
                     previousSalary: previousSalary || 0,
                     newSalary,
-                    currency: currency || 'GNF',
+                    currency: currency || 'GHS',
                     reason,
                     effectiveDate: new Date(effectiveDate || Date.now()),
                     authorizedById

@@ -129,8 +129,8 @@ const server = http_1.default.createServer(app);
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     const allowed = [
-        'https://mcbauchemie-hrm-gh.web.app',
-        'https://mcbauchemie-hrm-gh.firebaseapp.com',
+        'https://mcb-hrm-ghana.web.app',
+        'https://mcb-hrm-ghana.firebaseapp.com',
         // Add custom domain later: 'https://hrm.mc-bauchemie.com.gh',
         'http://localhost:3000',
         'http://localhost:5173',
@@ -244,7 +244,8 @@ app.get('/api/health', async (req, res) => {
         return res.json({
             status: isBooted ? 'UP' : 'BOOTING',
             database: 'CONNECTED',
-            version: '1.0.0-MCB-GH',
+            version: '1.0.2-MCB-GH',
+            last_sync: '2026-04-25T18:53:00Z',
             client: 'MC-Bauchemie Ghana',
             bootComplete: isBooted,
             nodeEnv: process.env.NODE_ENV
@@ -260,26 +261,11 @@ app.get('/api/health', async (req, res) => {
         });
     }
 });
-app.get('/api/routes', (req, res) => {
-    const routes = [];
-    function print(path, layer) {
-        if (layer.route) {
-            layer.route.stack.forEach((s) => routes.push({ path: path + layer.route.path, method: s.method.toUpperCase() }));
-        }
-        else if (layer.name === 'router' && layer.handle.stack) {
-            layer.handle.stack.forEach((s) => print(path + (layer.regexp.source.replace('\\/?(?=\\/|$)', '').replace('^', '').replace('\\/', '/')), s));
-        }
-    }
-    app._router.stack.forEach((l) => print('', l));
-    res.json(routes.filter(r => r.path !== ''));
-});
 app.get('/', (_req, res) => res.json({ message: '🚀 Nexus HR Platform Core Running', version: APP_VERSION, status: isBooted ? 'READY' : 'BOOTING' }));
 // Debug routes — development only
 if (process.env.NODE_ENV !== 'production') {
-    Promise.resolve().then(() => __importStar(require('./routes/debug.routes'))).then(m => {
-        app.use('/api/debug-env', m.default);
-        console.log('[Config] Debug routes enabled (non-production)');
-    });
+    const debugRoutes = require('./routes/debug.routes').default;
+    app.use('/api/debug-env', debugRoutes);
 }
 // Startup Sync deferred to after port binding to ensure deploy stability
 app.use('/api/auth', auth_routes_1.default);

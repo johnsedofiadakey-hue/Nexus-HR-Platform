@@ -85,7 +85,7 @@ const getSystemStats = async (req, res) => {
                 activeTrials,
                 monthlyPrice: masterSettings?.monthlyPrice || 30000000,
                 annualPrice: masterSettings?.annualPrice || 360000000,
-                currency: masterSettings?.currency || 'GNF',
+                currency: masterSettings?.currency || 'GHS',
                 paystackPublicKey: masterSettings?.paystackPublicKey || '',
                 paystackSecretKey: masterSettings?.paystackSecretKey || '',
                 paystackPayLink: masterSettings?.paystackPayLink || '',
@@ -401,7 +401,7 @@ exports.triggerBackup = triggerBackup;
 // Manual Bank Transfer Override
 const grantBankTransferAccess = async (req, res) => {
     try {
-        const { organizationId, plan, paymentReference, amount, currency = 'GNF', notes } = req.body;
+        const { organizationId, plan, paymentReference, amount, currency = 'GHS', notes } = req.body;
         const operator = req.user;
         if (!organizationId || !plan) {
             return res.status(400).json({ error: 'organizationId and plan are required.' });
@@ -433,7 +433,7 @@ const grantBankTransferAccess = async (req, res) => {
                     clientId: mdUser.id,
                     plan,
                     price: amount || 0,
-                    currency: currency || 'GNF',
+                    currency: currency || 'GHS',
                     status: 'ACTIVE',
                     paystackRef: paymentReference ? `BANK_TRANSFER:${paymentReference}` : `MANUAL:${Date.now()}`,
                     orgName: org.name,
@@ -446,7 +446,7 @@ const grantBankTransferAccess = async (req, res) => {
         // 4. Log the action in the audit trail
         await (0, system_logger_1.logSystemAction)({
             action: 'MANUAL_BANK_OVERRIDE',
-            details: `Granted ${plan} access to ${org.name}. Ref: ${paymentReference || 'N/A'}. Amount: ${currency || 'GNF'} ${amount || 'N/A'}. Notes: ${notes || 'None'}`,
+            details: `Granted ${plan} access to ${org.name}. Ref: ${paymentReference || 'N/A'}. Amount: ${currency || 'GHS'} ${amount || 'N/A'}. Notes: ${notes || 'None'}`,
             operatorId: operator.id,
             operatorEmail: operator.email,
             ipAddress: req.ip,
@@ -507,7 +507,7 @@ const listOrganizations = async (req, res) => {
 exports.listOrganizations = listOrganizations;
 const createOrganization = async (req, res) => {
     try {
-        const { name, email, currency = 'GNF', subscriptionPlan = 'FREE', customDomain } = req.body;
+        const { name, email, currency = 'GHS', subscriptionPlan = 'FREE', customDomain } = req.body;
         if (!name)
             return res.status(400).json({ error: 'Organization name is required' });
         const org = await client_1.default.organization.create({
@@ -535,7 +535,7 @@ const provisionClient = async (req, res) => {
     try {
         const { 
         // Org fields
-        companyName, subdomain, currency = 'GNF', country, phone, 
+        companyName, subdomain, currency = 'GHS', country, phone, 
         // MD user fields
         adminFullName, adminEmail, adminPassword, } = req.body;
         if (!companyName)

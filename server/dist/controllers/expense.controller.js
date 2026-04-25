@@ -22,7 +22,7 @@ const createExpenseClaim = async (req, res) => {
                 title: title || 'Expense Claim',
                 category: category || 'OTHER',
                 amount,
-                currency: currency || 'GNF',
+                currency: currency || 'GHS',
                 description,
                 receiptUrl,
                 status: 'PENDING'

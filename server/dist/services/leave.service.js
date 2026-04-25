@@ -47,7 +47,10 @@ class LeaveService {
         const pendingDays = pendingRequests.reduce((sum, r) => sum + Number(r.leaveDays || 0), 0);
         const availableBalance = metrics.balance - pendingDays;
         if (availableBalance < leaveDays) {
-            throw new Error(`Insufficient available balance. You have ${metrics.balance} days, but ${pendingDays} days are already tied up in pending/approved requests. Available: ${availableBalance}, Needed: ${leaveDays}`);
+            const allowedToBorrow = (0, leave_utils_1.canBorrowLeave)(user, leaveDays, availableBalance);
+            if (!allowedToBorrow) {
+                throw new Error(`Insufficient available balance. You have ${metrics.balance} days, but ${pendingDays} days are already tied up in pending/approved requests. Borrowing is either disabled or you've exceeded the limit. Available: ${availableBalance}, Needed: ${leaveDays}`);
+            }
         }
         const initialStatus = relieverId ? 'SUBMITTED' : 'MANAGER_REVIEW';
         const leave = await client_1.default.leaveRequest.create({

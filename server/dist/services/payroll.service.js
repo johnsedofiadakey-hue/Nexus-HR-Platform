@@ -140,7 +140,7 @@ const createPayrollRun = async (organizationId, month, year, employeeIds, adjust
     const adjMap = new Map((adjustments || []).map(a => [a.employeeId, a]));
     for (const emp of employees) {
         const base = Number(emp.salary) || 0;
-        const currency = emp.currency || 'GNF';
+        const currency = emp.currency || 'GHS';
         const adj = adjMap.get(emp.id);
         const overtime = adj?.overtime ?? 0;
         const bonus = adj?.bonus ?? 0;
@@ -199,12 +199,25 @@ const approvePayrollRun = async (organizationId, runId, approverId) => {
     });
     if (!run)
         throw new Error('Payroll run not found');
-    if (run.status !== 'DRAFT')
-        throw new Error('Only DRAFT runs can be approved');
+    if (run.status !== 'DRAFT' && run.status !== 'PENDING_HR' && run.status !== 'PENDING_MD') {
+        throw new Error('Run is not in an approvable state');
+    }
+    // Multi-stage transitions
+    let nextStatus = 'APPROVED';
+    if (run.status === 'DRAFT')
+        nextStatus = 'PENDING_HR';
+    else if (run.status === 'PENDING_HR')
+        nextStatus = 'PENDING_MD';
+    else if (run.status === 'PENDING_MD')
+        nextStatus = 'APPROVED';
     await client_1.default.payrollRun.updateMany({
         where: { id: runId, organizationId },
-        data: { status: 'APPROVED', approvedBy: approverId, approvedAt: new Date() }
+        data: { status: nextStatus, approvedBy: approverId, approvedAt: new Date() }
     });
+    // Only finalize deductions and send emails if moving to APPROVED
+    if (nextStatus !== 'APPROVED') {
+        return client_1.default.payrollRun.findFirst({ where: { id: runId, organizationId } });
+    }
     // Finalize auto-deductions
     await client_1.default.expenseClaim.updateMany({
         where: { paidInRunId: runId, organizationId },

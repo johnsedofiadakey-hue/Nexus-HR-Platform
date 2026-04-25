@@ -103,7 +103,7 @@ exports.DevPinSchema = zod_1.z.object({
     pin: zod_1.z.string().min(4).max(20),
 });
 // ── User / Employee ──────────────────────────────────────────────────────
-const ROLES = ['DEV', 'MD', 'DIRECTOR', 'MANAGER', 'MID_MANAGER', 'SUPERVISOR', 'IT_MANAGER', 'HR_OFFICER', 'STAFF', 'CASUAL'];
+const ROLES = ['DEV', 'MD', 'DIRECTOR', 'MANAGER', 'MID_MANAGER', 'SUPERVISOR', 'IT_MANAGER', 'IT_ADMIN', 'HR_OFFICER', 'STAFF', 'CASUAL'];
 const GENDERS = ['Male', 'Female', 'Other', 'Prefer not to say'];
 const USER_STATUSES = ['ACTIVE', 'PROBATION', 'NOTICE_PERIOD', 'TERMINATED', 'SUSPENDED'];
 const CURRENCIES = ['GHS', 'USD', 'EUR', 'GBP', 'GNF', 'NGN', 'KES', 'XOF'];
@@ -113,13 +113,13 @@ exports.CreateUserSchema = zod_1.z.object({
     role: zod_1.z.enum(ROLES),
     jobTitle: str(100),
     department: optStr(100),
-    departmentId: zod_1.z.coerce.number().int().positive().optional().nullable(),
+    departmentId: zod_1.z.coerce.number().int().positive().optional().nullable().or(zod_1.z.literal('')),
     employeeCode: optStr(30),
     password: optStr(128),
     status: zod_1.z.enum(USER_STATUSES).optional(),
     joinDate: optDateStr,
     supervisorId: optUuid,
-    gender: zod_1.z.enum(GENDERS).optional(),
+    gender: zod_1.z.enum(GENDERS).optional().or(zod_1.z.literal('')),
     nationalId: optStr(30),
     contactNumber: optStr(20),
     address: optStr(300),
@@ -127,9 +127,9 @@ exports.CreateUserSchema = zod_1.z.object({
     nextOfKinRelation: optStr(50),
     nextOfKinContact: optStr(20),
     salary: nonNegativeNum.max(999999999).optional().nullable(),
-    currency: zod_1.z.enum(CURRENCIES).optional(),
+    currency: zod_1.z.enum(CURRENCIES).optional().or(zod_1.z.literal('')),
     dob: optDateStr,
-    subUnitId: zod_1.z.coerce.number().int().positive().optional().nullable(),
+    subUnitId: zod_1.z.coerce.number().int().positive().optional().nullable().or(zod_1.z.literal('')),
 });
 exports.UpdateUserSchema = exports.CreateUserSchema.partial();
 // ── Leave ─────────────────────────────────────────────────────────────────
