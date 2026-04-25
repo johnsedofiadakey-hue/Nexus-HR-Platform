@@ -102,8 +102,8 @@ const server = http.createServer(app);
 app.use((req: Request, res: Response, next: NextFunction) => {
   const origin = req.headers.origin;
   const allowed = [
-    'https://mcbauchemie-hrm-gh.web.app',
-    'https://mcbauchemie-hrm-gh.firebaseapp.com',
+    'https://mcb-hrm-ghana.web.app',
+    'https://mcb-hrm-ghana.firebaseapp.com',
     // Add custom domain later: 'https://hrm.mc-bauchemie.com.gh',
     'http://localhost:3000',
     'http://localhost:5173',
