@@ -33,7 +33,7 @@
         } catch (e) {}
 
         const SCOPED_PREF_KEY = BASE_PREF_KEY + '_' + orgId;
-        const savedTheme = localStorage.getItem(SCOPED_PREF_KEY) || localStorage.getItem(BASE_PREF_KEY) || 'premium-monolith';
+        const savedTheme = localStorage.getItem(SCOPED_PREF_KEY) || localStorage.getItem(BASE_PREF_KEY) || 'premium-aero';
         document.documentElement.setAttribute('data-theme', savedTheme);
         
         // Atomic Defaults

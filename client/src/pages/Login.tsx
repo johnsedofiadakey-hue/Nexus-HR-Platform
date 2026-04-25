@@ -106,7 +106,7 @@ const Login = () => {
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary)] to-[var(--accent)]">{companyName}.</span>
                             </h1>
                             <p className="text-lg font-medium text-[var(--text-muted)] max-w-md italic">
-                                Access your enterprise workspace to manage personnel, payroll, and organizational growth.
+                                Sign in to manage your work, view your payroll, and track your progress.
                             </p>
                         </div>
                     </div>
@@ -128,13 +128,13 @@ const Login = () => {
 
                     <div className="flex items-center gap-10">
                         <div className="flex flex-col gap-1">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-50">Security Protocol</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-50">Data Protection</p>
                             <p className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2">
-                                <ShieldCheck size={14} className="text-emerald-500" /> AES-256 Encrypted
+                                <ShieldCheck size={14} className="text-emerald-500" /> Secure Encryption
                             </p>
                         </div>
                         <div className="flex flex-col gap-1">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-50">Deployment Node</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-50">System Location</p>
                             <p className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2">
                                 <Globe size={14} className="text-blue-500" /> West Africa Central
                             </p>
@@ -166,7 +166,7 @@ const Login = () => {
                         
                         <div className="mb-12 text-left">
                             <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tight uppercase italic leading-none mb-3">Sign In</h2>
-                            <p className="text-[var(--text-muted)] text-sm font-medium">Please authorize to enter the secure environment.</p>
+                            <p className="text-[var(--text-muted)] text-sm font-medium">Please enter your details to access Nexus HR.</p>
                         </div>
 
                         <AnimatePresence mode="wait">
@@ -184,8 +184,8 @@ const Login = () => {
                         </AnimatePresence>
 
                         <form onSubmit={handleLogin} className="space-y-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)] ml-2">Identity Address</label>
+                             <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)] ml-2">Work Email</label>
                                 <div className="relative group">
                                     <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary)] transition-colors">
                                         <Mail size={20} strokeWidth={2.5} />
@@ -195,16 +195,16 @@ const Login = () => {
                                         value={formData.email}
                                         onChange={e => setFormData(f => ({ ...f, email: e.target.value }))}
                                         className="nx-input !h-[72px] !pl-16 !bg-[var(--bg-elevated)]/50 !rounded-[1.8rem] !text-base focus:!ring-[var(--primary)]/10"
-                                        placeholder="Enter your work email"
+                                        placeholder="Enter your email"
                                         required
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-3">
+                             <div className="space-y-3">
                                 <div className="flex justify-between items-center px-2">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">Access Key</label>
-                                    <button type="button" className="text-[10px] font-black uppercase tracking-widest text-[var(--primary)] hover:underline decoration-2 underline-offset-4">Reset Key?</button>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">Password</label>
+                                    <button type="button" className="text-[10px] font-black uppercase tracking-widest text-[var(--primary)] hover:underline decoration-2 underline-offset-4">Forgot Password?</button>
                                 </div>
                                 <div className="relative group">
                                     <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary)] transition-colors">
@@ -238,8 +238,8 @@ const Login = () => {
                                 {loading ? (
                                     <Loader2 size={24} className="animate-spin" />
                                 ) : (
-                                    <div className="flex items-center gap-4">
-                                        <span>Authorize & Enter</span>
+                                     <div className="flex items-center gap-4">
+                                        <span>Sign In</span>
                                         <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
                                     </div>
                                 )}
