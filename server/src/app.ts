@@ -213,7 +213,8 @@ app.get('/api/health', async (req, res) => {
     return res.json({ 
       status: isBooted ? 'UP' : 'BOOTING', 
       database: 'CONNECTED',
-      version: '1.0.0-MCB-GH',
+      version: '1.0.2-MCB-GH',
+      last_sync: '2026-04-25T18:53:00Z',
       client: 'MC-Bauchemie Ghana',
       bootComplete: isBooted,
       nodeEnv: process.env.NODE_ENV 
