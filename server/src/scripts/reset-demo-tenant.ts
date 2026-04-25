@@ -18,20 +18,22 @@ export const resetDemoTenant = async () => {
             prisma.notification.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
             prisma.announcement.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
             prisma.leaveRequest.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
-            prisma.appraisal.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
+            prisma.appraisalReview.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
+            prisma.appraisalPacket.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
+            prisma.performanceScore.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
+            prisma.performanceReviewV2.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
             prisma.payrollItem.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
-            prisma.payrollRecord.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
-            prisma.biometricLog.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
-            prisma.attendanceRecord.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
+            prisma.payrollRun.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
+            prisma.attendanceLog.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
             prisma.assetAssignment.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
-            prisma.document.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
+            prisma.employeeDocument.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
+            prisma.disciplinaryCase.deleteMany({ where: { organizationId: DEMO_TENANT_ID } }),
         ];
 
         await prisma.$transaction(deleteOps);
         console.log(`[Cron] 🗑️  Transactional data wiped.`);
 
         // 2. Master Identity Wipe
-        // We delete users after their related transactional data is gone
         await prisma.user.deleteMany({ where: { organizationId: DEMO_TENANT_ID } });
         console.log(`[Cron] 🗑️  Master identities wiped.`);
 
