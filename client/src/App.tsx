@@ -472,7 +472,7 @@ export default function App() {
   return (
     <PageErrorBoundary>
       <ThemeProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/portal">
           <AIProvider>
             <AppContent />
           </AIProvider>

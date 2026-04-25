@@ -1,152 +1,167 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { DemoLauncher } from '../components/DemoLauncher.tsx';
-import { ReviewCortex } from '../components/ReviewCortex.tsx';
+import { Shield, Users, Clock, BrainCircuit, Zap, ArrowRight, Lock } from 'lucide-react';
 ---
 
-<Layout title="The Enterprise Operating System">
-	<main>
-		<!-- Hero Section -->
-		<section class="relative min-h-screen flex items-center justify-center pt-20 pb-32 px-6 overflow-hidden">
-			<!-- Background Visuals -->
-			<div class="absolute inset-0 z-0">
-				<div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-nexus-blue-600/10 blur-[120px] rounded-full animate-pulse-slow"></div>
-				<div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
+<Layout title="Nexus HRM | The Enterprise Workforce OS">
+	<main class="bg-[#F8FAFC]">
+		<!-- Global Navigation (Zoho Inspired) -->
+		<nav class="fixed top-0 left-0 right-0 z-[100] bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4">
+			<div class="max-w-7xl mx-auto flex justify-between items-center">
+				<div class="flex items-center gap-3">
+					<div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+						<Shield size={18} />
+					</div>
+					<span class="text-xl font-bold tracking-tight text-slate-900">Nexus<span class="text-indigo-600">HRM</span></span>
+				</div>
+				<div class="hidden md:flex items-center gap-8">
+					<a href="#features" class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Features</a>
+					<a href="#solutions" class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Solutions</a>
+					<a href="#security" class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Security</a>
+					<a href="/portal" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
+						Launch Demo App
+					</a>
+				</div>
 			</div>
+		</nav>
 
-			<div class="max-w-7xl mx-auto relative z-10 text-center">
-				<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 animate-fade-in-up">
-					<div class="w-2 h-2 rounded-full bg-nexus-blue-500 animate-pulse"></div>
-					<span class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Nexus Platform Core v4.1.6</span>
+		<!-- Hero Section -->
+		<section class="relative pt-40 pb-32 px-6 overflow-hidden bg-gradient-to-b from-slate-50 to-white">
+			<div class="max-w-7xl mx-auto text-center relative z-10">
+				<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 mb-8">
+					<span class="text-[10px] font-bold uppercase tracking-widest text-indigo-600">The Modern Workforce Blueprint</span>
 				</div>
 				
-				<h1 class="text-6xl md:text-9xl font-black tracking-tighter leading-[0.85] mb-12 uppercase italic animate-fade-in-up">
-					The Operating <br/>
-					System for <br/>
-					<span class="text-nexus-blue-500">Human Potential.</span>
+				<h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 leading-[1.1]">
+					Agile HR Management <br/>
+					for the <span class="text-indigo-600">Modern Enterprise.</span>
 				</h1>
 
-				<p class="max-w-2xl mx-auto text-xl text-slate-400 font-medium leading-relaxed mb-16 animate-fade-in-up" style="animation-delay: 0.1s">
-					Nexus redefines human resource management with recursive intelligence. Transition from fragmented spreadsheets to a singular, unified enterprise brain.
+				<p class="max-w-3xl mx-auto text-xl text-slate-600 font-medium leading-relaxed mb-12">
+					Nexus HRM simplifies your employee lifecycle. From strategic onboarding to precise payroll and performance analytics, manage your entire workforce through a singular, intelligent command center.
 				</p>
 
-				<div class="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up" style="animation-delay: 0.2s">
-					<a href="#how-it-works" class="btn-primary w-full sm:w-auto text-center">
-						Explore Infrastructure
+				<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+					<a href="/portal" class="w-full sm:w-auto px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-indigo-700 transition-all shadow-xl">
+						Explore the Demo Hub <ArrowRight size={18} />
 					</a>
-					<a href="#demo-hub" class="btn-secondary w-full sm:w-auto text-center">
-						Zero-Password Demo
+					<a href="#features" class="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all">
+						Core Capabilities
 					</a>
+				</div>
+			</div>
+
+			<!-- Product Preview -->
+			<div class="max-w-6xl mx-auto mt-24 relative px-4">
+				<div class="rounded-[2rem] overflow-hidden border border-slate-200 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] bg-white p-2">
+					<img 
+						src="/nexus-preview-hero.png" 
+						alt="Nexus Dashboard Preview" 
+						class="w-full h-auto rounded-[1.5rem]"
+					/>
 				</div>
 			</div>
 		</section>
 
-		<!-- Demo Hub Section -->
-		<section id="demo-hub" class="py-32 px-6 relative bg-nexus-slate-950">
+		<!-- Features Grid (Zoho People Inspired) -->
+		<section id="features" class="py-32 px-6 bg-white">
 			<div class="max-w-7xl mx-auto">
 				<div class="text-center mb-24">
-					<h2 class="text-5xl md:text-7xl font-black uppercase italic tracking-tighter mb-8">One-Click Entry.</h2>
-					<p class="text-lg text-slate-400 font-medium">Select a role to instantly simulate the Nexus experience. No credentials required.</p>
+					<h2 class="text-xs font-bold text-indigo-600 uppercase tracking-[0.3em] mb-4">Powerful Features</h2>
+					<h3 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">Everything you need to <br/> scale your human capital.</h3>
 				</div>
-				<DemoLauncher client:load />
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+					<!-- Core HR -->
+					<div class="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-indigo-500/5 transition-all group">
+						<div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-8 group-hover:scale-110 transition-transform">
+							<Users size={28} />
+						</div>
+						<h4 class="text-2xl font-bold text-slate-900 mb-4">Workforce Database</h4>
+						<p class="text-slate-600 leading-relaxed font-medium">Keep your employee records organized and accessible. Manage documentation, personal info, and organizational hierarchy in one place.</p>
+					</div>
+
+					<!-- Time & Attendance -->
+					<div class="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-indigo-500/5 transition-all group">
+						<div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 mb-8 group-hover:scale-110 transition-transform">
+							<Clock size={28} />
+						</div>
+						<h4 class="text-2xl font-bold text-slate-900 mb-4">Time & Attendance</h4>
+						<p class="text-slate-600 leading-relaxed font-medium">Hardware-agnostic tracking with biometric integration, geo-fencing, and real-time presence verification for every staff member.</p>
+					</div>
+
+					<!-- Performance -->
+					<div class="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-indigo-500/5 transition-all group">
+						<div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-8 group-hover:scale-110 transition-transform">
+							<BrainCircuit size={28} />
+						</div>
+						<h4 class="text-2xl font-bold text-slate-900 mb-4">Agile Performance</h4>
+						<p class="text-slate-600 leading-relaxed font-medium">Continuous feedback cycles, KRA tracking, and 360-degree appraisals designed to foster employee growth and strategic alignment.</p>
+					</div>
+
+					<!-- Payroll -->
+					<div class="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-indigo-500/5 transition-all group">
+						<div class="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center text-rose-600 mb-8 group-hover:scale-110 transition-transform">
+							<Zap size={28} />
+						</div>
+						<h4 class="text-2xl font-bold text-slate-900 mb-4">Nuclear Payroll</h4>
+						<p class="text-slate-600 leading-relaxed font-medium">Automated disbursements with built-in tax compliance. Process entire departmental payrolls with a single, verified click.</p>
+					</div>
+
+					<!-- Self Service -->
+					<div class="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-indigo-500/5 transition-all group">
+						<div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 mb-8 group-hover:scale-110 transition-transform">
+							<Users size={28} />
+						</div>
+						<h4 class="text-2xl font-bold text-slate-900 mb-4">Employee Hub</h4>
+						<p class="text-slate-600 leading-relaxed font-medium">Self-service portal for staff to request leave, view payslips, and manage their own professional growth pathways.</p>
+					</div>
+
+					<!-- Analytics -->
+					<div class="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-indigo-500/5 transition-all group">
+						<div class="w-14 h-14 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-700 mb-8 group-hover:scale-110 transition-transform">
+							<BrainCircuit size={28} />
+						</div>
+						<h4 class="text-2xl font-bold text-slate-900 mb-4">Case Management</h4>
+						<p class="text-slate-600 leading-relaxed font-medium">Structured HR help desk to resolve queries faster. Streamline communication between employees and the HR department.</p>
+					</div>
+				</div>
 			</div>
 		</section>
 
-		<!-- Capabilities Grid -->
-		<section id="how-it-works" class="py-32 px-6 bg-white text-nexus-slate-950 rounded-[4rem] mx-4 my-8">
-			<div class="max-w-7xl mx-auto">
-				<div class="flex flex-col lg:flex-row justify-between items-end gap-12 mb-24">
-					<div class="max-w-2xl">
-						<h2 class="text-5xl md:text-7xl font-black uppercase italic tracking-tighter mb-8 leading-none">High Impact <br/> Core Modules</h2>
-						<p class="text-lg text-slate-500 font-medium">Nexus focuses on high-impact operational zones, automating the complex and securing the essential for modern enterprises.</p>
-					</div>
-					<div class="hidden lg:block pb-4">
-						<span class="text-xs font-black uppercase tracking-[0.4em] text-nexus-blue-600">Enterprise Ready</span>
-					</div>
-				</div>
-
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-					<div class="p-12 bg-slate-50 rounded-[3rem] border border-slate-100 hover:shadow-2xl transition-all group">
-						<div class="w-16 h-16 bg-nexus-blue-600 rounded-2xl flex items-center justify-center text-white mb-10 group-hover:scale-110 transition-transform">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.4-1.4 1"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/><path d="M3 7v10c0 1.1.9 2 2 2h2"/><path d="M17 19h2c1.1 0 2-.9 2-2V7"/></svg>
-						</div>
-						<h3 class="text-3xl font-black uppercase italic mb-6">Nuclear Payroll</h3>
-						<p class="text-slate-500 font-medium leading-relaxed mb-8">Instant disbursement with 0.001% margin for error. Compliant with 40+ global tax regions automatically.</p>
-						<div class="h-1 w-12 bg-nexus-blue-600 rounded-full"></div>
-					</div>
-
-					<div class="p-12 bg-slate-50 rounded-[3rem] border border-slate-100 hover:shadow-2xl transition-all group">
-						<div class="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white mb-10 group-hover:scale-110 transition-transform">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z"/><path d="M12 18v-6"/><path d="M12 8h.01"/></svg>
-						</div>
-						<h3 class="text-3xl font-black uppercase italic mb-6">Biometric Presence</h3>
-						<p class="text-slate-500 font-medium leading-relaxed mb-8">Hardware-agnostic staff tracking. Real-time presence verification with anti-spoofing intelligence.</p>
-						<div class="h-1 w-12 bg-emerald-500 rounded-full"></div>
-					</div>
-
-					<div class="p-12 bg-slate-50 rounded-[3rem] border border-slate-100 hover:shadow-2xl transition-all group">
-						<div class="w-16 h-16 bg-nexus-slate-900 rounded-2xl flex items-center justify-center text-white mb-10 group-hover:scale-110 transition-transform">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-5c1.62-2.2 5-3 5-3"/><path d="M12 15v5s3.03-.55 5-2c2.2-1.62 3-5 3-5"/></svg>
-						</div>
-						<h3 class="text-3xl font-black uppercase italic mb-6">Cortex AI</h3>
-						<p class="text-slate-500 font-medium leading-relaxed mb-8">Recursive employee appraisals. AI-driven talent growth maps and automated promotion triggers.</p>
-						<div class="h-1 w-12 bg-nexus-slate-900 rounded-full"></div>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- Review Engine Exhibit -->
-		<section class="py-32 px-6 bg-nexus-slate-950 overflow-hidden">
-			<div class="max-w-5xl mx-auto">
-				<div class="text-center mb-16">
-					<h2 class="text-xs font-black uppercase tracking-[0.4em] text-nexus-blue-500 mb-4">Enterprise Resolution</h2>
-					<p class="text-slate-400 font-medium">Strategic validation from the world's most aggressive teams.</p>
-				</div>
-				<ReviewCortex client:load />
-			</div>
-		</section>
-
-		<!-- Security & Infrastructure Exhibit -->
-		<section id="security" class="py-32 px-6">
+		<!-- Security Trust -->
+		<section id="security" class="py-32 px-6 bg-slate-900 text-white">
 			<div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
 				<div class="lg:w-1/2">
-					<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-nexus-blue-600/10 border border-nexus-blue-600/20 mb-8">
-						<Shield className="w-4 h-4 text-nexus-blue-500" />
-						<span class="text-[10px] font-black uppercase tracking-[0.3em] text-nexus-blue-500">Security Shell 1.0</span>
-					</div>
-					<h2 class="text-5xl md:text-7xl font-black uppercase italic tracking-tighter mb-8 leading-none">Enterprise <br/> Hardened.</h2>
-					<p class="text-lg text-slate-400 font-medium leading-relaxed mb-12">
-						Nexus is built on a defensive architecture. Every byte of tenant data is isolated within an encrypted vault, guarded by biometric-first identity protocols.
+					<h2 class="text-xs font-bold text-indigo-400 uppercase tracking-[0.4em] mb-6">Enterprise Grade</h2>
+					<h3 class="text-5xl font-black tracking-tight mb-8">Data security is in <br/> our corporate DNA.</h3>
+					<p class="text-lg text-slate-400 leading-relaxed mb-12 font-medium">
+						Nexus HRM is built with multi-layered security protocols. Every organization is isolated within its own secure vault, ensuring zero data leakage and 99.9% availability.
 					</p>
-					
-					<div class="grid grid-cols-2 gap-8">
-						<div>
-							<h4 class="text-2xl font-black italic uppercase mb-2">ISO 27001</h4>
-							<p class="text-sm text-slate-500 font-bold">Gold Standard Certification</p>
-						</div>
-						<div>
-							<h4 class="text-2xl font-black italic uppercase mb-2">SOC 2 TYPE II</h4>
-							<p class="text-sm text-slate-500 font-bold">Continuous Compliance</p>
-						</div>
-					</div>
-				</div>
-				<div class="lg:w-1/2 relative">
-					<div class="glass-card p-4">
-						<div class="bg-nexus-slate-950 rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl">
-							<div class="p-8 border-b border-white/5 flex items-center justify-between">
-								<div class="flex gap-2">
-									<div class="w-2 h-2 rounded-full bg-rose-500"></div>
-									<div class="w-2 h-2 rounded-full bg-amber-500"></div>
-									<div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+					<ul class="space-y-6">
+						{['Bank-grade Encryption', 'Multi-tenant Data Isolation', 'SOC 2 & GDPR Compliance', 'Biometric SSO Integration'].map(item => (
+							<li class="flex items-center gap-4 text-slate-300 font-bold">
+								<div class="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+									<Zap size={12} />
 								</div>
-								<span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 italic">DEFENSIVE_PROTOCOL.CORE</span>
+								{item}
+							</li>
+						))}
+					</ul>
+				</div>
+				<div class="lg:w-1/2">
+					<div class="p-1 bg-white/5 border border-white/10 rounded-[3rem] overflow-hidden">
+						<div class="bg-slate-950 p-12 rounded-[2.8rem]">
+							<div class="flex items-center gap-2 mb-10">
+								<div class="w-3 h-3 rounded-full bg-rose-500"></div>
+								<div class="w-3 h-3 rounded-full bg-amber-500"></div>
+								<div class="w-3 h-3 rounded-full bg-emerald-500"></div>
 							</div>
-							<div class="p-12 font-mono text-sm space-y-4">
-								<p class="text-emerald-500">>> INITIALIZING_ENCRYPTION_VAULT...</p>
-								<p class="text-slate-400">>> AUTHENTICATING TENANT: ACME_GHANA_DEMO_001</p>
-								<p class="text-slate-400">>> ROTATING QUANTUM_KEYS [SHA-512]</p>
-								<p class="text-nexus-blue-500">>> SYSTEM_STATUS: OPERATIONAL [SHIELD_ACTIVE]</p>
+							<div class="space-y-4 font-mono text-sm">
+								<p class="text-indigo-400"># Initializing Security Subsystem...</p>
+								<p class="text-slate-500">> Verifying HMAC Signature...</p>
+								<p class="text-slate-500">> Encrypting Storage Tier [AES-256]</p>
+								<p class="text-emerald-400">> SHIELD STATUS: OPERATIONAL</p>
 							</div>
 						</div>
 					</div>
@@ -154,19 +169,69 @@ import { ReviewCortex } from '../components/ReviewCortex.tsx';
 			</div>
 		</section>
 
-		<!-- Pricing / DM for Quote -->
-		<section id="pricing" class="py-32 px-6">
-			<div class="max-w-4xl mx-auto glass-card p-20 text-center relative overflow-hidden">
-				<div class="absolute -top-20 -right-20 w-64 h-64 bg-nexus-blue-600/10 blur-[80px] rounded-full"></div>
-				<h2 class="text-6xl md:text-8xl font-black uppercase italic tracking-tighter mb-8">Strategic <br/> Investment</h2>
-				<p class="text-xl text-slate-400 font-medium mb-16">
-					Nexus is an enterprise-scale commitment. We provide custom infrastructure calibrated to your organization size and geographic complexity.
-				</p>
-				<a href="mailto:sales@nexus.com?subject=Strategic Query" class="btn-primary px-16 py-6 text-lg tracking-widest uppercase">
-					Request Strategic Quote
-				</a>
-				<p class="mt-8 text-xs font-black text-slate-600 uppercase tracking-widest">Pricing defined by resolution capacity</p>
+		<!-- Footer -->
+		<footer class="bg-white border-t border-slate-200 pt-20 pb-10 px-6">
+			<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12 mb-20">
+				<div class="max-w-sm">
+					<div class="flex items-center gap-3 mb-6">
+						<div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+							<Shield size={18} />
+						</div>
+						<span class="text-xl font-bold tracking-tight text-slate-900">Nexus<span class="text-indigo-600">HRM</span></span>
+					</div>
+					<p class="text-slate-500 font-medium leading-relaxed">
+						The next generation of human resource management. Empowering global teams with intelligent workforce orchestration.
+					</p>
+				</div>
+				<div class="grid grid-cols-2 md:grid-cols-3 gap-16">
+					<div>
+						<h5 class="text-xs font-black uppercase tracking-widest text-slate-900 mb-6">Platform</h5>
+						<ul class="space-y-4 text-sm font-semibold text-slate-500">
+							<li><a href="#" class="hover:text-indigo-600 transition-colors">Features</a></li>
+							<li><a href="#" class="hover:text-indigo-600 transition-colors">Pricing</a></li>
+							<li><a href="#" class="hover:text-indigo-600 transition-colors">Integrations</a></li>
+						</ul>
+					</div>
+					<div>
+						<h5 class="text-xs font-black uppercase tracking-widest text-slate-900 mb-6">Security</h5>
+						<ul class="space-y-4 text-sm font-semibold text-slate-500">
+							<li><a href="#" class="hover:text-indigo-600 transition-colors">Compliance</a></li>
+							<li><a href="#" class="hover:text-indigo-600 transition-colors">Data Privacy</a></li>
+							<li><a href="#" class="hover:text-indigo-600 transition-colors">Trust Center</a></li>
+						</ul>
+					</div>
+					<div>
+						<h5 class="text-xs font-black uppercase tracking-widest text-slate-900 mb-6">Enterprise Hub</h5>
+						<ul class="space-y-4 text-sm font-semibold text-slate-500">
+							<li><a href="/portal" class="text-indigo-600 hover:underline">Demo Command Center</a></li>
+							<li>
+								<!-- Dev Account Access - Low Visibility -->
+								<a href="/portal/login?access=dev" class="opacity-20 hover:opacity-100 flex items-center gap-2 group transition-opacity">
+									<Lock size={12} class="group-hover:text-rose-500" />
+									<span class="text-[10px]">Development Access</span>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
 			</div>
-		</section>
+			<div class="max-w-7xl mx-auto border-t border-slate-100 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+				<p class="text-xs font-bold text-slate-400">© 2026 NEXUS CORE. ALL RIGHTS RESERVED.</p>
+				<div class="flex gap-8 text-xs font-bold text-slate-400">
+					<a href="#" class="hover:text-slate-600">Privacy Policy</a>
+					<a href="#" class="hover:text-slate-600">Terms of Service</a>
+				</div>
+			</div>
+		</footer>
 	</main>
 </Layout>
+
+<style>
+	.btn-primary {
+		@apply bg-indigo-600 text-white rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200;
+	}
+	.btn-secondary {
+		@apply bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all;
+	}
+</style>
+

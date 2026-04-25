@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "nexus-hr-platform"
-  }
+  },
+  "targets": {
+    "nexus-hr-platform": {
+      "hosting": {
+        "app": [
+          "nexus-hr-platform"
+        ],
+        "marketing": [
+          "nexus-marketing-showroom"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

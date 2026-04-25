@@ -1,39 +1,23 @@
 {
   "hosting": {
-    "public": "client/dist",
+    "public": "combined_dist",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "headers": [
-      {
-        "source": "/**",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          }
-        ]
-      },
-      {
-        "source": "**/*.@(js|css|png|jpg|jpeg|gif|svg|ico)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "max-age=0, must-revalidate"
-          }
-        ]
-      }
-    ],
     "rewrites": [
       {
-        "source": "/__/auth/**",
-        "destination": "/__/auth/**"
+        "source": "/portal/**",
+        "destination": "/portal/index.html"
       },
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/login",
+        "destination": "/portal/index.html"
+      },
+      {
+        "source": "/dashboard",
+        "destination": "/portal/index.html"
       }
     ]
   }
