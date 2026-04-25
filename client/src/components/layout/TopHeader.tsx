@@ -93,7 +93,7 @@ const TopHeader = ({ onMenuClick, isCollapsed = false }: TopHeaderProps) => {
             {/* Identity & Actions */}
             <div className="flex items-center gap-3 sm:gap-6 lg:gap-10">
                 {/* Nexus AI Insight Trigger */}
-                {isAIEnabled && (
+                {isAIEnabled && (user?.rank || 0) >= 70 && (
                     <button 
                         onClick={() => setIsAIOpen(true)}
                          className={cn(

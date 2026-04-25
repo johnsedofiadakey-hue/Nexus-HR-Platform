@@ -15,7 +15,7 @@ import { usePersistentDraft } from '../hooks/usePersistentDraft';
 import { optimizeImage } from '../utils/image';
 
 
-const ROLES = ['DEV', 'MD', 'DIRECTOR', 'HR_OFFICER', 'IT_MANAGER', 'IT_ADMIN', 'MANAGER', 'SUPERVISOR', 'STAFF', 'CASUAL'];
+const ROLES = ['DEV', 'MD', 'DIRECTOR', 'MANAGER', 'MID_MANAGER', 'SUPERVISOR', 'IT_MANAGER', 'IT_ADMIN', 'HR_OFFICER', 'STAFF', 'CASUAL'];
 // ROLE_LABELS is now handled by i18n in the render
 
 const ROLE_THEMES: Record<string, string> = {
@@ -843,22 +843,22 @@ export default function EmployeeManagement() {
 
                  {modalTab === 'academic' && (
                      <div className="space-y-8 animate-in slide-in-from-right-4 fade-in duration-300">
-                         <FormField label="Highest Education / Academic Tier" value={form.education} onChange={(e: any) => setForm({ ...form, education: e.target.value })} placeholder="e.g., BSc. Information Technology" />
+                         <FormField label={t('employees.academic_tier', 'Highest Education')} value={form.education} onChange={(e: any) => setForm({ ...form, education: e.target.value })} placeholder={t('employees.academic_placeholder', "e.g. BSc Information Technology")} />
                          
                          <div className="space-y-4">
                              <div className="flex items-center justify-between">
-                                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">Professional Certifications</h4>
-                                 <button type="button" onClick={() => setForm({ ...form, certifications: [...form.certifications, { name: '', issueDate: '', authority: '' }] })} className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-emerald-500 transition-all">+ Add Certificate</button>
+                                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">{t('employees.certifications', 'Professional Certificates')}</h4>
+                                 <button type="button" onClick={() => setForm({ ...form, certifications: [...form.certifications, { name: '', issueDate: '', authority: '' }] })} className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-emerald-500 transition-all">+ {t('employees.add_certificate', 'Add Certificate')}</button>
                              </div>
                              
                              <div className="space-y-4">
                                  {form.certifications.length === 0 ? (
-                                    <div className="p-8 text-center border border-dashed border-[var(--border-subtle)] rounded-3xl bg-[var(--bg-elevated)]/20 text-[11px] font-medium text-[var(--text-muted)]">No professional certificates logged.</div>
+                                    <div className="p-8 text-center border border-dashed border-[var(--border-subtle)] rounded-3xl bg-[var(--bg-elevated)]/20 text-[11px] font-medium text-[var(--text-muted)]">{t('employees.no_certificates', 'No professional certificates logged.')}</div>
                                  ) : form.certifications.map((cert: any, i: number) => (
                                      <div key={i} className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-[var(--bg-elevated)]/30 p-4 rounded-3xl border border-[var(--border-subtle)]/50 items-start">
-                                         <div className="md:col-span-4"><FormField label="Certificate Name" value={cert.name} onChange={(e: any) => { const newCerts = [...form.certifications]; newCerts[i].name = e.target.value; setForm({ ...form, certifications: newCerts }); }} placeholder="e.g. PMP" /></div>
-                                         <div className="md:col-span-4"><FormField label="Issuing Authority" value={cert.authority} onChange={(e: any) => { const newCerts = [...form.certifications]; newCerts[i].authority = e.target.value; setForm({ ...form, certifications: newCerts }); }} placeholder="e.g. PMI" /></div>
-                                         <div className="md:col-span-3"><FormField label="Date Issued" type="date" value={cert.issueDate} onChange={(e: any) => { const newCerts = [...form.certifications]; newCerts[i].issueDate = e.target.value; setForm({ ...form, certifications: newCerts }); }} /></div>
+                                         <div className="md:col-span-4"><FormField label={t('employees.cert_name', 'Certificate Name')} value={cert.name} onChange={(e: any) => { const newCerts = [...form.certifications]; newCerts[i].name = e.target.value; setForm({ ...form, certifications: newCerts }); }} placeholder="e.g. PMP" /></div>
+                                         <div className="md:col-span-4"><FormField label={t('employees.issuing_authority', 'Issuing Authority')} value={cert.authority} onChange={(e: any) => { const newCerts = [...form.certifications]; newCerts[i].authority = e.target.value; setForm({ ...form, certifications: newCerts }); }} placeholder="e.g. PMI" /></div>
+                                         <div className="md:col-span-3"><FormField label={t('employees.date_issued', 'Date Issued')} type="date" value={cert.issueDate} onChange={(e: any) => { const newCerts = [...form.certifications]; newCerts[i].issueDate = e.target.value; setForm({ ...form, certifications: newCerts }); }} /></div>
                                          <div className="md:col-span-1 py-1 flex justify-end">
                                              <button type="button" onClick={() => { const newCerts = [...form.certifications]; newCerts.splice(i, 1); setForm({ ...form, certifications: newCerts }); }} className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-[var(--text-inverse)] transition-all"><X size={14} /></button>
                                          </div>
