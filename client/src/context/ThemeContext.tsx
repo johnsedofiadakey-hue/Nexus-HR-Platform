@@ -215,6 +215,20 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ['info', settingsToUse.infoColor || '#06b6d4'],
     ];
 
+    // --- SIDEBAR HEURISTIC SYNC: Force Light Sidebar in Aero/Canvas if old dark navy is detected ---
+    const isLightHeadingTheme = themeName === 'premium-aero' || themeName === 'premium-canvas';
+    const oldDarkNavy = '#0f172a';
+    const currentSidebarBg = settingsToUse.sidebarBg?.toLowerCase();
+    
+    if (isLightHeadingTheme && (currentSidebarBg === oldDarkNavy || !currentSidebarBg)) {
+      // Force professional Light Aero Gray if the database still holds the old default
+      const aeroGray = '#f8fafc';
+      tokens.push(['bg-sidebar', aeroGray]);
+      tokens.push(['sidebarText', '#64748b']);
+      tokens.push(['sidebarActive', 'rgba(0, 158, 227, 0.08)']);
+    }
+
+
     tokens.forEach(([key, value]) => {
       if (value) {
         // Use !important for the variables to override index.css root presets
@@ -264,8 +278,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         html[data-theme="${themeName}"] .border-purple-500 { border-color: var(--primary) !important; }
 
         /* Alpha/Opacity Variants for Overlays */
-        html[data-theme="${themeName}"] .bg-purple-500/5, html[data-theme="${themeName}"] .bg-purple-500/10, html[data-theme="${themeName}"] .bg-purple-500/20 { background-color: var(--primary-light) !important; opacity: 0.1; }
+        html[data-theme="${themeName}"] .bg-purple-500/5, html[data-theme="${themeName}"] .bg-purple-500/10, html[data-theme="${themeName}"] .bg-purple-500/20 { background-color: var(--primary) !important; opacity: 0.1; }
         html[data-theme="${themeName}"] .border-purple-500/20, html[data-theme="${themeName}"] .border-purple-500/30 { border-color: var(--primary) !important; opacity: 0.2; }
+        
+        /* Modal & Popup Overlord: Force consistency in overlays */
+        html[data-theme="${themeName}"] .bg-black/60, html[data-theme="${themeName}"] .bg-slate-900/80 { background-color: var(--bg-main) !important; opacity: 0.8; backdrop-filter: blur(4px); }
+        html[data-theme="${themeName}"] .bg-purple-50 { background-color: var(--primary) !important; opacity: 0.05; }
+        html[data-theme="${themeName}"] .text-purple-700 { color: var(--primary) !important; }
+        html[data-theme="${themeName}"] .border-purple-100 { border-color: var(--border-subtle) !important; }
+
 
 
         /* Status & Secondary Surface Catchers */

@@ -458,7 +458,7 @@ const TargetDashboard: React.FC = () => {
         {[
           { label: t('targets.total'), value: (activeTab === 'TEAM' ? teamTargets : myTargets).length, icon: Target, color: '#6366f1' },
           { label: t('targets.in_progress'), value: statusCounts['IN_PROGRESS'] || 0, icon: TrendingUp, color: '#f59e0b' },
-          { label: t('targets.under_review'), value: statusCounts['UNDER_REVIEW'] || 0, icon: Clock, color: '#a855f7' },
+          { label: t('targets.under_review'), value: statusCounts['UNDER_REVIEW'] || 0, icon: Clock, color: 'var(--primary)' },
           { label: t('targets.completed'), value: statusCounts['COMPLETED'] || 0, icon: CheckCircle, color: '#10b981' },
         ].map(s => (
           <div key={s.label} className="nx-card p-5 group hover:border-[var(--primary)]/30 transition-all">

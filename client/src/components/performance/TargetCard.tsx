@@ -53,7 +53,7 @@ const getStatusConfig = (t: any): Record<string, { label: string; badge: string;
   ASSIGNED: { label: t('targets.status.ASSIGNED'), badge: 'bg-indigo-50 text-indigo-700 border-indigo-100', color: '#6366f1', ring: 'ring-indigo-400/20' },
   ACKNOWLEDGED: { label: t('targets.status.ACKNOWLEDGED'), badge: 'bg-blue-50 text-blue-700 border-blue-100', color: '#3b82f6', ring: 'ring-blue-400/20' },
   IN_PROGRESS: { label: t('targets.status.IN_PROGRESS'), badge: 'bg-amber-50 text-amber-700 border-amber-100', color: '#f59e0b', ring: 'ring-amber-400/20' },
-  UNDER_REVIEW: { label: t('targets.status.UNDER_REVIEW'), badge: 'bg-purple-50 text-purple-700 border-purple-100', color: '#a855f7', ring: 'ring-purple-400/20' },
+  UNDER_REVIEW: { label: t('targets.status.UNDER_REVIEW'), badge: 'bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/20', color: 'var(--primary)', ring: 'ring-[var(--primary)]/20' },
   COMPLETED: { label: t('targets.status.COMPLETED'), badge: 'bg-emerald-50 text-emerald-700 border-emerald-100', color: '#10b981', ring: 'ring-emerald-400/20' },
   OVERDUE: { label: t('targets.status.OVERDUE'), badge: 'bg-rose-50 text-rose-700 border-rose-100', color: '#f43f5e', ring: 'ring-rose-400/20' },
   CANCELLED: { label: t('targets.status.CANCELLED'), badge: 'bg-slate-100 text-slate-600 border-slate-200', color: '#64748b', ring: 'ring-slate-400/20' },
