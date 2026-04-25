@@ -105,8 +105,8 @@ const ManagerDashboard = () => {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
-          className="premium-glass border-glow-premium p-10 bg-gradient-to-br from-purple-500/5 to-transparent">
-          <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-purple-400 mb-10 flex items-center gap-3">
+          className="premium-glass border-glow-premium p-10 bg-gradient-to-br from-[var(--primary)]/5 to-transparent">
+          <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-[var(--primary)] mb-10 flex items-center gap-3">
             <Award size={16} />
             {t('manager_dashboard.team_growth')}
           </h3>
@@ -117,12 +117,12 @@ const ManagerDashboard = () => {
                { label: t('md_dashboard.growth'), icon: Award },
              ].map((step, idx) => (
                <div key={idx} className="flex flex-col items-center gap-4 flex-1 relative">
-                  <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border-2 transition-all duration-500 ${idx === 1 ? 'bg-purple-500 border-purple-500 text-white shadow-2xl shadow-purple-500/40 scale-110' : 'bg-purple-500/20 border-purple-500/30 text-purple-400'}`}>
+                  <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border-2 transition-all duration-500 ${idx === 1 ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-2xl shadow-[var(--primary)]/40 scale-110' : 'bg-[var(--primary)]/20 border-[var(--primary)]/30 text-[var(--primary)]'}`}>
                     <step.icon size={24} />
                   </div>
                   <span className={`text-[9px] font-black uppercase tracking-widest text-center ${idx === 1 ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>{step.label}</span>
                   {idx < 2 && (
-                    <div className="absolute top-8 -right-4 w-8 h-[1px] bg-gradient-to-r from-purple-500/30 to-transparent" />
+                    <div className="absolute top-8 -right-4 w-8 h-[1px] bg-gradient-to-r from-[var(--primary)]/30 to-transparent" />
                   )}
                </div>
              ))}
@@ -222,12 +222,12 @@ const ManagerDashboard = () => {
             </Link>
             <Link to="/reviews/team" className="premium-glass border-glow-premium p-8 group no-underline hover-float shadow-xl">
                <div className="flex items-center justify-between mb-8">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center border border-[var(--primary)]/20">
                     <ClipboardCheck size={22} />
                   </div>
-                  <ArrowRight size={20} className="text-[var(--text-muted)] group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight size={20} className="text-[var(--text-muted)] group-hover:text-[var(--primary)] group-hover:translate-x-1 transition-all" />
                </div>
-               <h4 className="font-black text-xl text-[var(--text-primary)] uppercase tracking-tight mb-2 group-hover:text-purple-400 transition-colors">{t('manager_dashboard.pending_reviews')}</h4>
+               <h4 className="font-black text-xl text-[var(--text-primary)] uppercase tracking-tight mb-2 group-hover:text-[var(--primary)] transition-colors">{t('manager_dashboard.pending_reviews')}</h4>
                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 leading-relaxed">{t('manager_dashboard.growth_calibration')}</p>
             </Link>
           </div>

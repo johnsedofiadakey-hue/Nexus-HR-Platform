@@ -243,20 +243,30 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         html[data-theme="${themeName}"] .bg-indigo-600, 
         html[data-theme="${themeName}"] .bg-blue-600, 
         html[data-theme="${themeName}"] .bg-violet-600,
+        html[data-theme="${themeName}"] .bg-purple-600,
+        html[data-theme="${themeName}"] .bg-fuchsia-600,
         html[data-theme="${themeName}"] .bg-brand-primary,
-        html[data-theme="${themeName}"] .bg-purple-600 { background-color: var(--primary) !important; }
+        html[data-theme="${themeName}"] .bg-purple-500 { background-color: var(--primary) !important; }
         
         html[data-theme="${themeName}"] .text-indigo-600, 
         html[data-theme="${themeName}"] .text-blue-600,
         html[data-theme="${themeName}"] .text-violet-600,
+        html[data-theme="${themeName}"] .text-purple-600,
+        html[data-theme="${themeName}"] .text-purple-400,
         html[data-theme="${themeName}"] .text-brand-primary,
-        html[data-theme="${themeName}"] .text-purple-600 { color: var(--primary) !important; }
+        html[data-theme="${themeName}"] .text-purple-500 { color: var(--primary) !important; }
 
         html[data-theme="${themeName}"] .border-indigo-600, 
         html[data-theme="${themeName}"] .border-blue-600,
         html[data-theme="${themeName}"] .border-violet-600,
+        html[data-theme="${themeName}"] .border-purple-600,
         html[data-theme="${themeName}"] .border-brand-primary,
-        html[data-theme="${themeName}"] .border-purple-600 { border-color: var(--primary) !important; }
+        html[data-theme="${themeName}"] .border-purple-500 { border-color: var(--primary) !important; }
+
+        /* Alpha/Opacity Variants for Overlays */
+        html[data-theme="${themeName}"] .bg-purple-500/5, html[data-theme="${themeName}"] .bg-purple-500/10, html[data-theme="${themeName}"] .bg-purple-500/20 { background-color: var(--primary-light) !important; opacity: 0.1; }
+        html[data-theme="${themeName}"] .border-purple-500/20, html[data-theme="${themeName}"] .border-purple-500/30 { border-color: var(--primary) !important; opacity: 0.2; }
+
 
         /* Status & Secondary Surface Catchers */
         html[data-theme="${themeName}"] .bg-slate-200, html[data-theme="${themeName}"] .bg-gray-200 { background-color: var(--border-subtle) !important; }

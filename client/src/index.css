@@ -308,15 +308,15 @@ body {
   --bg-elevated: #f1f5f9;
   --bg-input: #ffffff;
   
-  --bg-sidebar: #0f172a;
-  --bg-sidebar-active: rgba(255, 255, 255, 0.1);
+  --bg-sidebar: #f1f5f9;
+  --bg-sidebar-active: rgba(0, 158, 227, 0.08);
   
   --text-primary: #1e293b;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
   --text-inverse: #ffffff;
-  --text-sidebar: #94a3b8;
-  --text-sidebar-active: #ffffff;
+  --text-sidebar: #64748b;
+  --text-sidebar-active: #009EE3;
   
   --border-subtle: #f1f5f9;
   --border-strong: #e2e8f0;
