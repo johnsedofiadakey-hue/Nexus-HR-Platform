@@ -10,15 +10,30 @@ import { toast } from '../../utils/toast';
 
 const SiteManagement = () => {
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'hero' | 'features' | 'security' | 'pricing'>('hero');
+  const [activeTab, setActiveTab] = useState<'hero' | 'features' | 'security' | 'pricing' | 'demo' | 'reviews'>('hero');
   
   const [siteData, setSiteData] = useState({
-    heroTitle: 'Manage Your Company Brain.',
-    heroSub: 'The Nexus HRM Platform is a recursive enterprise shell designed to handle the complexities of modern teams.',
+    heroTitle: 'The Operating System for Human Potential.',
+    heroSub: 'Nexus redefines human resource management with recursive intelligence. Transition from fragmented spreadsheets to a singular, unified enterprise brain.',
     pricingModel: 'Consultative Inquiry (DM for Price)',
     securityLevel: 'Military-Grade (SOC 2 Type II)',
-    contactEmail: 'strategic@nexus-core.com'
+    contactEmail: 'strategic@nexus-core.com',
+    demoTenantID: 'acme-ghana-demo-001',
+    isDemoResetting: false
   });
+
+  const [reviews, setReviews] = useState([
+    { id: 1, text: "The Operating System for Human Potential.", author: "Director of Operations, Enterprise Ltd.", tag: "EFFICIENCY_GAINED" },
+    { id: 2, text: "Atomic Nuclear Payroll is a game changer.", author: "CFO, Global Manufacturing", tag: "PAYROLL_SYNCED" }
+  ]);
+
+  const handleDemoReset = () => {
+    setSiteData({...siteData, isDemoResetting: true});
+    setTimeout(() => {
+      setSiteData({...siteData, isDemoResetting: false});
+      toast.success('Acme Ghana Demo Tenant Flushed & Re-Seeded');
+    }, 2000);
+  };
 
   const handleSave = () => {
     setIsSaving(true);
@@ -34,7 +49,7 @@ const SiteManagement = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">Showroom Control</h2>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">Nexus Public Interface Manager v1.0.4</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">Nexus Public Interface Manager v1.0.5</p>
         </div>
         <div className="flex gap-4">
            <button onClick={() => window.open('/', '_blank')} className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
@@ -51,12 +66,14 @@ const SiteManagement = () => {
         {/* Left Control Column */}
         <div className="lg:col-span-2 space-y-8">
            {/* Tab Switcher */}
-           <div className="flex gap-2 p-1 bg-slate-100/50 rounded-2xl w-fit">
+           <div className="flex flex-wrap gap-2 p-1 bg-slate-100/50 rounded-2xl w-fit">
               {[
                 { id: 'hero', label: 'Hero Display', icon: LayoutDashboard },
-                { id: 'features', label: 'Feature Exhibits', icon: Zap },
-                { id: 'security', label: 'Security Protocols', icon: Shield },
-                { id: 'pricing', label: 'Pricing Strategy', icon: Globe }
+                { id: 'features', label: 'Exhibits', icon: Zap },
+                { id: 'demo', label: 'Demo Hub', icon: RefreshCw },
+                { id: 'reviews', label: 'Social Proof', icon: MessageSquare },
+                { id: 'security', label: 'Security', icon: Shield },
+                { id: 'pricing', label: 'Pricing', icon: Globe }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -98,6 +115,70 @@ const SiteManagement = () => {
                       <span className="text-[10px] font-black uppercase tracking-widest">Headline is SEO Optimized</span>
                    </div>
                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Character Count: {siteData.heroTitle.length}/60</p>
+                </div>
+             </motion.div>
+           )}
+
+           {/* Demo Hub Control */}
+           {activeTab === 'demo' && (
+             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm space-y-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Simulation Engineering</h3>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Active Tenant: {siteData.demoTenantID}</p>
+                  </div>
+                  <button 
+                    onClick={handleDemoReset}
+                    disabled={siteData.isDemoResetting}
+                    className="flex items-center gap-3 px-6 py-3 bg-rose-50 text-rose-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-100 transition-all"
+                  >
+                    {siteData.isDemoResetting ? <RefreshCw className="animate-spin" size={14} /> : <AlertCircle size={14} />} 
+                    Force Tenant Flush
+                  </button>
+                </div>
+                
+                <div className="p-8 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="flex items-center gap-4 mb-6">
+                    <CheckCircle2 className="text-emerald-500" size={18} />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">Zero-Password Handshake Active</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-8">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Restricted Roles</label>
+                      <div className="space-y-3">
+                        {['Managing Director', 'Department Manager', 'Staff'].map(role => (
+                          <div key={role} className="flex items-center gap-3">
+                            <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-slate-200" />
+                            <span className="text-[10px] font-bold text-slate-600">{role}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+             </motion.div>
+           )}
+
+           {/* Reviews Manager */}
+           {activeTab === 'reviews' && (
+             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm space-y-8">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Social Proof Pipeline</h3>
+                  <button className="text-[10px] font-black uppercase tracking-widest text-blue-600">+ Add New Exhibit</button>
+                </div>
+                <div className="space-y-4">
+                  {reviews.map(review => (
+                    <div key={review.id} className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between group">
+                      <div>
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-1">{review.tag}</p>
+                        <p className="text-xs font-bold text-slate-900 max-w-md">"{review.text}"</p>
+                        <p className="text-[9px] font-medium text-slate-400 mt-2">— {review.author}</p>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-all">
+                        <button className="text-rose-500 p-2 hover:bg-rose-50 rounded-lg"><X size={14}/></button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
              </motion.div>
            )}

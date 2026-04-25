@@ -164,7 +164,14 @@ cron.schedule('0 8 * * *', async () => {
 
 cron.schedule('0 9 * * *', async () => {
   try { await RenewalService.checkExpirations(); } 
-  catch (e) { console.error('[CRON] Renewal check failed:', e); }
+  catch (e) { console.error('[Cron] Renewal check failed:', e); }
+});
+
+cron.schedule('0 2 * * *', async () => {
+  try {
+    const { resetDemoTenant } = await import('./scripts/reset-demo-tenant');
+    await resetDemoTenant();
+  } catch (e) { console.error('[Cron] Demo reset failed:', e); }
 });
 
 // ─── TELEMETRY & TENANT RESOLUTION ──────────────────────────────────────────

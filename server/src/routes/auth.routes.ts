@@ -3,6 +3,7 @@ import { authenticate } from '../middleware/auth.middleware';
 import { loginLimiter, passwordResetLimiter } from '../middleware/rate-limit.middleware';
 import { validate, LoginSchema, ChangePasswordSchema, ForgotPasswordSchema, ResetPasswordSchema, TenantSignupSchema } from '../middleware/validate.middleware';
 import * as authController from '../controllers/auth.controller';
+import * as demoController from '../controllers/demo.controller';
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.post('/change-password', authenticate, validate(ChangePasswordSchema), au
 router.post('/impersonate', authenticate, authController.impersonateTenant);
 
 router.post('/sandbox', authController.sandboxLogin);
+router.post('/demo-login', loginLimiter, demoController.demoLogin);
 
 export default router;

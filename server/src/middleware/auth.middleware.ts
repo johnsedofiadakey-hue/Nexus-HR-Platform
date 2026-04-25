@@ -9,6 +9,7 @@ declare global {
         name: string;
         organizationId: string | null;
         rank: number;
+        isDemo?: boolean;
       };
     }
   }
@@ -52,7 +53,22 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string; role?: string; name?: string; organizationId?: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: string; role?: string; name?: string; organizationId?: string; isDemo?: boolean };
+
+    // ── DEMO SAFETY GUARD ──
+    // Intercept destructive actions for demo sessions
+    const isDestructive = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
+    if (decoded.isDemo && isDestructive) {
+      // Allow only essential paths (e.g., self-audit, UI preferences)
+      const allowedPaths = ['/api/audit/heartbeat', '/api/user/prefs'];
+      if (!allowedPaths.includes(req.path)) {
+        return res.status(403).json({ 
+          error: 'Demo Mode: Modification restricted.', 
+          message: 'This action is disabled in the public showroom to maintain data integrity for other visitors.',
+          isDemo: true 
+        });
+      }
+    }
 
     // ── SANDBOX RESILIENCE BYPASS ──
     // If this is a sandbox token, we prioritize simulation stability over strict DB lookup
@@ -105,6 +121,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       organizationId: user.organizationId || null,
       rank: getRoleRank(user.role),
       departmentId: user.departmentId || null,
+      isDemo: decoded.isDemo || false,
     };
 
     // Run the rest of the request within the tenant context
