@@ -22,7 +22,7 @@ async function seedMCBGhana() {
       sidebarBg:      '#0A1628',
       sidebarText:    '#FFFFFF',
       sidebarActive:  '#009EE3',
-      themePreset:    'nexus-dark',
+      subdomain:      'mcb-hrm-ghana',
       isEnterprise:   true,
       isAiEnabled:    true,
       subscriptionPlan: 'ENTERPRISE',

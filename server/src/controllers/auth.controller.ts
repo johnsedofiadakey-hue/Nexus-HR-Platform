@@ -107,9 +107,14 @@ export const login = async (req: Request, res: Response) => {
     const orgId = user.organizationId || 'default-tenant';
     const tenantDomain = req.headers['x-tenant-domain'] as string;
 
-    if (tenantDomain && tenantDomain !== 'nexus-hr-platform.web.app' && tenantDomain !== 'localhost') {
+    if (tenantDomain && tenantDomain !== 'nexus-hr-platform.web.app' && tenantDomain !== 'localhost' && tenantDomain !== 'mcb-hrm-ghana.web.app') {
       const orgMatch = await prisma.organization.findFirst({
-        where: { customDomain: tenantDomain }
+        where: {
+          OR: [
+            { customDomain: tenantDomain },
+            { subdomain: tenantDomain.split('.')[0] }
+          ]
+        }
       });
       if (!orgMatch || orgMatch.id !== orgId) {
          await safeLogSecurityEvent({ email: normalizedEmail, success: false, organizationId: orgId, reason: 'CROSS_TENANT_LOGIN_ATTEMPT', req });
