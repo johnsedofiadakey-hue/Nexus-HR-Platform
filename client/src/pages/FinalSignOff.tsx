@@ -136,7 +136,7 @@ const FinalSignOff = () => {
   if (loading) return (
     <div className="flex flex-col items-center justify-center py-32 gap-4">
       <Loader2 size={32} className="animate-spin text-[var(--growth-light)]" />
-      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">Loading reviews...</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">Loading reviews...</p>
     </div>
   );
 
@@ -163,10 +163,10 @@ const FinalSignOff = () => {
         {/* Left Column: Awaiting Approval */}
         <div className="lg:col-span-4 space-y-6">
             <div className="relative group">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-[var(--growth-light)] transition-colors" size={18} />
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--growth-light)] transition-colors" size={18} />
                 <input 
                     placeholder="Search staff records..." 
-                    className="nx-input !pl-14 !bg-white/[0.02] border-white/5 focus:!border-[var(--growth)]/30"
+                    className="nx-input !pl-14 !bg-[var(--bg-card)]/50 border-[var(--border-subtle)] focus:!border-[var(--growth)]/30"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -191,7 +191,7 @@ const FinalSignOff = () => {
                         "p-6 rounded-[1.8rem] cursor-pointer transition-all duration-300 border relative overflow-hidden group/card",
                         selectedAppraisal?.id === appraisal.id
                           ? "bg-[var(--growth)]/10 border-[var(--growth)]/30 shadow-2xl shadow-[var(--growth)]/10"
-                          : "glass border-white/5 hover:border-white/10"
+                          : "nx-card border-[var(--border-subtle)] hover:border-[var(--primary)]/30"
                       )}
                     >
                       <div className="flex items-start justify-between mb-4">
@@ -200,25 +200,25 @@ const FinalSignOff = () => {
                               {appraisal?.employee?.fullName?.split(' ')?.map(n => n[0])?.join('')?.slice(0, 2) || '??'}
                            </div>
                            <div>
-                             <p className="font-bold text-sm text-white">{appraisal.employee.fullName}</p>
-                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-0.5">{appraisal.employee.jobTitle}</p>
+                             <p className="font-bold text-sm text-[var(--text-primary)]">{appraisal.employee.fullName}</p>
+                             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mt-0.5">{appraisal.employee.jobTitle}</p>
                            </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.03]">
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-[var(--border-subtle)]/30">
                          <div className="flex items-center gap-3">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-1.5">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1.5">
                                 <Clock size={12} className="text-[var(--growth-light)]" />
-                                Review Stage: <strong className="text-white text-xs ml-1">{(appraisal.currentStage || 'Unknown').replace(/_/g, ' ')}</strong>
+                                Review Stage: <strong className="text-[var(--text-primary)] text-xs ml-1">{(appraisal.currentStage || 'Unknown').replace(/_/g, ' ')}</strong>
                             </span>
                             <button 
                                 onClick={(e) => handleDeleteAppraisal(e, appraisal.id, appraisal.employee.fullName)}
-                                className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-600 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20"
+                                className="p-2 rounded-lg bg-[var(--primary)]/5 hover:bg-red-500/20 text-[var(--text-muted)] hover:text-red-400 transition-all border border-transparent hover:border-red-500/20"
                             >
                                 <Trash2 size={12} />
                             </button>
                          </div>
-                         <ChevronRight size={14} className="text-slate-700 group-hover/card:text-[var(--growth-light)] group-hover/card:translate-x-1 transition-all" />
+                         <ChevronRight size={14} className="text-[var(--text-muted)] group-hover/card:text-[var(--growth-light)] group-hover/card:translate-x-1 transition-all" />
                       </div>
                     </motion.div>
                   ))
@@ -244,13 +244,13 @@ const FinalSignOff = () => {
                   key={selectedAppraisal.id}
                   initial={{ opacity: 0, scale: 0.98, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  className="glass p-10 border-white/[0.05] relative bg-[#0a0c14]/40 backdrop-blur-3xl overflow-hidden rounded-[2.5rem]"
+                  className="nx-card p-10 border-[var(--border-subtle)] relative bg-[var(--bg-card)]/40 backdrop-blur-3xl overflow-hidden rounded-[2.5rem]"
                 >
-                  <div className="relative z-10 w-full mb-12 border-b border-white/[0.05] pb-10">
-                    <h2 className="text-4xl font-black text-white font-display tracking-tight uppercase leading-none mb-4">{selectedAppraisal.employee.fullName}</h2>
-                    <p className="text-xs font-bold text-slate-500 flex items-center gap-3">
+                  <div className="relative z-10 w-full mb-12 border-b border-[var(--border-subtle)]/50 pb-10">
+                    <h2 className="text-4xl font-black text-[var(--text-primary)] font-display tracking-tight uppercase leading-none mb-4">{selectedAppraisal.employee.fullName}</h2>
+                    <p className="text-xs font-bold text-[var(--text-muted)] flex items-center gap-3">
                         {selectedAppraisal.employee.jobTitle} 
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-800" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--border-subtle)]" />
                         {selectedAppraisal.cycle.title}
                     </p>
                   </div>
@@ -266,14 +266,14 @@ const FinalSignOff = () => {
                                 {selectedAppraisal.reviews.map(r => (
                                     <div key={r.id} className="space-y-2">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-[10px] font-bold text-slate-400 italic">{(r.reviewStage || '').replace(/_/g, ' ')}</span>
-                                            <span className="text-xs font-black text-white">{r.overallRating !== null ? `${r.overallRating}%` : '[Hidden]'}</span>
+                                            <span className="text-[10px] font-bold text-[var(--text-muted)] italic">{(r.reviewStage || '').replace(/_/g, ' ')}</span>
+                                            <span className="text-xs font-black text-[var(--text-primary)]">{r.overallRating !== null ? `${r.overallRating}%` : '[Hidden]'}</span>
                                         </div>
-                                        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                        <div className="w-full h-1 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
                                             <div className="h-full bg-[var(--primary)]/30" style={{ width: `${r.overallRating || 0}%` }} />
                                         </div>
                                         {r.summary && (
-                                            <p className="text-[9px] text-slate-500 leading-relaxed font-medium pl-3 border-l border-white/10 tracking-tighter italic">
+                                            <p className="text-[9px] text-[var(--text-muted)] leading-relaxed font-medium pl-3 border-l border-[var(--border-subtle)] tracking-tighter italic">
                                                 "{r.summary}"
                                             </p>
                                         )}
@@ -285,17 +285,17 @@ const FinalSignOff = () => {
                         <div className="flex flex-col gap-6">
                             <div className="flex-1 p-10 rounded-[2.5rem] bg-[var(--growth)]/5 border border-[var(--growth)]/10 flex flex-col items-center justify-center text-center">
                                 <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--growth-light)] mb-4 italic">Performance Score</p>
-                                <div className="text-7xl font-black text-white font-display leading-none mb-2">{selectedAppraisal.finalScore !== null && selectedAppraisal.finalScore !== undefined ? selectedAppraisal.finalScore : '[Hidden]'}</div>
-                                <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Final Score</div>
+                                <div className="text-7xl font-black text-[var(--text-primary)] font-display leading-none mb-2">{selectedAppraisal.finalScore !== null && selectedAppraisal.finalScore !== undefined ? selectedAppraisal.finalScore : '[Hidden]'}</div>
+                                <div className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Final Score</div>
                             </div>
                             
                             <div className="space-y-3">
-                                <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 ml-4 italic">Final Conclusion</label>
+                                <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-4 italic">Final Conclusion</label>
                                 <textarea 
                                     value={finalComment}
                                     onChange={(e) => setFinalComment(e.target.value)}
                                     placeholder="Add final comments for the official record..."
-                                    className="nx-input min-h-[100px] !bg-white/5 !rounded-2xl"
+                                    className="nx-input min-h-[100px] !bg-[var(--bg-elevated)]/50 !rounded-2xl"
                                 />
                             </div>
 
@@ -314,7 +314,7 @@ const FinalSignOff = () => {
                                 <button
                                     onClick={(e) => handlePrint(e, selectedAppraisal.id)}
                                     disabled={exporting}
-                                    className="flex-1 py-4 rounded-[1.5rem] border border-white/10 hover:border-white/20 text-slate-500 hover:text-white flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-widest transition-all"
+                                    className="flex-1 py-4 rounded-[1.5rem] border border-[var(--border-subtle)] hover:border-[var(--primary)]/30 text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-widest transition-all"
                                 >
                                     {exporting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                                     Download Official Report

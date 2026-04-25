@@ -27,7 +27,7 @@ const HelpPanel = ({ isOpen, onClose }: HelpPanelProps) => {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed right-0 top-0 h-full w-full max-w-md bg-[#080c16] border-l border-white/10 z-[120] shadow-2xl flex flex-col"
+                        className="fixed right-0 top-0 h-full w-full max-w-md bg-[var(--bg-card)] border-l border-[var(--border-subtle)] z-[120] shadow-2xl flex flex-col"
                     >
                         <div className="p-8 border-b border-white/5 flex justify-between items-center bg-black/20">
                             <div className="flex items-center gap-4">
@@ -35,8 +35,8 @@ const HelpPanel = ({ isOpen, onClose }: HelpPanelProps) => {
                                     <HelpCircle size={24} />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-black text-white font-display tracking-tight uppercase">Platform Support</h2>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 mt-1">Resource Center</p>
+                                    <h2 className="text-xl font-black text-[var(--text-primary)] font-display tracking-tight uppercase">Platform Support</h2>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[var(--text-muted)] mt-1">Resource Center</p>
                                 </div>
                             </div>
                             <button
@@ -50,7 +50,7 @@ const HelpPanel = ({ isOpen, onClose }: HelpPanelProps) => {
                         <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
                             {/* Quick Links */}
                             <div className="space-y-4">
-                                <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-600 mb-6">Knowledge Base</h3>
+                                <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)] mb-6">Knowledge Base</h3>
                                 <SupportCard
                                     icon={BookOpen}
                                     title="System Documentation"
@@ -67,7 +67,7 @@ const HelpPanel = ({ isOpen, onClose }: HelpPanelProps) => {
 
                             {/* Contact Support */}
                             <div className="space-y-4">
-                                <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-600 mb-6">Direct Support</h3>
+                                <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)] mb-6">Direct Support</h3>
                                 <SupportCard
                                     icon={MessageSquare}
                                     title="Live Chat"
@@ -102,8 +102,8 @@ const HelpPanel = ({ isOpen, onClose }: HelpPanelProps) => {
                             </div>
                         </div>
 
-                        <div className="p-8 border-t border-white/5 bg-black/40 text-center">
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
+                        <div className="p-8 border-t border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 text-center">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
                                 HRM OS &copy; 2026. All rights reserved.
                             </p>
                         </div>
@@ -135,10 +135,10 @@ const SupportCard = ({ icon: Icon, title, desc, link, highlight }: any) => (
             </div>
             <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                    <h4 className="text-sm font-black text-white tracking-tight">{title}</h4>
-                    {link && <ExternalLink size={12} className="text-slate-700 group-hover:text-primary transition-colors" />}
+                    <h4 className="text-sm font-black text-[var(--text-primary)] tracking-tight">{title}</h4>
+                    {link && <ExternalLink size={12} className="text-[var(--text-muted)] group-hover:text-[var(--primary)] transition-colors" />}
                 </div>
-                <p className="text-[11px] font-medium text-slate-500 leading-relaxed group-hover:text-slate-400">
+                <p className="text-[11px] font-medium text-[var(--text-muted)] leading-relaxed group-hover:text-[var(--text-primary)]">
                     {desc}
                 </p>
             </div>

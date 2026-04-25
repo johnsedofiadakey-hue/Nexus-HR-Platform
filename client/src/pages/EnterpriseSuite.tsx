@@ -15,17 +15,22 @@ const tabs: Array<{ key: TabKey; label: string }> = [
   { key: 'tax', label: 'Tax Rules' },
 ];
 
-const badge = (value: string) =>
-  `inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${value === 'ACTIVE' || value === 'PUBLISHED'
-    ? 'bg-emerald-500/10 text-emerald-400'
-    : value === 'IN_PROGRESS' || value === 'OPEN'
-      ? 'bg-primary/10 text-primary-light'
-      : 'bg-white/[0.06] text-slate-400'
+const badge = (value: string) => {
+  const isSuccess = value === 'ACTIVE' || value === 'PUBLISHED';
+  const isWarning = value === 'IN_PROGRESS' || value === 'OPEN' || value === 'APPLIED';
+  
+  return `inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+    isSuccess
+      ? 'bg-[var(--success)]/10 text-[var(--success)]'
+      : isWarning
+        ? 'bg-[var(--warning)]/10 text-[var(--warning)]'
+        : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border-subtle)]'
   }`;
+};
 
 const SectionCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="glass p-4 md:p-6">
-    <h3 className="font-display text-lg font-bold text-white mb-4">{title}</h3>
+    <h3 className="font-display text-lg font-bold text-[var(--text-primary)] mb-4">{title}</h3>
     {children}
   </section>
 );
@@ -102,7 +107,7 @@ const EnterpriseSuite = () => {
   return (
     <div className="space-y-5 pb-10 page-transition">
       <div className="flex flex-col gap-2">
-        <h1 className="font-display text-2xl md:text-3xl font-black text-white">Enterprise HR Suite v4.0</h1>
+        <h1 className="font-display text-2xl md:text-3xl font-black text-[var(--text-primary)]">Enterprise HR Suite v4.0</h1>
         <p className="text-sm text-slate-400">Role hierarchy, ATS, onboarding/offboarding, benefits, shifts, announcements, and tax engine.</p>
       </div>
 
@@ -112,7 +117,7 @@ const EnterpriseSuite = () => {
             <button
               key={item.key}
               onClick={() => setTab(item.key)}
-              className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-colors ${tab === item.key ? 'bg-primary/20 text-primary-light border border-primary/40' : 'bg-white/[0.02] text-slate-400 border border-white/[0.05] hover:text-white'
+              className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-colors ${tab === item.key ? 'bg-[var(--primary)]/20 text-[var(--primary)] border border-[var(--primary)]/40' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
                 }`}
             >
               {item.label}
@@ -129,10 +134,10 @@ const EnterpriseSuite = () => {
           {(quickStats || []).map((item) => (
             <div key={item.title} className="glass p-4">
               <div className="flex items-center justify-between mb-2">
-                <item.icon size={16} className="text-primary-light" />
-                <ShieldCheck size={14} className="text-slate-500" />
+                <item.icon size={16} className="text-[var(--primary)]" />
+                <ShieldCheck size={14} className="text-[var(--text-muted)]" />
               </div>
-              <p className="text-2xl font-black text-white font-display">{item.value}</p>
+              <p className="text-2xl font-black text-[var(--text-primary)] font-display">{item.value}</p>
               <p className="text-xs text-slate-400">{item.title}</p>
             </div>
           ))}
@@ -168,9 +173,9 @@ const EnterpriseSuite = () => {
           <SectionCard title="Recent KPIs">
             <div className="space-y-2">
               {(deptKpis || []).map((kpi) => (
-                <div key={kpi.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                <div key={kpi.id} className="p-3 rounded-xl bg-[var(--bg-elevated)]/30 border border-[var(--border-subtle)]">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-white">{kpi.title}</p>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">{kpi.title}</p>
                     <span className={badge(kpi.status || 'ACTIVE')}>{kpi.status || 'ACTIVE'}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-1">{kpi.metricType} • Target {kpi.targetValue}</p>
@@ -211,9 +216,9 @@ const EnterpriseSuite = () => {
           <SectionCard title="Open Job Positions">
             <div className="space-y-2">
               {(jobs || []).map((j) => (
-                <div key={j.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                <div key={j.id} className="p-3 rounded-xl bg-[var(--bg-elevated)]/30 border border-[var(--border-subtle)]">
                   <div className="flex justify-between items-center">
-                    <p className="text-sm text-white font-semibold">{j.title}</p>
+                    <p className="text-sm text-[var(--text-primary)] font-semibold">{j.title}</p>
                     <span className={badge(j.status || 'OPEN')}>{j.status || 'OPEN'}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-1">{j.location || 'Location not set'}</p>
@@ -225,9 +230,9 @@ const EnterpriseSuite = () => {
           <SectionCard title="Candidates">
             <div className="space-y-2">
               {(candidates || []).map((c) => (
-                <div key={c.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                <div key={c.id} className="p-3 rounded-xl bg-[var(--bg-elevated)]/30 border border-[var(--border-subtle)]">
                   <div className="flex justify-between items-center">
-                    <p className="text-sm text-white font-semibold">{c.fullName}</p>
+                    <p className="text-sm text-[var(--text-primary)] font-semibold">{c.fullName}</p>
                     <span className={badge(c.status || 'APPLIED')}>{c.status || 'APPLIED'}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-1">{c.email || 'No email'}</p>
@@ -242,9 +247,9 @@ const EnterpriseSuite = () => {
         <SectionCard title="Onboarding Checklists">
           <div className="space-y-2">
             {(onboarding || []).map((item) => (
-              <div key={item.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-between gap-2">
+              <div key={item.id} className="p-3 rounded-xl bg-[var(--bg-elevated)]/30 border border-[var(--border-subtle)] flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm text-white font-semibold">Employee ID: {item.employeeId}</p>
+                  <p className="text-sm text-[var(--text-primary)] font-semibold">Employee ID: {item.employeeId}</p>
                   <p className="text-xs text-slate-400">Started: {new Date(item.startedAt).toLocaleDateString()}</p>
                 </div>
                 <span className={badge(item.status || 'IN_PROGRESS')}>{item.status || 'IN_PROGRESS'}</span>
@@ -270,9 +275,9 @@ const EnterpriseSuite = () => {
           <SectionCard title="Benefit Plans">
             <div className="space-y-2">
               {(benefitPlans || []).map((plan) => (
-                <div key={plan.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-between">
+                <div key={plan.id} className="p-3 rounded-xl bg-[var(--bg-elevated)]/30 border border-[var(--border-subtle)] flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-white font-semibold">{plan.name}</p>
+                    <p className="text-sm text-[var(--text-primary)] font-semibold">{plan.name}</p>
                     <p className="text-xs text-slate-400">{plan.category}</p>
                   </div>
                   <span className={badge(plan.status || 'ACTIVE')}>{plan.status || 'ACTIVE'}</span>
@@ -298,8 +303,8 @@ const EnterpriseSuite = () => {
           <SectionCard title="Shift List">
             <div className="space-y-2">
               {(shifts || []).map((s) => (
-                <div key={s.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-                  <p className="text-sm text-white font-semibold">{s.name}</p>
+                <div key={s.id} className="p-3 rounded-xl bg-[var(--bg-elevated)]/30 border border-[var(--border-subtle)]">
+                  <p className="text-sm text-[var(--text-primary)] font-semibold">{s.name}</p>
                   <p className="text-xs text-slate-400 mt-1">{s.startTime} - {s.endTime} ({s.timezone})</p>
                 </div>
               ))}
@@ -328,9 +333,9 @@ const EnterpriseSuite = () => {
           <SectionCard title="Published Announcements">
             <div className="space-y-2">
               {(announcements || []).map((a) => (
-                <div key={a.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                <div key={a.id} className="p-3 rounded-xl bg-[var(--bg-elevated)]/30 border border-[var(--border-subtle)]">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm text-white font-semibold">{a.title}</p>
+                    <p className="text-sm text-[var(--text-primary)] font-semibold">{a.title}</p>
                     <span className={badge(a.status || 'PUBLISHED')}>{a.status || 'PUBLISHED'}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-1 line-clamp-2">{a.content}</p>
@@ -356,8 +361,8 @@ const EnterpriseSuite = () => {
           <SectionCard title="Tax Rules">
             <div className="space-y-2">
               {(taxRules || []).map((rule) => (
-                <div key={rule.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-                  <p className="text-sm text-white font-semibold">{rule.name}</p>
+                <div key={rule.id} className="p-3 rounded-xl bg-[var(--bg-elevated)]/30 border border-[var(--border-subtle)]">
+                  <p className="text-sm text-[var(--text-primary)] font-semibold">{rule.name}</p>
                   <p className="text-xs text-slate-400 mt-1">{rule.countryCode} • {rule.taxType}</p>
                 </div>
               ))}

@@ -43,7 +43,7 @@ const AnnouncementManager = () => {
         <div className="p-8 space-y-8">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-black text-white">Announcement Engine</h1>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)]">Announcement Engine</h1>
                     <p className="text-slate-500">Targeted communication across the organization.</p>
                 </div>
                 <button
@@ -70,8 +70,8 @@ const AnnouncementManager = () => {
                                     {a.targetAudience}
                                 </span>
                             </div>
-                            <h4 className="text-lg font-bold text-white mb-2">{a.title}</h4>
-                            <p className="text-sm text-slate-400 line-clamp-2 mb-4">{a.content}</p>
+                            <h4 className="text-lg font-bold text-[var(--text-primary)] mb-2">{a.title}</h4>
+                            <p className="text-sm text-[var(--text-secondary)] line-clamp-2 mb-4">{a.content}</p>
                         </div>
                         <div className="flex justify-between items-center pt-4 border-t border-white/5">
                             <span className="text-[10px] font-bold text-slate-500">By {a.createdBy?.fullName}</span>
@@ -94,7 +94,7 @@ const AnnouncementManager = () => {
                         onSubmit={handleCreate}
                         className="w-full max-w-2xl glass-card p-10 rounded-[2.5rem] space-y-6"
                     >
-                        <h2 className="text-2xl font-black text-white">New Broadcast</h2>
+                        <h2 className="text-2xl font-black text-[var(--text-primary)]">New Broadcast</h2>
                         <div className="space-y-4">
                             <input
                                 placeholder="Announcement Title"
@@ -135,7 +135,7 @@ const AnnouncementManager = () => {
                         </div>
                         <div className="flex gap-4">
                             <button type="submit" className="premium-btn flex-1">Launch Broadcast</button>
-                            <button type="button" onClick={() => setIsCreating(false)} className="px-6 rounded-2xl border border-white/5 text-slate-400 font-bold hover:bg-white/5 transition-all">Cancel</button>
+                            <button type="button" onClick={() => setIsCreating(false)} className="px-6 rounded-2xl border border-[var(--border-subtle)] text-[var(--text-secondary)] font-bold hover:bg-[var(--bg-elevated)] transition-all">Cancel</button>
                         </div>
                     </motion.form>
                 </div>

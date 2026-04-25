@@ -22,10 +22,10 @@ router.get('/my-packets', appraisalController.getMyPackets);
 router.get('/team-packets', requireRole(70), appraisalController.getTeamPackets);
 
 // Get packets awaiting final executive verdict (MD/Director)
-router.get('/final-verdict-list', requireRole(80), appraisalController.getFinalVerdictList);
+router.get('/final-sign-off-list', requireRole(80), appraisalController.getFinalVerdictList);
 
 // Provide final executive sign-off
-router.post('/final-verdict', requireRole(80), appraisalController.finalSignOff);
+router.post('/final-sign-off', requireRole(80), appraisalController.finalSignOff);
 
 // Permanent Delete a packet (Director+)
 router.delete('/:packetId', requireRole(80), appraisalController.deleteAppraisalPacket);

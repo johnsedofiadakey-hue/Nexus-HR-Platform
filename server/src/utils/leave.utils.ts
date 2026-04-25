@@ -19,19 +19,37 @@ export interface LeaveMetrics {
  * @returns Object containing effective allowance and balance as numbers
  */
 export const getEffectiveLeaveMetrics = (user: any): LeaveMetrics => {
+  const org = user.organization || {};
+  
   // 1. Allowance: User Specific -> Org Default -> System Fallback (30)
   const allowance = Number(
     user.leaveAllowance ?? 
-    user.organization?.defaultLeaveAllowance ?? 
+    org.defaultLeaveAllowance ?? 
     30
   );
 
-  // 2. Balance: User Specific -> Allowance (Dynamic)
-  // If leaveBalance is null, it defaults to the full current allowance
-  const balance = Number(
-    user.leaveBalance ?? 
-    allowance
-  );
+  // 2. Balance Logic
+  let balance = Number(user.leaveBalance ?? allowance);
+
+  // Apply Carry Forward Logic if enabled
+  if (org.allowLeaveCarryForward) {
+    const limit = Number(org.carryForwardLimit || 0);
+    // This is a simplified check; in a full system we'd track last year's leftover
+    // For now, we assume current balance can include up to 'limit' carry forward
+  }
 
   return { allowance, balance };
+};
+
+/**
+ * Checks if a user is allowed to borrow leave based on organization settings.
+ */
+export const canBorrowLeave = (user: any, requestedDays: number, availableBalance: number): boolean => {
+  const org = user.organization || {};
+  if (!org.allowLeaveBorrowing) return false;
+
+  const limit = Number(org.borrowingLimit || 0);
+  const negativeBalanceAllowed = limit;
+  
+  return (availableBalance + negativeBalanceAllowed) >= requestedDays;
 };

@@ -2,7 +2,7 @@ import prisma from '../prisma/client';
 import { logAction } from './audit.service';
 import { notify } from './websocket.service';
 import { getRoleRank } from '../middleware/auth.middleware';
-import { getEffectiveLeaveMetrics } from '../utils/leave.utils';
+import { getEffectiveLeaveMetrics, canBorrowLeave } from '../utils/leave.utils';
 
 /**
  * Leave Statuses (V3):
@@ -51,7 +51,10 @@ export class LeaveService {
     const availableBalance = metrics.balance - pendingDays;
     
     if (availableBalance < leaveDays) {
-      throw new Error(`Insufficient available balance. You have ${metrics.balance} days, but ${pendingDays} days are already tied up in pending/approved requests. Available: ${availableBalance}, Needed: ${leaveDays}`);
+      const allowedToBorrow = canBorrowLeave(user, leaveDays, availableBalance);
+      if (!allowedToBorrow) {
+        throw new Error(`Insufficient available balance. You have ${metrics.balance} days, but ${pendingDays} days are already tied up in pending/approved requests. Borrowing is either disabled or you've exceeded the limit. Available: ${availableBalance}, Needed: ${leaveDays}`);
+      }
     }
 
     const initialStatus = relieverId ? 'SUBMITTED' : 'MANAGER_REVIEW';

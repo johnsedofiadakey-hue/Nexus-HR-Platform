@@ -127,13 +127,13 @@ export const CreateUserSchema = z.object({
   role: z.enum(ROLES),
   jobTitle: str(100),
   department: optStr(100),
-  departmentId: z.coerce.number().int().positive().optional().nullable(),
+  departmentId: z.coerce.number().int().positive().optional().nullable().or(z.literal('')),
   employeeCode: optStr(30),
   password: optStr(128),
   status: z.enum(USER_STATUSES).optional(),
   joinDate: optDateStr,
   supervisorId: optUuid,
-  gender: z.enum(GENDERS).optional(),
+  gender: z.enum(GENDERS).optional().or(z.literal('')),
   nationalId: optStr(30),
   contactNumber: optStr(20),
   address: optStr(300),
@@ -141,9 +141,9 @@ export const CreateUserSchema = z.object({
   nextOfKinRelation: optStr(50),
   nextOfKinContact: optStr(20),
   salary: nonNegativeNum.max(999999999).optional().nullable(),
-  currency: z.enum(CURRENCIES).optional(),
+  currency: z.enum(CURRENCIES).optional().or(z.literal('')),
   dob: optDateStr,
-  subUnitId: z.coerce.number().int().positive().optional().nullable(),
+  subUnitId: z.coerce.number().int().positive().optional().nullable().or(z.literal('')),
 });
 
 export const UpdateUserSchema = CreateUserSchema.partial();

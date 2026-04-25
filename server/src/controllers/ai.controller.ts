@@ -95,33 +95,38 @@ Operational Directives:
 
 Always refer to the user by name if appropriate and make them feel like they are talking to a human partner who knows their business inside out.`;
 
-    // 2. Initialize Model with Tools
+    // 2. Initialize Model with Tools & System Instruction
     const model = ai.getGenerativeModel({
       model: 'gemini-1.5-flash',
       tools: [{ functionDeclarations } as any],
+      systemInstruction: sysPrompt,
     });
 
-    // 3. Prepare Chat History
-    const formattedHistory = history?.map((h: any) => ({
+    // 3. Prepare Chat History (Exclude any previous system prompts to avoid conflicts)
+    const formattedHistory = history?.filter((h: any) => h.role !== 'system').map((h: any) => ({
       role: h.role === 'user' ? 'user' : 'model',
       parts: [{ text: h.text }]
     })) || [];
 
-    // Ensure system prompt is known
-    if (formattedHistory.length === 0) {
-        formattedHistory.push({ role: 'user', parts: [{ text: `System Instruction: ${sysPrompt}` }] });
-        formattedHistory.push({ role: 'model', parts: [{ text: "Acknowledged. Cortex is online and ready to assist with institutional operations." }] });
-    }
-
     const chatSession = model.startChat({ history: formattedHistory });
 
     // 4. Send Message & Handle Tool Execution Loop
-    let result = await chatSession.sendMessage(message);
+    let result;
+    try {
+        result = await chatSession.sendMessage(message);
+    } catch (sendErr: any) {
+        console.error('[Cortex Agent] Initial Send Error:', sendErr.message);
+        return res.status(500).json({ error: 'Cortex was unable to process the initial signal. Possible API overload.' });
+    }
+
     let response = result.response;
     let calls = response.functionCalls();
+    let iterationCount = 0;
+    const MAX_ITERATIONS = 5;
 
-    // Iterate until AI stops calling functions
-    while (calls && calls.length > 0) {
+    // Iterate until AI stops calling functions or we hit limit
+    while (calls && calls.length > 0 && iterationCount < MAX_ITERATIONS) {
+      iterationCount++;
       const toolResults = await Promise.all(
         calls.map(async (call) => {
           try {
@@ -133,6 +138,7 @@ Always refer to the user by name if appropriate and make them feel like they are
               }
             };
           } catch (error: any) {
+            console.error(`[Cortex Tool Error] ${call.name}:`, error.message);
             return {
               functionResponse: {
                 name: call.name,
@@ -144,15 +150,23 @@ Always refer to the user by name if appropriate and make them feel like they are
       );
 
       // Send tool results back to model
-      result = await chatSession.sendMessage(toolResults as any);
-      response = result.response;
-      calls = response.functionCalls();
+      try {
+        result = await chatSession.sendMessage(toolResults as any);
+        response = result.response;
+        calls = response.functionCalls();
+      } catch (loopErr: any) {
+        console.error('[Cortex Agent] Tool Feedback Loop Error:', loopErr.message);
+        break; // Exit loop and return what we have or an error
+      }
     }
 
     res.json({ reply: response.text() });
   } catch (err: any) {
-    console.error('[Cortex Agent] Chat Error:', err.message);
-    res.status(500).json({ error: 'Elite Intelligence layer experienced a synchronization fault.' });
+    console.error('[Cortex Agent] Critical synchronization fault:', err.stack || err.message);
+    res.status(500).json({ 
+      error: 'Elite Intelligence layer experienced a synchronization fault.',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    });
   }
 };
 

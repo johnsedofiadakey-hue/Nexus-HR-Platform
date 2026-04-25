@@ -76,8 +76,8 @@ const CompetencyManagement: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h3 className="text-lg font-black text-white font-display">Competency Framework</h3>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">Define areas for performance appraisal</p>
+          <h3 className="text-lg font-black text-[var(--text-primary)] font-display">Competency Framework</h3>
+          <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mt-1">Define areas for performance appraisal</p>
         </div>
         {!showAdd && (
           <motion.button
@@ -110,27 +110,27 @@ const CompetencyManagement: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-display font-black text-white text-base">Professional Setting Guide</h4>
-                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  <h4 className="font-display font-black text-[var(--text-primary)] text-base">Professional Setting Guide</h4>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
                     Set clear, measurable areas for appraisal to ensure transparency. Use <strong>Weights</strong> to prioritize what matters most to your organization.
                   </p>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-black/20 border border-white/5">
-                    <p className="text-[10px] font-black uppercase text-primary-light mb-2">Example: Technical Proficiency</p>
-                    <p className="text-[11px] text-slate-300 italic">"Consistently delivers bug-free code, adheres to architectural patterns, and mentors junior engineers."</p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-2">Recommended Weight: 6 / 10</p>
+                  <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+                    <p className="text-[10px] font-black uppercase text-[var(--primary)] mb-2">Example: Technical Proficiency</p>
+                    <p className="text-[11px] text-[var(--text-secondary)] italic">"Consistently delivers bug-free code, adheres to architectural patterns, and mentors junior engineers."</p>
+                    <p className="text-[9px] font-bold text-[var(--text-muted)] mt-2">Recommended Weight: 6 / 10</p>
                   </div>
-                  <div className="p-4 rounded-2xl bg-black/20 border border-white/5">
-                    <p className="text-[10px] font-black uppercase text-emerald-400 mb-2">Example: Target Delivery</p>
-                    <p className="text-[11px] text-slate-300 italic">"Achieves quarterly sales targets and maintains a healthy lead pipeline. Accurate forecasting."</p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-2">Recommended Weight: 8 / 10</p>
+                  <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+                    <p className="text-[10px] font-black uppercase text-[var(--success)] mb-2">Example: Target Delivery</p>
+                    <p className="text-[11px] text-[var(--text-secondary)] italic">"Achieves quarterly sales targets and maintains a healthy lead pipeline. Accurate forecasting."</p>
+                    <p className="text-[9px] font-bold text-[var(--text-muted)] mt-2">Recommended Weight: 8 / 10</p>
                   </div>
                 </div>
-                <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10">
-                    <p className="text-[10px] font-black uppercase text-amber-500 mb-1">How Weighting Works</p>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                <div className="p-4 rounded-2xl bg-[var(--warning)]/5 border border-[var(--warning)]/10">
+                    <p className="text-[10px] font-black uppercase text-[var(--warning)] mb-1">How Weighting Works</p>
+                    <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
                         Weights determine the priority of each area in the final calculation. A scale of 1-10 ensures clarity in expectations.
                     </p>
                 </div>
@@ -151,7 +151,7 @@ const CompetencyManagement: React.FC = () => {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Area Name</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Area Name</label>
                 <input
                   required
                   className="nx-input p-3 font-bold"
@@ -161,7 +161,7 @@ const CompetencyManagement: React.FC = () => {
                 />
               </div>
                <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Priority Weight (1-10)</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Priority Weight (1-10)</label>
                 <input
                   required
                    type="number"
@@ -174,7 +174,7 @@ const CompetencyManagement: React.FC = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Description (Clarity for Staff)</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Description (Clarity for Staff)</label>
               <textarea
                 required
                 className="nx-input p-3 font-bold resize-none h-24"
@@ -187,7 +187,7 @@ const CompetencyManagement: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowAdd(false)}
-                className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors"
+                className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
                 Cancel
               </button>
@@ -204,7 +204,7 @@ const CompetencyManagement: React.FC = () => {
 
       <div className="space-y-3">
         {competencies.length === 0 && !loading ? (
-          <div className="p-10 text-center rounded-[2rem] border border-dashed border-white/10 text-slate-500">
+          <div className="p-10 text-center rounded-[2rem] border border-dashed border-[var(--border-subtle)] text-[var(--text-muted)]">
             <Info size={32} className="mx-auto mb-3 opacity-20" />
             <p className="text-xs font-bold uppercase tracking-widest">No custom competencies defined</p>
             <p className="text-[10px] mt-2 opacity-60">System will use defaults if none are provided.</p>
@@ -218,21 +218,21 @@ const CompetencyManagement: React.FC = () => {
             >
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                   <h4 className="font-bold text-white text-sm">{c.name}</h4>
-                  <span className="px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black text-slate-400">Weight: {c.weight}</span>
+                   <h4 className="font-bold text-[var(--text-primary)] text-sm">{c.name}</h4>
+                  <span className="px-2 py-0.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[9px] font-black text-[var(--text-muted)]">Weight: {c.weight}</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">{c.description}</p>
+                <p className="text-[11px] text-[var(--text-muted)] mt-1 line-clamp-1">{c.description}</p>
               </div>
               <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => startEdit(c)}
-                  className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 hover:text-primary-light hover:bg-primary/10 transition-all"
+                  className="w-8 h-8 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--primary)]/10 transition-all"
                 >
                   <Edit3 size={14} />
                 </button>
                 <button
                   onClick={() => handleDelete(c.id)}
-                  className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
+                  className="w-8 h-8 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--error)] hover:bg-[var(--error)]/10 transition-all"
                 >
                   <Trash2 size={14} />
                 </button>

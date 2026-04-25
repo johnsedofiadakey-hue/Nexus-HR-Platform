@@ -101,7 +101,7 @@ const Inbox = () => {
              <div className="p-3 rounded-2xl bg-[var(--primary)] text-white shadow-xl shadow-[var(--primary)]/20 relative">
                <InboxIcon size={24} />
                {unreadCount > 0 && (
-                 <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-rose-500 border-2 border-white flex items-center justify-center text-[10px] font-black">
+                 <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--error)] border-2 border-white flex items-center justify-center text-[10px] font-black">
                    {unreadCount}
                  </div>
                )}
@@ -190,9 +190,9 @@ const Inbox = () => {
                 <div className="flex-shrink-0 pt-1">
                   <div className={cn(
                     "w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm relative",
-                    n.type === 'ALERT' ? "bg-rose-500/10 text-rose-500" :
-                    n.type === 'WARNING' ? "bg-amber-500/10 text-amber-500" :
-                    n.type === 'SUCCESS' ? "bg-emerald-500/10 text-emerald-500" :
+                    n.type === 'ALERT' ? "bg-[var(--error)]/10 text-[var(--error)]" :
+                    n.type === 'WARNING' ? "bg-[var(--warning)]/10 text-[var(--warning)]" :
+                    n.type === 'SUCCESS' ? "bg-[var(--success)]/10 text-[var(--success)]" :
                     "bg-[var(--primary)]/10 text-[var(--primary)]"
                   )}>
                     {n.type === 'ALERT' ? <AlertCircle size={20} /> :

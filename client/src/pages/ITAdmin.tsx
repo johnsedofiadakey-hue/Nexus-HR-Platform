@@ -43,7 +43,7 @@ const ITAdmin = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [resettingId, setResettingId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'accounts' | 'assets'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'accounts' | 'assets' | 'integrations'>('overview');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -94,7 +94,7 @@ const ITAdmin = () => {
       <div className="flex items-center gap-4">
         <button 
           onClick={() => navigate('/dashboard')}
-          className="group flex items-center gap-3 px-6 py-3 bg-white hover:bg-slate-950 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-white transition-all shadow-sm"
+          className="group flex items-center gap-3 px-6 py-3 bg-[var(--bg-card)] hover:bg-[var(--bg-sidebar-active)] border border-[var(--border-subtle)] rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all shadow-sm"
         >
           <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
           Back to Overview
@@ -115,11 +115,11 @@ const ITAdmin = () => {
 
         <div className="flex items-center gap-4">
           <div className="flex bg-[var(--bg-elevated)]/50 p-1.5 rounded-2xl border border-[var(--border-subtle)]">
-             {(['overview', 'accounts', 'assets'] as const).map(tab => (
+             {(['overview', 'accounts', 'assets', 'integrations'] as const).map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
-                  className={cn("px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                  activeTab === tab ? "bg-[var(--bg-card)] text-[var(--primary)] shadow-sm border border-[var(--border-subtle)]" : "text-[var(--text-muted)]")}>
-                  {tab === 'overview' ? 'Network' : tab === 'accounts' ? 'Personnel' : 'Hardware'}
+                   className={cn("px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                   activeTab === tab ? "bg-[var(--bg-card)] text-[var(--primary)] shadow-sm border border-[var(--border-subtle)]" : "text-[var(--text-muted)]")}>
+                  {tab === 'overview' ? 'Network' : tab === 'accounts' ? 'Personnel' : tab === 'assets' ? 'Hardware' : 'Integrations'}
                 </button>
              ))}
           </div>
@@ -343,6 +343,123 @@ const ITAdmin = () => {
                       Go to Hardware Hub <ArrowRight size={18} />
                    </Link>
                  </div>
+            )}
+
+            {activeTab === 'integrations' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    <div className="lg:col-span-8 space-y-10">
+                        <div className="nx-card p-10 border-[var(--border-subtle)] bg-[var(--bg-card)]">
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600">
+                                    <Server size={28} />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight">Company Email Integration</h3>
+                                    <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mt-1">SMTP Gateway Configuration Guide</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-12">
+                                <div className="flex gap-8 relative">
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-10 h-10 rounded-full bg-[var(--primary)] text-white flex items-center justify-center font-black text-sm relative z-10">1</div>
+                                        <div className="w-0.5 flex-1 bg-[var(--border-subtle)] my-2" />
+                                    </div>
+                                    <div className="flex-1 pb-10">
+                                        <h4 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest mb-3">SMTP Infrastructure Preparation</h4>
+                                        <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-6">Gather your corporate mail server credentials. If using Microsoft 365 or Google Workspace, we recommend creating a dedicated "App Password" or a Service Account for maximum security.</p>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] space-y-1">
+                                                <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest">TLS Port</p>
+                                                <p className="text-xs font-black text-[var(--text-primary)]">587 (Recommended)</p>
+                                            </div>
+                                            <div className="p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] space-y-1">
+                                                <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest">SSL Port</p>
+                                                <p className="text-xs font-black text-[var(--text-primary)]">465</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-8 relative">
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-10 h-10 rounded-full bg-[var(--primary)] text-white flex items-center justify-center font-black text-sm relative z-10">2</div>
+                                        <div className="w-0.5 flex-1 bg-[var(--border-subtle)] my-2" />
+                                    </div>
+                                    <div className="flex-1 pb-10">
+                                        <h4 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest mb-3">Deployment in Settings</h4>
+                                        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">Navigate to <Link to="/settings" className="text-[var(--primary)] font-bold hover:underline">Admin Settings</Link>. Locate the "Email & SMTP" section. Input your host (e.g., smtp.office365.com), user credentials, and the preferred 'From' address that staff will see in their inboxes.</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-8">
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-sm relative z-10">3</div>
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest mb-3">Diagnostic Validation</h4>
+                                        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">After saving, click "Test Connection" to fire a test packet to your administrative email. Once successful, all system notifications (Payslips, Leave Approvals, Appraisals) will flow through your company domain.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="lg:col-span-4 space-y-8">
+                        <div className="nx-card p-8 bg-[var(--primary)] text-[var(--text-inverse)] border-none relative overflow-hidden shadow-2xl shadow-[var(--primary)]/30">
+                            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+                            <Shield className="mb-6 opacity-40" size={32} />
+                            <h4 className="text-lg font-black uppercase tracking-tight mb-4">API Node Status</h4>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center py-3 border-b border-white/10">
+                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Auth Engine</span>
+                                    <span className="text-xs font-black">ENCRYPTED</span>
+                                </div>
+                                <div className="flex justify-between items-center py-3 border-b border-white/10">
+                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Mail Relay</span>
+                                    <span className="text-xs font-black">ACTIVE</span>
+                                </div>
+                                <div className="flex justify-between items-center py-3">
+                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Webhooks</span>
+                                    <span className="text-xs font-black">LISTENING</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="nx-card p-8 border-[var(--border-subtle)] bg-[var(--bg-card)]">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                                    <Fingerprint size={20} />
+                                </div>
+                                <h4 className="text-sm font-black uppercase tracking-tight text-[var(--text-primary)]">Biometric Sync</h4>
+                            </div>
+                            <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed mb-6">
+                                Connect ZKTeco or Hikvision devices to the central attendance node.
+                            </p>
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3 text-[10px] font-bold text-[var(--text-muted)]">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]" /> Port 4370 (UDP) Open
+                                </div>
+                                <div className="flex items-center gap-3 text-[10px] font-bold text-[var(--text-muted)]">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]" /> Static IP Assigned
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="nx-card p-8 border-[var(--border-subtle)] bg-[var(--bg-elevated)]/20">
+                            <div className="flex items-center gap-3 mb-6">
+                                <Activity size={18} className="text-amber-500" />
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-primary)]">System Logs</h4>
+                            </div>
+                            <div className="space-y-4">
+                                <p className="text-[10px] text-[var(--text-secondary)] italic leading-relaxed">Identity Hub is currently operating at peak performance with zero reported latency on authentication nodes.</p>
+                                <button onClick={() => navigate('/audit')} className="text-[10px] font-black text-[var(--primary)] uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all">
+                                    View full audit trails <ArrowRight size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
           </motion.div>
         )}

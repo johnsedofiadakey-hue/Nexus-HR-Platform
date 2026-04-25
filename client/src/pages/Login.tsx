@@ -2,11 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { storage, StorageKey } from '../services/storage';
-import { Lock, Mail, ArrowRight, Loader2, Eye, EyeOff, Shield, AlertCircle, Fingerprint, Command, Zap } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Loader2, Eye, EyeOff, Shield, AlertCircle, Heart, Sparkles, Coffee, Users, ShieldCheck, Globe } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from '../utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+
+const QUOTES = [
+    { text: "The first 90 minutes of your day dictate your success. The first 5 minutes dictate how much coffee you need.", author: "Institutional Wisdom", icon: <Coffee className="text-orange-500" size={16} /> },
+    { text: "Great things in business are never done by one person. They're done by a team of people... and several spreadsheets.", author: "Nexus HR", icon: <Users className="text-blue-500" size={16} /> },
+    { text: "Success is best when it's shared. But the office snacks? That's a different story.", author: "Corporate Reality", icon: <Sparkles className="text-amber-500" size={16} /> },
+    { text: "The only way to do great work is to love what you do. Or at least have a really comfortable ergonomic chair.", author: "Office Ergonomics", icon: <Heart className="text-rose-500" size={16} /> },
+    { text: "Your growth is our priority. Your password security is your responsibility.", author: "IT Security", icon: <Shield className="text-emerald-500" size={16} /> }
+];
 
 const Login = () => {
     const navigate = useNavigate();
@@ -16,45 +24,18 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const { settings } = useTheme();
     const [formData, setFormData] = useState({ email: '', password: '' });
-    const [isDemoMode, setIsDemoMode] = useState(false);
+    const [quote, setQuote] = useState(QUOTES[0]);
+    const [greeting, setGreeting] = useState('Welcome Back');
 
     useEffect(() => {
-        if (storage.getItem(StorageKey.AUTH_TOKEN, null)) navigate('/dashboard');
+        setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
         
-        // Handle Demo Mode Auto-Fill & Silent Auto-Login
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('demo') === 'true') {
-            setIsDemoMode(true);
-            const demoCreds = {
-                email: 'guest@nexus-demo.com',
-                password: 'nexusdemo'
-            };
-            setFormData(demoCreds);
-            
-            // Execute Silent Handshake
-            const performAutoLogin = async () => {
-                setLoading(true);
-                try {
-                    const res = await api.post('/auth/login', demoCreds);
-                    const { token, refreshToken, user } = res.data;
-                    
-                    storage.setItem(StorageKey.AUTH_TOKEN, token);
-                    if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
-                    storage.setItem(StorageKey.USER, user || {});
+        const hour = new Date().getHours();
+        if (hour < 12) setGreeting('Good Morning');
+        else if (hour < 18) setGreeting('Good Afternoon');
+        else setGreeting('Good Evening');
 
-                    navigate('/dashboard');
-                    toast.success('Demo Space Initialized Successfully');
-                } catch (err: any) {
-                    setError('Demo Initialization Protocol Failed.');
-                } finally {
-                    setLoading(false);
-                }
-            };
-            
-            // Visual feedback delay before silent redirect
-            const timer = setTimeout(performAutoLogin, 800);
-            return () => clearTimeout(timer);
-        }
+        if (storage.getItem(StorageKey.AUTH_TOKEN, null)) navigate('/dashboard');
     }, [navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -81,180 +62,199 @@ const Login = () => {
         }
     };
 
+    const companyName = settings?.companyName || 'MC Bauchemie';
+    const logoUrl = settings?.logoUrl || settings?.companyLogoUrl;
+
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 relative overflow-hidden font-sans selection:bg-blue-500/30">
-            {/* ── Visual Atmosphere ────────────────────────────────── */}
-            <div className="absolute inset-0 z-0 text-left">
-                <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] rounded-full bg-blue-500/5 blur-[120px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-emerald-500/5 blur-[100px]" />
+        <div className="min-h-screen w-full flex items-center justify-center bg-[var(--bg-main)] relative overflow-hidden font-display selection:bg-[var(--primary)]/30">
+            {/* ── Visual Atmosphere Architecture ────────────────────────────────── */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute top-[-20%] left-[-10%] w-[1000px] h-[1000px] rounded-full bg-[var(--primary)]/5 blur-[150px] animate-pulse" />
+                <div className="absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] rounded-full bg-[var(--accent)]/5 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+                
+                {/* Subtle Grid Pattern */}
+                <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, var(--text-muted) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
             </div>
 
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full max-w-[480px] px-6 relative z-10 text-left"
-            >
-                {/* Navigation Return */}
-                <div className="flex justify-center mb-10">
-                    <button 
-                        onClick={() => navigate('/home')}
-                        className="group flex items-center gap-3 px-6 py-3 bg-white hover:bg-slate-950 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-white transition-all shadow-sm"
-                    >
-                        <ArrowRight size={14} className="rotate-180 group-hover:-translate-x-1 transition-transform" /> 
-                        Back to Website
-                    </button>
-                </div>
-
-                {/* Branding */}
-                <div className="flex flex-col items-center mb-10">
-                    <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center border border-slate-200 shadow-xl mb-6 overflow-hidden relative group"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <Command size={32} className="text-slate-900 group-hover:text-white transition-colors relative z-10" />
-                    </motion.div>
-
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tighter text-center leading-none mb-3 italic uppercase">
-                        NEXUS<span className="text-blue-600">.</span>CORE
-                    </h1>
-                    
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 shadow-sm">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Secure Staff Access</span>
-                    </div>
-                </div>
-
-                {/* Login Terminal */}
-                <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8 md:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] relative overflow-hidden text-left">
-                    {/* Demo Mode Badge */}
-                    <AnimatePresence>
-                        {isDemoMode && (
-                            <motion.div 
-                                initial={{ y: -20, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                className="absolute top-0 right-0 left-0 bg-blue-600 py-2 flex items-center justify-center gap-2"
-                            >
-                                <Zap size={12} className="text-white fill-white" />
-                                <span className="text-[8px] font-black text-white uppercase tracking-[0.3em]">Demo Mode Active: Pre-filled</span>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    <div className="mb-10 text-center pt-4">
-                        <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-tight uppercase italic">Sign In</h2>
-                        <p className="text-slate-500 text-sm font-medium mt-2">Enter your work email and password.</p>
-                    </div>
-
-                    <AnimatePresence mode="wait">
-                        {error && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="mb-8 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-center gap-3 text-rose-600"
-                            >
-                                <AlertCircle size={18} className="flex-shrink-0" />
-                                <span className="text-[11px] font-bold uppercase tracking-wider">{error}</span>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    <form onSubmit={handleLogin} className="space-y-6 text-left">
-                        {/* Email */}
-                        <div className="space-y-2 text-left">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Work Email</label>
-                            <div className="relative group">
-                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
-                                    <Mail size={18} strokeWidth={2.5} />
-                                </div>
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={e => setFormData(f => ({ ...f, email: e.target.value }))}
-                                    className="w-full h-16 pl-14 pr-6 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/50 text-slate-900 font-bold transition-all placeholder:text-slate-300"
-                                    placeholder="your-email@company.com"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {/* Password */}
-                        <div className="space-y-2 text-left">
-                            <div className="flex justify-between items-center px-1">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Password</label>
-                                <button type="button" className="text-[9px] font-black uppercase tracking-wider text-blue-600 hover:text-blue-700 transition-colors">Forgot?</button>
-                            </div>
-                            <div className="relative group">
-                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
-                                    <Lock size={18} strokeWidth={2.5} />
-                                </div>
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={formData.password}
-                                    onChange={e => setFormData(f => ({ ...f, password: e.target.value }))}
-                                    className="w-full h-16 pl-14 pr-16 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/50 text-slate-900 font-bold transition-all placeholder:text-slate-300 tracking-[0.2em]"
-                                    placeholder="••••••••"
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                                >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Submit Button */}
-                        <motion.button
-                            whileHover={{ scale: 1.01, y: -1 }}
-                            whileTap={{ scale: 0.99, y: 0 }}
-                            type="submit"
-                            disabled={loading}
-                            className="w-full h-16 bg-blue-600 hover:bg-blue-700 rounded-2xl flex items-center justify-center font-black uppercase tracking-[0.4em] text-xs text-white shadow-xl shadow-blue-500/20 transition-all disabled:opacity-50 group mt-4"
+            <div className="w-full max-w-[1200px] grid lg:grid-cols-2 gap-16 px-6 relative z-10 items-center">
+                
+                {/* Left Side: Branding & Inspiration */}
+                <motion.div 
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    className="hidden lg:flex flex-col justify-center space-y-12"
+                >
+                    <div className="space-y-6">
+                        <motion.div 
+                            whileHover={{ scale: 1.05 }}
+                            className="w-20 h-20 rounded-3xl bg-[var(--bg-card)] flex items-center justify-center border border-[var(--border-subtle)] shadow-2xl overflow-hidden relative group"
                         >
-                            {loading ? (
-                                <Loader2 size={20} className="animate-spin" />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-[var(--primary)] to-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                            {logoUrl ? (
+                                <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-4 relative z-10" />
                             ) : (
-                                <div className="flex items-center gap-3">
-                                    <span>Sign In</span>
-                                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                <div className="w-full h-full flex items-center justify-center bg-[var(--primary)]">
+                                    <span className="text-3xl font-black text-white italic">{companyName[0]}</span>
                                 </div>
                             )}
-                        </motion.button>
-                    </form>
-
-                    {/* Secondary Access Providers */}
-                    <div className="mt-10">
-                        <div className="relative flex items-center justify-center mb-6 text-left">
-                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100 text-left"></div></div>
-                            <div className="relative bg-white px-4 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 text-left">Trusted Access Only</div>
-                        </div>
+                        </motion.div>
                         
-                        <div className="flex justify-center gap-4">
-                            <button className="w-14 h-14 rounded-2xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-slate-300 transition-all group shadow-sm">
-                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5 opacity-80 group-hover:opacity-100 transition-all" alt="Google" />
-                            </button>
-                            <button onClick={() => navigate('/vault')} className="w-14 h-14 rounded-2xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-slate-300 transition-all group shadow-sm">
-                                <Shield className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-all" />
-                            </button>
+                        <div className="space-y-2">
+                            <h1 className="text-6xl font-black text-[var(--text-primary)] tracking-tighter uppercase leading-[0.9]">
+                                {greeting}, <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary)] to-[var(--accent)]">{companyName}.</span>
+                            </h1>
+                            <p className="text-lg font-medium text-[var(--text-muted)] max-w-md italic">
+                                Access your enterprise workspace to manage personnel, payroll, and organizational growth.
+                            </p>
                         </div>
                     </div>
-                </div>
 
-                {/* Footer Hardware Metrics */}
-                <div className="mt-10 flex justify-between items-center px-4">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nexus Platform Core v4.1.6</span>
-                    <div className="flex gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500/20" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500/40" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                    <div className="p-10 rounded-[3rem] bg-[var(--bg-elevated)]/50 border border-[var(--border-subtle)] backdrop-blur-xl relative group overflow-hidden">
+                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                            {quote.icon}
+                        </div>
+                        <div className="space-y-6 relative z-10">
+                            <p className="text-xl font-bold text-[var(--text-primary)] italic leading-relaxed">
+                                "{quote.text}"
+                            </p>
+                            <div className="flex items-center gap-4">
+                                <div className="w-8 h-px bg-[var(--primary)]/30" />
+                                <p className="text-xs font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">{quote.author}</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </motion.div>
+
+                    <div className="flex items-center gap-10">
+                        <div className="flex flex-col gap-1">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-50">Security Protocol</p>
+                            <p className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2">
+                                <ShieldCheck size={14} className="text-emerald-500" /> AES-256 Encrypted
+                            </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-50">Deployment Node</p>
+                            <p className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2">
+                                <Globe size={14} className="text-blue-500" /> West Africa Central
+                            </p>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Right Side: Login Form */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full max-w-[520px] mx-auto lg:ml-auto"
+                >
+                    {/* Mobile Branding (only visible on small screens) */}
+                    <div className="lg:hidden flex flex-col items-center mb-12 space-y-4">
+                         {logoUrl ? (
+                            <img src={logoUrl} alt="Logo" className="h-16 w-auto object-contain" />
+                        ) : (
+                            <div className="w-16 h-16 rounded-2xl bg-[var(--primary)] flex items-center justify-center text-white font-black text-2xl italic">N</div>
+                        )}
+                        <h2 className="text-3xl font-black text-[var(--text-primary)] uppercase tracking-tighter">{companyName}</h2>
+                        <div className="px-4 py-1.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">Enterprise Portal</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-[var(--bg-card)] rounded-[3.5rem] border border-[var(--border-subtle)] p-10 md:p-14 shadow-2xl relative overflow-hidden">
+                        
+                        <div className="mb-12 text-left">
+                            <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tight uppercase italic leading-none mb-3">Sign In</h2>
+                            <p className="text-[var(--text-muted)] text-sm font-medium">Please authorize to enter the secure environment.</p>
+                        </div>
+
+                        <AnimatePresence mode="wait">
+                            {error && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="mb-10 p-5 rounded-2xl bg-rose-500/5 border border-rose-500/10 flex items-center gap-4 text-rose-500"
+                                >
+                                    <AlertCircle size={20} className="flex-shrink-0" />
+                                    <span className="text-xs font-black uppercase tracking-wider">{error}</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        <form onSubmit={handleLogin} className="space-y-8">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)] ml-2">Identity Address</label>
+                                <div className="relative group">
+                                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary)] transition-colors">
+                                        <Mail size={20} strokeWidth={2.5} />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={e => setFormData(f => ({ ...f, email: e.target.value }))}
+                                        className="nx-input !h-[72px] !pl-16 !bg-[var(--bg-elevated)]/50 !rounded-[1.8rem] !text-base focus:!ring-[var(--primary)]/10"
+                                        placeholder="Enter your work email"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center px-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">Access Key</label>
+                                    <button type="button" className="text-[10px] font-black uppercase tracking-widest text-[var(--primary)] hover:underline decoration-2 underline-offset-4">Reset Key?</button>
+                                </div>
+                                <div className="relative group">
+                                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary)] transition-colors">
+                                        <Lock size={20} strokeWidth={2.5} />
+                                    </div>
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={formData.password}
+                                        onChange={e => setFormData(f => ({ ...f, password: e.target.value }))}
+                                        className="nx-input !h-[72px] !pl-16 !pr-16 !bg-[var(--bg-elevated)]/50 !rounded-[1.8rem] !text-base focus:!ring-[var(--primary)]/10 tracking-[0.3em]"
+                                        placeholder="••••••••"
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-6 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <motion.button
+                                whileHover={{ scale: 1.01, y: -2 }}
+                                whileTap={{ scale: 0.99, y: 0 }}
+                                type="submit"
+                                disabled={loading}
+                                className="w-full h-20 bg-[var(--primary)] hover:bg-[var(--primary)]/90 rounded-[2rem] flex items-center justify-center font-black uppercase tracking-[0.4em] text-[11px] text-white shadow-2xl shadow-[var(--primary)]/30 transition-all disabled:opacity-50 group mt-10"
+                            >
+                                {loading ? (
+                                    <Loader2 size={24} className="animate-spin" />
+                                ) : (
+                                    <div className="flex items-center gap-4">
+                                        <span>Authorize & Enter</span>
+                                        <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+                                    </div>
+                                )}
+                            </motion.button>
+                        </form>
+                    </div>
+
+                    {/* Footer Info */}
+                    <div className="mt-12 text-center">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)] opacity-40">
+                            Nexus Enterprise Cloud · Deployment 2026.4.25
+                        </p>
+                    </div>
+                </motion.div>
+            </div>
         </div>
     );
 };

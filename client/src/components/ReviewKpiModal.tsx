@@ -48,10 +48,10 @@ const ReviewKpiModal = ({ isOpen, onClose, sheetId, employeeName, onSuccess }: R
                     />
                     
                     <motion.div 
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="glass w-full max-w-lg bg-[#0a0f1e]/90 border-white/[0.05] overflow-hidden flex flex-col shadow-2xl shadow-primary/10"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="glass w-full max-w-lg bg-[var(--bg-card)] border-[var(--border-subtle)] overflow-hidden flex flex-col shadow-2xl shadow-[var(--primary)]/10"
                     >
                         {/* Header */}
                         <div className="p-8 border-b border-white/[0.05] flex justify-between items-center bg-white/[0.02]">

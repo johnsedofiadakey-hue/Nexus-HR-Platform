@@ -58,6 +58,7 @@ const OrgChart = lazy(() => import('./pages/OrgChart'));
 const DeptKpiPage = lazy(() => import('./pages/kpi/DepartmentKPI'));
 const Inbox = lazy(() => import('./pages/Inbox'));
 const Training = lazy(() => import('./pages/Training'));
+const HolidayCalendar = lazy(() => import('./pages/HolidayCalendar'));
 const MDKpiView = lazy(() => import('./pages/kpi/MDKpiView'));
 const MyTargetsPage = lazy(() => import('./pages/performance/TargetDashboard'));
 const AnnouncementsPage = lazy(() => import('./pages/Announcements'));
@@ -156,6 +157,17 @@ const Layout = () => {
       <CommandPalette />
       <CoreGuide isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
       <FirstRunWelcome />
+      {settings?.maintenanceMode && (
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-[var(--warning)] text-black py-2 px-4 flex justify-between items-center font-black uppercase tracking-widest text-[10px]">
+          <span>{t('common.maintenance_active')}</span>
+          <button 
+            onClick={() => navigate('/settings')}
+            className="bg-black text-[var(--warning)] px-4 py-1 rounded-full hover:bg-black/80 transition-all font-bold"
+          >
+            {t('common.deactivate')}
+          </button>
+        </div>
+      )}
       {isImpersonating && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500 text-black py-2 px-4 flex justify-between items-center font-black uppercase tracking-widest text-[10px]">
           <div className="flex items-center gap-2">
@@ -224,10 +236,12 @@ const Layout = () => {
       </div>
       <MobileNav />
       <DemoPersonaSwitcher />
-      <NexusAIInsight 
-        isOpen={isAIOpen} 
-        onClose={() => setIsAIOpen(false)} 
-      />
+      {rank >= 70 && (
+        <NexusAIInsight 
+          isOpen={isAIOpen} 
+          onClose={() => setIsAIOpen(false)} 
+        />
+      )}
       <SandboxHUD />
     </div>
   );
@@ -245,7 +259,7 @@ const SettingsHub = lazy(() => import('./pages/SettingsHub'));
 
 const AppContent = () => {
   const { settings } = useTheme();
-  useTranslation(); // Still initialized for core translation loading if needed
+  const { t } = useTranslation();
 
   const isCentralDomain = window.location.hostname === 'nexus-hr-platform.web.app' || window.location.hostname === 'nexus-hr-platform.firebaseapp.com';
 
@@ -358,8 +372,8 @@ const AppContent = () => {
                 />
               </div>
 
-              <div className="w-20 h-20 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center text-amber-500 mx-auto mb-6">
-                <Clock size={32} className="animate-pulse" />
+              <div className="w-20 h-20 bg-[var(--warning)]/10 border border-[var(--warning)]/20 rounded-2xl flex items-center justify-center text-[var(--warning)] mx-auto mb-6">
+                <Shield size={40} />
               </div>
               
               <h2 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight mb-2">Session Expiring</h2>
@@ -378,10 +392,13 @@ const AppContent = () => {
                   Stay Connected
                 </button>
                 <button 
-                  onClick={() => window.location.replace('/?reason=logout')}
-                  className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-rose-500 transition-colors"
+                  onClick={() => {
+                    localStorage.clear();
+                    window.location.href = '/login';
+                  }}
+                  className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--error)] transition-colors"
                 >
-                  Logout Now
+                  {t('common.force_logout')}
                 </button>
               </div>
             </motion.div>
@@ -393,7 +410,6 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Navigate to="/" replace />} />
-          <Route path="/home" element={<StormglideHome />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/force-logout" element={<ForceLogout />} />
 

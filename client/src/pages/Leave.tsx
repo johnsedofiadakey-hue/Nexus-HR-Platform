@@ -322,12 +322,12 @@ const Leave = () => {
              {userRank >= 60 && (
                <button onClick={() => setActiveTab('TEAM')} className={cn("px-4 sm:px-6 py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest relative transition-all whitespace-nowrap", activeTab === 'TEAM' ? "bg-[var(--bg-card)] text-[var(--primary)] shadow-sm border border-[var(--border-subtle)]" : "text-[var(--text-muted)]")}>
                  {t('leave.team_hub')}
-                 {teamLeaves.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 rounded-full flex items-center justify-center text-[8px] text-white animate-pulse font-black">{teamLeaves.length}</span>}
+                 {teamLeaves.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--error)] rounded-full flex items-center justify-center text-[8px] text-white animate-pulse font-black">{teamLeaves.length}</span>}
                </button>
              )}
               <button onClick={() => setActiveTab('RELIEF')} className={cn("px-4 sm:px-6 py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest relative transition-all whitespace-nowrap", activeTab === 'RELIEF' ? "bg-[var(--bg-card)] text-[var(--primary)] shadow-sm border border-[var(--border-subtle)]" : "text-[var(--text-muted)]")}>
                {t('leave.handover')}
-               {reliefRequests.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center text-[8px] text-black animate-pulse font-black">{reliefRequests.length}</span>}
+               {reliefRequests.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--warning)] rounded-full flex items-center justify-center text-[8px] text-black animate-pulse font-black">{reliefRequests.length}</span>}
               </button>
               <button onClick={() => setActiveTab('HISTORY')} className={cn("px-4 sm:px-6 py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest relative transition-all whitespace-nowrap", activeTab === 'HISTORY' ? "bg-[var(--bg-card)] text-[var(--primary)] shadow-sm border border-[var(--border-subtle)]" : "text-[var(--text-muted)]")}>
                {t('leave.handover_history')}
@@ -337,8 +337,8 @@ const Leave = () => {
                     {t('leave.register')}
                   </button>
               )}
-              {userRank >= 80 && (
-                  <button onClick={() => setActiveTab('ADMIN')} className={cn("px-4 sm:px-6 py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap", activeTab === 'ADMIN' ? "bg-amber-500/10 text-amber-600 shadow-sm border border-amber-500/20" : "text-[var(--text-muted)]")}>
+               {userRank >= 80 && (
+                  <button onClick={() => setActiveTab('ADMIN')} className={cn("px-4 sm:px-6 py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap", activeTab === 'ADMIN' ? "bg-[var(--warning)]/10 text-[var(--warning)] shadow-sm border border-[var(--warning)]/20" : "text-[var(--text-muted)]")}>
                     {t('leave.admin_controls', 'Company Controls')}
                   </button>
               )}
@@ -359,15 +359,15 @@ const Leave = () => {
            <motion.div 
              initial={{ opacity: 0, y: -20 }} 
              animate={{ opacity: 1, y: 0 }}
-             className="nx-card p-6 bg-rose-500/5 border border-rose-500/20 flex flex-col md:flex-row items-center justify-between gap-6"
+             className="nx-card p-6 bg-[var(--error)]/5 border border-[var(--error)]/20 flex flex-col md:flex-row items-center justify-between gap-6"
            >
              <div className="flex items-center gap-5">
-               <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
+               <div className="w-14 h-14 rounded-2xl bg-[var(--error)]/10 flex items-center justify-center text-[var(--error)] shrink-0">
                  <AlertTriangle size={28} className="animate-pulse" />
                </div>
                <div className="space-y-1">
-                 <h4 className="text-[14px] font-black uppercase tracking-tight text-rose-600">{t('leave.debt_alert_title', 'Negative Balance / Leave Debt Detected')}</h4>
-                 <p className="text-[11px] font-bold text-rose-600/60 uppercase tracking-widest leading-relaxed">
+                 <h4 className="text-[14px] font-black uppercase tracking-tight text-[var(--error)]">{t('leave.debt_alert_title', 'Negative Balance / Leave Debt Detected')}</h4>
+                 <p className="text-[11px] font-bold text-[var(--error)]/60 uppercase tracking-widest leading-relaxed">
                    {t('leave.debt_alert_desc', 'You are currently drawing from future leave years. ')}
                    {Math.abs(Number(balance.leaveBalance)) >= (balance.leaveAllowance || 24) * 2 
                      ? t('leave.debt_severe', 'You have no leave availability for the next 2+ years.')
@@ -377,7 +377,7 @@ const Leave = () => {
              </div>
              <button 
                onClick={() => navigate('/settings?tab=policies')}
-               className="px-6 h-11 rounded-xl bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:scale-105 active:scale-95 transition-all"
+               className="px-6 h-11 rounded-xl bg-[var(--error)] text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[var(--error)]/20 hover:scale-105 active:scale-95 transition-all"
              >
                View Leave Policy
              </button>
@@ -489,7 +489,7 @@ const Leave = () => {
                                              <Icon size={12} className={cfg.color} /> {t(cfg.label)}
                                           </span>
                                           {(leave.status === 'MANAGER_REJECTED' || leave.status === 'MD_REJECTED' || leave.status === 'RELIEVER_DECLINED') && (
-                                            <div className="flex items-center gap-2 text-[9px] font-bold text-rose-500 bg-rose-500/5 px-3 py-1.5 rounded-lg border border-rose-500/10 w-fit">
+                                            <div className="flex items-center gap-2 text-[9px] font-bold text-[var(--error)] bg-[var(--error)]/5 px-3 py-1.5 rounded-lg border border-[var(--error)]/10 w-fit">
                                               <XCircle size={10} />
                                               <span className="opacity-90">{leave.managerComment || leave.hrComment || leave.relieverComment || t('leave.no_reason_provided')}</span>
                                             </div>
@@ -504,19 +504,19 @@ const Leave = () => {
                                                "p-2 rounded-lg transition-all border",
                                                leave.status === 'APPROVED' 
                                                  ? "bg-[var(--primary)]/5 text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white border-[var(--primary)]/10" 
-                                                 : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-50"
+                                                 : "bg-[var(--bg-elevated)]/50 text-[var(--text-muted)] border-[var(--border-subtle)] cursor-not-allowed opacity-50"
                                              )}
                                              title={leave.status === 'APPROVED' ? t('leave.print_pdf') : t('leave.pending_signoff')}
                                            >
                                              <Printer size={14} />
                                            </button>
                                          {(leave.status === 'SUBMITTED' || leave.status === 'PENDING_RELIEVER') && (
-                                             <button onClick={() => handleCancel(leave.id)} className="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline decoration-rose-500/30 underline-offset-8">{t('leave.decommission_btn')}</button>
+                                             <button onClick={() => handleCancel(leave.id)} className="text-[10px] font-black text-[var(--error)] uppercase tracking-widest hover:underline decoration-[var(--error)]/30 underline-offset-8">{t('leave.decommission_btn')}</button>
                                          )}
                                          {userRank >= 90 && (
                                            <button 
                                              onClick={() => handleDeleteLeave(leave.id)}
-                                             className="p-2 rounded-lg bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-rose-500/10"
+                                             className="p-2 rounded-lg bg-[var(--error)]/5 text-[var(--error)] hover:bg-[var(--error)] hover:text-white transition-all border border-[var(--error)]/10"
                                              title={t('leave.administrative_delete', 'Delete Record')}
                                            >
                                              <Trash2 size={14} />
@@ -559,7 +559,7 @@ const Leave = () => {
                                           <p className="text-[11px] font-black text-[var(--text-primary)] uppercase">{leave.reliever.fullName}</p>
                                           <span className={cn(
                                             "text-[7px] font-black uppercase tracking-widest mt-1",
-                                            leave.relieverStatus === 'ACCEPTED' ? "text-emerald-500" : "text-amber-500"
+                                            leave.relieverStatus === 'ACCEPTED' ? "text-[var(--success)]" : "text-[var(--warning)]"
                                           )}>
                                             {leave.relieverStatus === 'ACCEPTED' ? t('leave.protocol_signed') : t('leave.pending_signature')}
                                           </span>
@@ -584,7 +584,7 @@ const Leave = () => {
                                              "w-11 h-11 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-90 border",
                                              leave.status === 'APPROVED'
                                                ? "bg-[var(--primary)]/5 text-[var(--primary)] border-[var(--primary)]/10 hover:bg-[var(--primary)] hover:text-white"
-                                               : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-50"
+                                               : "bg-[var(--bg-elevated)]/50 text-[var(--text-muted)] border-[var(--border-subtle)] cursor-not-allowed opacity-50"
                                            )}
                                            title={leave.status === 'APPROVED' ? t('leave.print_pdf') : t('leave.not_validated')}
                                         >
@@ -608,7 +608,7 @@ const Leave = () => {
                                          {userRank >= 90 && (
                                            <button 
                                              onClick={() => handleDeleteLeave(leave.id)}
-                                             className="p-2 rounded-lg bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-rose-500/10 ml-2"
+                                             className="p-2 rounded-lg bg-[var(--error)]/5 text-[var(--error)] hover:bg-[var(--error)] hover:text-white transition-all border border-[var(--error)]/10 ml-2"
                                              title={t('leave.administrative_delete', 'Delete Record')}
                                            >
                                              <Trash2 size={14} />
@@ -658,7 +658,7 @@ const Leave = () => {
                                                 "p-2 rounded-lg transition-all border",
                                                 leave.status === 'APPROVED'
                                                   ? "bg-[var(--primary)]/5 text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white border-[var(--primary)]/10"
-                                                  : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-50"
+                                                  : "bg-[var(--bg-elevated)]/50 text-[var(--text-muted)] border-[var(--border-subtle)] cursor-not-allowed opacity-50"
                                               )}
                                               title={leave.status === 'APPROVED' ? t('leave.print_request') : t('leave.awaiting_md')}
                                             >
@@ -670,7 +670,7 @@ const Leave = () => {
                                             {userRank >= 90 && (
                                                 <button 
                                                   onClick={() => handleDeleteLeave(leave.id)}
-                                                  className="p-2 rounded-lg bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-rose-500/10"
+                                                  className="p-2 rounded-lg bg-[var(--error)]/5 text-[var(--error)] hover:bg-[var(--error)] hover:text-white transition-all border border-[var(--error)]/10"
                                                   title={t('leave.administrative_delete')}
                                                 >
                                                   <Trash2 size={14} />
@@ -702,7 +702,7 @@ const Leave = () => {
                                <motion.tr key={rec.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.02 }} className="hover:bg-[var(--bg-elevated)]/30 transition-all group">
                                   <td className="px-10 py-6" data-label={t('leave.handover_personnel')}>
                                      <div className="flex items-center gap-3">
-                                        <div className={cn("w-2 h-2 rounded-full", rec.relieverId === user.id ? "bg-[var(--accent)]" : "bg-blue-500")} />
+                                        <div className={cn("w-2 h-2 rounded-full", rec.relieverId === user.id ? "bg-[var(--accent)]" : "bg-[var(--info)]")} />
                                         <div>
                                           <p className="text-[12px] font-black text-[var(--text-primary)] uppercase tracking-tight">
                                             {rec.relieverId === user.id ? t('leave.covering_for', { name: rec.requester?.fullName, defaultValue: `Covering for ${rec.requester?.fullName}` }) : t('leave.covered_by', { name: rec.reliever?.fullName, defaultValue: `${rec.reliever?.fullName} covering for me` })}
@@ -718,7 +718,7 @@ const Leave = () => {
                                      {format(new Date(rec.acceptedAt), 'PPp')}
                                   </td>
                                   <td className="py-6" data-label={t('leave.handover_status')}>
-                                     <span className="px-3 py-1 rounded-lg bg-emerald-500/5 text-emerald-600 text-[8px] font-black uppercase tracking-widest border border-emerald-500/10 flex items-center gap-2 w-fit">
+                                     <span className="px-3 py-1 rounded-lg bg-[var(--success)]/5 text-[var(--success)] text-[8px] font-black uppercase tracking-widest border border-[var(--success)]/10 flex items-center gap-2 w-fit">
                                         <CheckCircle size={10} /> {rec.status}
                                      </span>
                                   </td>

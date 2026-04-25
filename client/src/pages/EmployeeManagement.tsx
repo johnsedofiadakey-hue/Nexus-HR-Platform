@@ -19,16 +19,16 @@ const ROLES = ['DEV', 'MD', 'DIRECTOR', 'MANAGER', 'MID_MANAGER', 'SUPERVISOR', 
 // ROLE_LABELS is now handled by i18n in the render
 
 const ROLE_THEMES: Record<string, string> = {
-  DEV: 'text-emerald-600 bg-emerald-500/5 border-emerald-500/10',
-  MD: 'text-rose-600 bg-rose-500/5 border-rose-500/10',
-  DIRECTOR: 'text-purple-600 bg-purple-500/5 border-purple-500/10',
-  HR_OFFICER: 'text-indigo-600 bg-indigo-500/5 border-indigo-500/10',
-  IT_MANAGER: 'text-cyan-600 bg-cyan-500/5 border-cyan-500/10',
-  IT_ADMIN: 'text-cyan-600 bg-cyan-500/5 border-cyan-500/10',
-  MANAGER: 'text-blue-600 bg-blue-500/5 border-blue-500/10',
-  SUPERVISOR: 'text-cyan-600 bg-cyan-500/5 border-cyan-500/10',
+  DEV: 'text-[var(--success)] bg-[var(--success)]/5 border-[var(--success)]/10',
+  MD: 'text-[var(--error)] bg-[var(--error)]/5 border-[var(--error)]/10',
+  DIRECTOR: 'text-[var(--primary)] bg-[var(--primary)]/5 border-[var(--primary)]/10',
+  HR_OFFICER: 'text-[var(--primary)] bg-[var(--primary)]/5 border-[var(--primary)]/10',
+  IT_MANAGER: 'text-[var(--info)] bg-[var(--info)]/5 border-[var(--info)]/10',
+  IT_ADMIN: 'text-[var(--info)] bg-[var(--info)]/5 border-[var(--info)]/10',
+  MANAGER: 'text-[var(--primary)] bg-[var(--primary)]/5 border-[var(--primary)]/10',
+  SUPERVISOR: 'text-[var(--info)] bg-[var(--info)]/5 border-[var(--info)]/10',
   STAFF: 'text-[var(--text-secondary)] bg-[var(--bg-elevated)] border-[var(--border-subtle)]',
-  CASUAL: 'text-amber-600 bg-amber-500/5 border-amber-500/10'
+  CASUAL: 'text-[var(--warning)] bg-[var(--warning)]/5 border-[var(--warning)]/10'
 };
 
 const STATUS_THEMES: Record<string, string> = {
@@ -390,10 +390,10 @@ export default function EmployeeManagement() {
 
              {rank >= 80 && (
                 <div className="flex items-center gap-2 ml-2">
-                    <button onClick={() => handleExport('csv')} className="p-3 rounded-xl bg-[var(--bg-elevated)]/50 border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-emerald-500 hover:border-emerald-500/30 transition-all shadow-sm" title={t('common.export_csv', 'Export CSV Ledger')}>
+                    <button onClick={() => handleExport('csv')} className="p-3 rounded-xl bg-[var(--bg-elevated)]/50 border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--success)] hover:border-[var(--success)]/30 transition-all shadow-sm" title={t('common.export_csv', 'Export CSV Ledger')}>
                         <div className="text-[9px] font-black uppercase">CSV</div>
                     </button>
-                    <button onClick={() => handleExport('pdf')} className="p-3 rounded-xl bg-[var(--bg-elevated)]/50 border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-rose-500 hover:border-rose-500/30 transition-all shadow-sm" title={t('common.export_pdf', 'Export PDF Ledger')}>
+                    <button onClick={() => handleExport('pdf')} className="p-3 rounded-xl bg-[var(--bg-elevated)]/50 border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--error)] hover:border-[var(--error)]/30 transition-all shadow-sm" title={t('common.export_pdf', 'Export PDF Ledger')}>
                         <Printer size={14} />
                     </button>
                 </div>
@@ -466,7 +466,7 @@ export default function EmployeeManagement() {
                                 {t(`employees.roles.${emp.role}`)}
                              </div>
                              {emp.isOnLeave && (
-                               <div className="px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border bg-amber-500/10 text-amber-600 border-amber-500/20 flex items-center gap-1.5 animate-pulse">
+                               <div className="px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20 flex items-center gap-1.5 animate-pulse">
                                   <Clock size={10} /> {t('leave.status.ON_LEAVE', 'ON LEAVE')}
                                </div>
                              )}
@@ -494,7 +494,7 @@ export default function EmployeeManagement() {
                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[var(--bg-elevated)] to-transparent border-t border-[var(--border-subtle)]/50 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                       <div className="flex items-center justify-between gap-2">
                          {activeTab === 'archived' ? (
-                            <button onClick={() => handleRestore(emp)} className="flex-1 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 border border-emerald-500/20 shadow-sm">
+                            <button onClick={() => handleRestore(emp)} className="flex-1 h-10 rounded-xl bg-[var(--success)]/10 text-[var(--success)] hover:bg-[var(--success)] hover:text-white transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 border border-[var(--success)]/20 shadow-sm">
                                 <ArrowRight size={14} /> {t('employees.restore_to_duty')}
                             </button>
                          ) : (
@@ -508,7 +508,7 @@ export default function EmployeeManagement() {
                                     <Edit2 size={14} />
                                 </button>
                                 {getRankFromRole(user.role) >= 90 && (
-                                    <button onClick={() => openArchive(emp)} className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-rose-500 text-[var(--text-muted)] hover:text-rose-500 transition-all flex items-center justify-center">
+                                    <button onClick={() => openArchive(emp)} className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--error)] text-[var(--text-muted)] hover:text-[var(--error)] transition-all flex items-center justify-center">
                                         <Trash2 size={14} />
                                     </button>
                                 )}
@@ -557,7 +557,7 @@ export default function EmployeeManagement() {
                                      {t(`employees.statuses.${emp.status}`)}
                                   </span>
                                   {emp.isOnLeave && (
-                                    <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-amber-500/20 bg-amber-500/10 text-amber-600 flex items-center gap-1.5">
+                                    <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-[var(--warning)]/20 bg-[var(--warning)]/10 text-[var(--warning)] flex items-center gap-1.5">
                                        <Umbrella size={10} /> {t('leave.status.ON_LEAVE', 'OUT')}
                                     </span>
                                   )}
@@ -569,7 +569,7 @@ export default function EmployeeManagement() {
                                         <Eye size={16} />
                                      </button>
                                       {activeTab === 'archived' ? (
-                                        <button onClick={() => handleRestore(emp)} className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center" title={t('employees.restore_employee')}>
+                                        <button onClick={() => handleRestore(emp)} className="w-9 h-9 rounded-xl bg-[var(--success)]/10 text-[var(--success)] hover:bg-[var(--success)] hover:text-white transition-all flex items-center justify-center" title={t('employees.restore_employee')}>
                                           <ArrowRight size={16} />
                                         </button>
                                       ) : (
@@ -643,7 +643,7 @@ export default function EmployeeManagement() {
                     </div>
                  )}
 
-                 {error && <div className="px-5 py-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-[11px] font-black uppercase tracking-widest">{error}</div>}
+                 {error && <div className="px-5 py-4 rounded-2xl bg-[var(--error)]/10 border border-[var(--error)]/20 text-[var(--error)] text-[11px] font-black uppercase tracking-widest">{error}</div>}
 
                  {/* Tabbed Navigation Bar */}
                  <div className="flex overflow-x-auto gap-2 border-b border-[var(--border-subtle)] pb-4 mb-8 custom-scrollbar">

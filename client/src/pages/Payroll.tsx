@@ -14,11 +14,11 @@ import { useTranslation } from 'react-i18next';
 
 const statusColors: Record<string, { badge: string; dot: string }> = {
   DRAFT: { badge: 'bg-slate-500/10 text-slate-600 border-slate-500/20', dot: 'bg-slate-500' },
-  PENDING_HR: { badge: 'bg-amber-500/10 text-amber-600 border-amber-500/20', dot: 'bg-amber-500' },
+  PENDING_HR: { badge: 'bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20', dot: 'bg-[var(--warning)]' },
   PENDING_MD: { badge: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20', dot: 'bg-indigo-500' },
-  APPROVED: { badge: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', dot: 'bg-emerald-500' },
+  APPROVED: { badge: 'bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20', dot: 'bg-[var(--success)]' },
   PAID: { badge: 'bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/20', dot: 'bg-[var(--primary)]' },
-  CANCELLED: { badge: 'bg-rose-500/10 text-rose-600 border-rose-500/20', dot: 'bg-rose-500' },
+  CANCELLED: { badge: 'bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20', dot: 'bg-[var(--error)]' },
 };
 
 const currencyGradients: Record<string, string> = {
@@ -269,10 +269,10 @@ const Payroll = () => {
                               </div>
                             </td>
                             <td className="text-[13px] font-medium text-[var(--text-secondary)]" data-label={t('payroll.headers.gross')}>{fmt(slip.grossPay, slip.currency, i18n.language)}</td>
-                            <td className="text-[13px] font-bold text-rose-500" data-label={t('payroll.headers.tax')}>-{fmt(slip.tax, slip.currency, i18n.language)}</td>
-                            <td className="text-[13px] font-bold text-amber-500" data-label={t('payroll.headers.ss')}>-{fmt(slip.ssnit, slip.currency, i18n.language)}</td>
+                             <td className="text-[13px] font-bold text-[var(--error)]" data-label={t('payroll.headers.tax')}>-{fmt(slip.tax, slip.currency, i18n.language)}</td>
+                            <td className="text-[13px] font-bold text-[var(--warning)]" data-label={t('payroll.headers.ss')}>-{fmt(slip.ssnit, slip.currency, i18n.language)}</td>
                             <td className="py-6" data-label={t('payroll.headers.net')}>
-                              <div className="px-4 py-2 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-emerald-600 font-black text-[15px] w-fit">
+                              <div className="px-4 py-2 rounded-xl bg-[var(--success)]/5 border border-[var(--success)]/10 text-[var(--success)] font-black text-[15px] w-fit">
                                 {fmt(slip.netPay, slip.currency, i18n.language)}
                               </div>
                             </td>
@@ -683,11 +683,11 @@ const Payroll = () => {
                             <button 
                               type="button" 
                               onClick={() => setForm(f => ({ ...f, year: String(parseInt(f.year) - 1) }))}
-                              className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all font-black"
+                              className="w-12 h-12 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center hover:bg-[var(--bg-elevated)] transition-all font-black"
                             >-</button>
                             <input 
                               type="number" 
-                              className="flex-1 bg-white border-2 border-slate-200 rounded-xl h-12 text-center text-[16px] font-black focus:border-[var(--primary)] outline-none transition-all" 
+                              className="flex-1 bg-[var(--bg-card)] border-2 border-[var(--border-subtle)] rounded-xl h-12 text-center text-[16px] font-black focus:border-[var(--primary)] outline-none transition-all" 
                               value={form.year}
                               onChange={e => setForm({ ...form, year: e.target.value })} 
                               min="2020" max="2099" 
@@ -695,7 +695,7 @@ const Payroll = () => {
                             <button 
                               type="button" 
                               onClick={() => setForm(f => ({ ...f, year: String(parseInt(f.year) + 1) }))}
-                              className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all font-black"
+                              className="w-12 h-12 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center hover:bg-[var(--bg-elevated)] transition-all font-black"
                             >+</button>
                           </div>
                         </div>
