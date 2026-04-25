@@ -243,21 +243,31 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         html[data-theme="${themeName}"] .bg-indigo-600, 
         html[data-theme="${themeName}"] .bg-blue-600, 
         html[data-theme="${themeName}"] .bg-violet-600,
+        html[data-theme="${themeName}"] .bg-brand-primary,
         html[data-theme="${themeName}"] .bg-purple-600 { background-color: var(--primary) !important; }
         
         html[data-theme="${themeName}"] .text-indigo-600, 
         html[data-theme="${themeName}"] .text-blue-600,
         html[data-theme="${themeName}"] .text-violet-600,
+        html[data-theme="${themeName}"] .text-brand-primary,
         html[data-theme="${themeName}"] .text-purple-600 { color: var(--primary) !important; }
 
         html[data-theme="${themeName}"] .border-indigo-600, 
         html[data-theme="${themeName}"] .border-blue-600,
         html[data-theme="${themeName}"] .border-violet-600,
+        html[data-theme="${themeName}"] .border-brand-primary,
         html[data-theme="${themeName}"] .border-purple-600 { border-color: var(--primary) !important; }
 
-        /* Elevation Catchers */
+        /* Status & Secondary Surface Catchers */
         html[data-theme="${themeName}"] .bg-slate-200, html[data-theme="${themeName}"] .bg-gray-200 { background-color: var(--border-subtle) !important; }
+        html[data-theme="${themeName}"] .bg-slate-300, html[data-theme="${themeName}"] .bg-gray-300 { background-color: var(--border-strong) !important; }
+        html[data-theme="${themeName}"] .bg-slate-800, html[data-theme="${themeName}"] .bg-gray-800 { background-color: var(--bg-elevated) !important; }
+        html[data-theme="${themeName}"] .bg-slate-900, html[data-theme="${themeName}"] .bg-gray-900 { background-color: var(--bg-card) !important; }
+        
         html[data-theme="${themeName}"] .text-slate-500, html[data-theme="${themeName}"] .text-gray-500 { color: var(--text-muted) !important; }
+        html[data-theme="${themeName}"] .text-slate-300, html[data-theme="${themeName}"] .text-gray-300 { color: var(--text-muted) !important; }
+        html[data-theme="${themeName}"] .text-slate-100, html[data-theme="${themeName}"] .text-gray-100 { color: var(--text-primary) !important; }
+        html[data-theme="${themeName}"] .text-slate-50, html[data-theme="${themeName}"] .text-gray-50 { color: var(--text-primary) !important; }
 
         /* Print Override System: Force Browser Print to use Brand Identity */
         @media print {

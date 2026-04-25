@@ -70,7 +70,7 @@ const TopHeader = ({ onMenuClick, isCollapsed = false }: TopHeaderProps) => {
 
                 {/* Mobile Branding Logo */}
                 {(settings?.logoUrl || settings?.companyLogoUrl) && (
-                    <div className="lg:hidden w-10 h-10 rounded-xl overflow-hidden border border-[var(--border-subtle)] bg-white flex-shrink-0">
+                    <div className="lg:hidden w-10 h-10 rounded-xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-card)] flex-shrink-0">
                         <img 
                             src={getLogoUrl(settings?.logoUrl || settings?.companyLogoUrl) as string} 
                             key={settings?.logoUrl || settings?.companyLogoUrl}
@@ -126,7 +126,7 @@ const TopHeader = ({ onMenuClick, isCollapsed = false }: TopHeaderProps) => {
                 >
                     <InboxIcon size={20} />
                     {taskCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--accent)] text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-[var(--bg-main)] shadow-[0_0_10px_var(--accent)]">
+                        <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--accent)] text-[var(--text-inverse)] text-[9px] font-black flex items-center justify-center rounded-full border-2 border-[var(--bg-main)] shadow-[0_0_10px_var(--accent)]">
                             {taskCount > 9 ? '9+' : taskCount}
                         </span>
                     )}
@@ -139,7 +139,7 @@ const TopHeader = ({ onMenuClick, isCollapsed = false }: TopHeaderProps) => {
                 >
                     <Bell size={20} />
                     {unreadCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--primary)] text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-[var(--bg-main)] shadow-[0_0_10px_var(--primary)]">
+                        <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--primary)] text-[var(--text-inverse)] text-[9px] font-black flex items-center justify-center rounded-full border-2 border-[var(--bg-main)] shadow-[0_0_10px_var(--primary)]">
                             {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                     )}

@@ -163,7 +163,7 @@ const Layout = () => {
           <span>{t('common.maintenance_active')}</span>
           <button 
             onClick={() => navigate('/settings')}
-            className="bg-black text-[var(--warning)] px-4 py-1 rounded-full hover:bg-black/80 transition-all font-bold"
+            className="bg-[var(--text-primary)] text-[var(--bg-main)] px-4 py-1 rounded-full hover:opacity-90 transition-all font-bold"
           >
             {t('common.deactivate')}
           </button>
@@ -177,7 +177,7 @@ const Layout = () => {
           </div>
           <button
             onClick={handleExitImpersonation}
-            className="bg-black text-amber-500 px-4 py-1 rounded-full hover:bg-black/80 transition-all font-bold"
+            className="bg-[var(--text-primary)] text-amber-500 px-4 py-1 rounded-full hover:opacity-90 transition-all font-bold"
           >
             Exit Session
           </button>

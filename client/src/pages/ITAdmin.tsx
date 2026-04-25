@@ -125,7 +125,7 @@ const ITAdmin = () => {
           </div>
           <motion.button
             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            className="px-8 h-[52px] rounded-2xl bg-[var(--primary)] text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[var(--primary)]/30 flex items-center gap-3"
+            className="px-8 h-[52px] rounded-2xl bg-[var(--primary)] text-[var(--text-inverse)] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-[var(--primary)]/30 flex items-center gap-3"
             onClick={() => setShowCreate(true)}
           >
             <Plus size={18} /> Add New Personnel
@@ -145,10 +145,10 @@ const ITAdmin = () => {
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {[
-                      { label: 'Total Staff', value: overview.totalUsers, icon: Users, color: 'text-indigo-600 bg-indigo-500/5' },
-                      { label: 'Active Identity', value: overview.activeUsers, icon: Zap, color: 'text-emerald-600 bg-emerald-500/5' },
-                      { label: 'Inventory', value: overview.assets, icon: Package, color: 'text-blue-600 bg-blue-500/5' },
-                      { label: 'Unassigned Assets', value: overview.availableAssets, icon: Cpu, color: 'text-amber-600 bg-amber-500/5' },
+                      { label: 'Total Staff', value: overview.totalUsers, icon: Users, color: 'text-[var(--primary)] bg-[var(--primary)]/5' },
+                      { label: 'Active Identity', value: overview.activeUsers, icon: Zap, color: 'text-[var(--success)] bg-[var(--success)]/5' },
+                      { label: 'Inventory', value: overview.assets, icon: Package, color: 'text-[var(--info)] bg-[var(--info)]/5' },
+                      { label: 'Unassigned Assets', value: overview.availableAssets, icon: Cpu, color: 'text-[var(--warning)] bg-[var(--warning)]/5' },
                     ].map((s, idx) => (
                       <motion.div 
                         key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}

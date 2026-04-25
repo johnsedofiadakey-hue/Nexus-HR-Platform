@@ -62,7 +62,7 @@ const NavItem = ({ to, icon: Icon, label, badge, isCollapsed }: NavItemProps) =>
           <span className="text-[13px] tracking-tight truncate">{label}</span>
         )}
         {badge !== undefined && !isCollapsed && (
-          <span className="ml-auto px-1.5 py-0.5 rounded-full bg-[var(--primary)] text-[var(--text-inverse)] text-[9px] font-bold">
+          <span className="ml-auto px-2 py-0.5 rounded-full bg-[var(--primary)] text-[var(--text-inverse)] text-[9px] font-black shadow-sm ring-1 ring-white/10">
             {badge}
           </span>
         )}
@@ -152,7 +152,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, setIsCollapsed }: SidebarProps)
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 z-[60] lg:hidden"
+            className="fixed inset-0 bg-[var(--bg-main)]/80 backdrop-blur-sm z-[60] lg:hidden"
           />
         )}
       </AnimatePresence>
@@ -166,6 +166,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, setIsCollapsed }: SidebarProps)
         )}
         style={{ 
           backgroundColor: 'var(--bg-sidebar)',
+          backdropFilter: 'blur(10px)',
           borderRight: '1px solid var(--border-subtle)',
         }}
       >
@@ -173,7 +174,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, setIsCollapsed }: SidebarProps)
         <div className="flex items-center justify-between h-24 px-6 flex-shrink-0">
           {!isCollapsed && (
             <div className="flex items-center gap-4 overflow-hidden ml-1">
-              <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center flex-shrink-0 border border-[var(--border-subtle)] relative group overflow-hidden">
+              <div className="w-11 h-11 rounded-xl bg-[var(--bg-card)] flex items-center justify-center flex-shrink-0 border border-[var(--border-subtle)] relative group overflow-hidden shadow-sm">
                 {getLogoUrl(settings?.logoUrl || settings?.companyLogoUrl) ? (
                   <img src={getLogoUrl(settings?.logoUrl || settings?.companyLogoUrl) as string} key={settings?.logoUrl} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
@@ -193,7 +194,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, setIsCollapsed }: SidebarProps)
             </div>
           )}
           {isCollapsed && (
-             <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center mx-auto border border-[var(--border-subtle)] relative group overflow-hidden">
+             <div className="w-12 h-12 rounded-xl bg-[var(--bg-card)] flex items-center justify-center mx-auto border border-[var(--border-subtle)] relative group overflow-hidden shadow-sm">
                 {getLogoUrl(settings?.logoUrl || settings?.companyLogoUrl) ? (
                   <img src={getLogoUrl(settings?.logoUrl || settings?.companyLogoUrl) as string} key={settings?.logoUrl} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
