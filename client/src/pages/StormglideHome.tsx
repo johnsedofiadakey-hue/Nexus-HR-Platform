@@ -27,22 +27,8 @@ const StormglideHome = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleDemoLaunch = async () => {
-    try {
-      const res = await api.post('/auth/login', {
-        email: 'director@nexus-demo.com',
-        password: 'nexusdemo'
-      });
-      const { token, refreshToken, user } = res.data;
-      storage.setItem(StorageKey.AUTH_TOKEN, token);
-      if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
-      storage.setItem(StorageKey.USER, user);
-      
-      toast.success('Instant Access: Director Role Synchronized');
-      window.location.href = '/dashboard';
-    } catch (err) {
-      navigate('/login?demo=true');
-    }
+  const handleDemoLaunch = () => {
+    navigate('/login?demo=true');
   };
 
   const scrollTo = (id: string) => {

@@ -21,15 +21,39 @@ const Login = () => {
     useEffect(() => {
         if (storage.getItem(StorageKey.AUTH_TOKEN, null)) navigate('/dashboard');
         
-        // Handle Demo Mode Auto-Fill
+        // Handle Demo Mode Auto-Fill & Silent Auto-Login
         const params = new URLSearchParams(window.location.search);
         if (params.get('demo') === 'true') {
             setIsDemoMode(true);
-            setFormData({
+            const demoCreds = {
                 email: 'guest@nexus-demo.com',
                 password: 'nexusdemo'
-            });
-            toast.success('Demo Hub Activated: Credentials Pre-filled');
+            };
+            setFormData(demoCreds);
+            
+            // Execute Silent Handshake
+            const performAutoLogin = async () => {
+                setLoading(true);
+                try {
+                    const res = await api.post('/auth/login', demoCreds);
+                    const { token, refreshToken, user } = res.data;
+                    
+                    storage.setItem(StorageKey.AUTH_TOKEN, token);
+                    if (refreshToken) storage.setItem(StorageKey.REFRESH_TOKEN, refreshToken);
+                    storage.setItem(StorageKey.USER, user || {});
+
+                    navigate('/dashboard');
+                    toast.success('Demo Space Initialized Successfully');
+                } catch (err: any) {
+                    setError('Demo Initialization Protocol Failed.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            // Visual feedback delay before silent redirect
+            const timer = setTimeout(performAutoLogin, 800);
+            return () => clearTimeout(timer);
         }
     }, [navigate]);
 
