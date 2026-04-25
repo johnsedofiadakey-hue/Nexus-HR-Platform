@@ -191,12 +191,25 @@ export const approvePayrollRun = async (organizationId: string, runId: string, a
     include: { items: { include: { employee: true } } }
   });
   if (!run) throw new Error('Payroll run not found');
-  if (run.status !== 'DRAFT') throw new Error('Only DRAFT runs can be approved');
+  if (run.status !== 'DRAFT' && run.status !== 'PENDING_HR' && run.status !== 'PENDING_MD') {
+    throw new Error('Run is not in an approvable state');
+  }
+
+  // Multi-stage transitions
+  let nextStatus = 'APPROVED';
+  if (run.status === 'DRAFT') nextStatus = 'PENDING_HR';
+  else if (run.status === 'PENDING_HR') nextStatus = 'PENDING_MD';
+  else if (run.status === 'PENDING_MD') nextStatus = 'APPROVED';
 
   await prisma.payrollRun.updateMany({
     where: { id: runId, organizationId },
-    data: { status: 'APPROVED', approvedBy: approverId, approvedAt: new Date() }
+    data: { status: nextStatus, approvedBy: approverId, approvedAt: new Date() }
   });
+
+  // Only finalize deductions and send emails if moving to APPROVED
+  if (nextStatus !== 'APPROVED') {
+    return prisma.payrollRun.findFirst({ where: { id: runId, organizationId } }) as any;
+  }
 
   // Finalize auto-deductions
   await prisma.expenseClaim.updateMany({

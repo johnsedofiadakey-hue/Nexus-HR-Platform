@@ -55,9 +55,9 @@ const Payroll = lazy(() => import('./pages/Payroll'));
 const FinanceHub = lazy(() => import('./pages/FinanceHub'));
 const AttendanceDashboard = lazy(() => import('./pages/AttendanceDashboard'));
 const OrgChart = lazy(() => import('./pages/OrgChart'));
-const Training = lazy(() => import('./pages/Training'));
-const HolidayCalendar = lazy(() => import('./pages/HolidayCalendar'));
 const DeptKpiPage = lazy(() => import('./pages/kpi/DepartmentKPI'));
+const Inbox = lazy(() => import('./pages/Inbox'));
+const Training = lazy(() => import('./pages/Training'));
 const MDKpiView = lazy(() => import('./pages/kpi/MDKpiView'));
 const MyTargetsPage = lazy(() => import('./pages/performance/TargetDashboard'));
 const AnnouncementsPage = lazy(() => import('./pages/Announcements'));
@@ -418,21 +418,22 @@ const AppContent = () => {
             <Route path="/employees/history" element={<RoleGuard minRank={70}><EmployeeHistory /></RoleGuard>} />
             <Route path="/employees/:id" element={<EmployeeProfile />} />
             <Route path="/assets" element={<AssetManagement />} />
-            <Route path="/audit" element={<RoleGuard minRank={90}><AuditLogs /></RoleGuard>} />
+            <Route path="/audit" element={<RoleGuard minRank={88}><AuditLogs /></RoleGuard>} />
             <Route path="/departments" element={<DepartmentManagement />} />
-            <Route path="/settings" element={<RoleGuard minRank={90}><SettingsHub /></RoleGuard>} />
+            <Route path="/settings" element={<RoleGuard minRank={95}><SettingsHub /></RoleGuard>} />
             <Route path="/company-settings" element={<Navigate to="/settings" replace />} />
             <Route path="/performance/strategic" element={<RoleGuard minRank={80}><StrategicGoalBuilder /></RoleGuard>} />
             <Route path="/performance/calibration" element={<RoleGuard minRank={70}><CalibrationView /></RoleGuard>} />
-            <Route path="/payroll" element={<RoleGuard minRank={85}><Payroll /></RoleGuard>} />
+            <Route path="/payroll" element={<RoleGuard minRank={87}><Payroll /></RoleGuard>} />
             <Route path="/finance" element={<FinanceHub />} />
             <Route path="/attendance" element={<AttendanceDashboard />} />
             <Route path="/org-chart" element={<RoleGuard minRank={85}><OrgChart /></RoleGuard>} />
-            <Route path="/enterprise" element={<RoleGuard minRank={90}><EnterpriseSuite /></RoleGuard>} />
-            <Route path="/it-admin" element={<RoleGuard minRank={80}><ITAdmin /></RoleGuard>} />
+            <Route path="/enterprise" element={<RoleGuard minRank={95}><EnterpriseSuite /></RoleGuard>} />
+            <Route path="/it-admin" element={<RoleGuard minRank={85}><ITAdmin /></RoleGuard>} />
             <Route path="/training" element={<Training />} />
             <Route path="/holidays" element={<HolidayCalendar />} />
             <Route path="/announcements" element={<AnnouncementsPage />} />
+            <Route path="/inbox" element={<Inbox />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/onboarding" element={<RoleGuard minRank={85}><Onboarding /></RoleGuard>} />
             <Route path="/offboarding" element={<RoleGuard minRank={85}><Offboarding /></RoleGuard>} />

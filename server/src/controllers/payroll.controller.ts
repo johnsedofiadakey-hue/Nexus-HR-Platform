@@ -30,8 +30,20 @@ export const createRun = async (req: Request, res: Response) => {
 export const approveRun = async (req: Request, res: Response) => {
   try {
     const userReq = (req as any).user;
-    if (getRoleRank(userReq.role) < 90) {
-      return res.status(403).json({ error: 'Only MD can approve payroll runs' });
+    const currentRun = await prisma.payrollRun.findUnique({ where: { id: req.params.id } });
+    if (!currentRun) return res.status(404).json({ error: 'Run not found' });
+
+    const userRank = getRoleRank(userReq.role);
+    
+    // Authorization Matrix
+    if (currentRun.status === 'DRAFT' && userRank < 87) {
+       return res.status(403).json({ error: 'Requires Finance Manager rank to request review' });
+    }
+    if (currentRun.status === 'PENDING_HR' && userRank < 88) {
+       return res.status(403).json({ error: 'Requires HR Manager rank to approve HR review' });
+    }
+    if (currentRun.status === 'PENDING_MD' && userRank < 95) {
+       return res.status(403).json({ error: 'Requires Managing Director rank for final approval' });
     }
     const orgId = getOrgId(req);
     const organizationId = orgId || 'default-tenant';

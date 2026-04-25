@@ -215,6 +215,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, setIsCollapsed }: SidebarProps)
             <>
               <NavGroup label={t('common.personal')} isCollapsed={isCollapsed}>
                 <NavItem to="/dashboard" icon={LayoutDashboard} label={t('common.dashboard')} isCollapsed={isCollapsed} />
+                <NavItem to="/inbox" icon={Megaphone} label="Inbox" isCollapsed={isCollapsed} />
                 <NavItem to="/profile" icon={Users} label={t('common.profile')} isCollapsed={isCollapsed} />
                 <NavItem to="/attendance" icon={Clock} label={t('common.attendance')} isCollapsed={isCollapsed} />
                 <NavItem to="/leave" icon={Calendar} label={t('common.leave')} isCollapsed={isCollapsed} />
@@ -259,7 +260,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, setIsCollapsed }: SidebarProps)
               <NavGroup label={t('common.operations')} isCollapsed={isCollapsed}>
                 <NavItem to="/expenses" icon={Wallet} label={t('common.expenses')} isCollapsed={isCollapsed} />
                 <NavItem to="/assets" icon={Package} label={t('common.assets')} isCollapsed={isCollapsed} />
-                {user.role === 'IT_MANAGER' && (
+                {rank >= 85 && (
                   <NavItem to="/it-admin" icon={ShieldAlert} label={t('common.it_admin')} isCollapsed={isCollapsed} />
                 )}
                 <NavItem to="/support" icon={Briefcase} label={t('common.support')} isCollapsed={isCollapsed} />
@@ -273,10 +274,10 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, setIsCollapsed }: SidebarProps)
                 )}
               </NavGroup>
 
-              {rank >= 80 && (
+              {rank >= 87 && (
                 <NavGroup label={t('common.administration')} isCollapsed={isCollapsed}>
                   <NavItem to="/payroll" icon={DollarSign} label={t('common.payroll')} isCollapsed={isCollapsed} />
-                  {rank >= 90 && (
+                  {rank >= 95 && (
                     <>
                       <NavItem to="/settings" icon={Settings} label={t('common.admin_settings')} isCollapsed={isCollapsed} />
                       <NavItem to="/enterprise" icon={Zap} label={t('common.enterprise_suite')} isCollapsed={isCollapsed} />

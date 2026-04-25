@@ -13,7 +13,9 @@ import { getStoredUser, getRankFromRole } from '../utils/session';
 import { useTranslation } from 'react-i18next';
 
 const statusColors: Record<string, { badge: string; dot: string }> = {
-  DRAFT: { badge: 'bg-amber-500/10 text-amber-600 border-amber-500/20', dot: 'bg-amber-500' },
+  DRAFT: { badge: 'bg-slate-500/10 text-slate-600 border-slate-500/20', dot: 'bg-slate-500' },
+  PENDING_HR: { badge: 'bg-amber-500/10 text-amber-600 border-amber-500/20', dot: 'bg-amber-500' },
+  PENDING_MD: { badge: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20', dot: 'bg-indigo-500' },
   APPROVED: { badge: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', dot: 'bg-emerald-500' },
   PAID: { badge: 'bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/20', dot: 'bg-[var(--primary)]' },
   CANCELLED: { badge: 'bg-rose-500/10 text-rose-600 border-rose-500/20', dot: 'bg-rose-500' },
@@ -50,8 +52,11 @@ const Payroll = () => {
   const [form, setForm] = useState({ month: String(new Date().getMonth() + 1), year: String(currentYear) });
 
   const user = getStoredUser();
-  const isAdmin = getRankFromRole(user.role) >= 80;
-  const isMD = user.role === 'MD';
+  const rank = getRankFromRole(user.role);
+  const isAdmin = rank >= 87; // Finance Manager or above
+  const isFinance = rank >= 87;
+  const isHR = rank >= 88;
+  const isMD = rank >= 95;
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -434,16 +439,32 @@ const Payroll = () => {
                               <CreditCard size={20} className="group-hover:scale-110 transition-transform" />
                               <span className="text-[10px] font-black uppercase tracking-widest">{t('payroll.bank_transfer', 'Bank Batch')}</span>
                             </button>
-                           {isMD && (
-                             <div className="flex items-center gap-3">
-                               {selectedRun.status === 'DRAFT' && (
+                           <div className="flex items-center gap-3">
+                               {selectedRun.status === 'DRAFT' && isFinance && (
+                                 <button 
+                                  onClick={() => handleApprove(selectedRun.id)}
+                                  className="px-8 h-[52px] rounded-2xl bg-amber-600 text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-amber-600/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                 >
+                                   Request HR Review
+                                 </button>
+                               )}
+                               {selectedRun.status === 'PENDING_HR' && isHR && (
+                                 <button 
+                                  onClick={() => handleApprove(selectedRun.id)}
+                                  className="px-8 h-[52px] rounded-2xl bg-indigo-600 text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-600/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                 >
+                                   Approve & Send to MD
+                                 </button>
+                               )}
+                               {selectedRun.status === 'PENDING_MD' && isMD && (
                                  <button 
                                   onClick={() => handleApprove(selectedRun.id)}
                                   className="px-8 h-[52px] rounded-2xl bg-emerald-600 text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-600/20 hover:scale-[1.02] active:scale-95 transition-all"
                                  >
-                                   {t('payroll.authorize')}
+                                   Final MD Authorization
                                  </button>
                                )}
+
                                {selectedRun.status !== 'PAID' && (
                                  <button 
                                   onClick={() => handleDelete(selectedRun.id)}
@@ -454,7 +475,6 @@ const Payroll = () => {
                                  </button>
                                )}
                              </div>
-                           )}
                         </div>
                       </div>
 
@@ -519,7 +539,7 @@ const Payroll = () => {
                                        <td className="text-[14px] font-black text-[var(--text-primary)]" data-label={t('payroll.headers.net_payout')}>{fmt(item.netPay, item.currency, i18n.language)}</td>
                                        <td className="text-right px-8" data-label={t('payroll.headers.action')}>
                                           <div className="flex justify-end gap-2 pr-2">
-                                            {selectedRun.status === 'DRAFT' && isMD && (
+                                            {selectedRun.status === 'DRAFT' && (isFinance || isHR || isMD) && (
                                               !isEditing ? (
                                                 <button onClick={() => startEditItem(item)} className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--bg-elevated)]/50 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--bg-card)] border border-transparent hover:border-[var(--border-subtle)] transition-all"><Edit2 size={13} /></button>
                                               ) : (
