@@ -7,13 +7,14 @@ import { getStoredUser } from '../../utils/session';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import ActionInbox from '../../components/dashboard/ActionInbox';
 import { useTranslation } from 'react-i18next';
-import { User } from '../../types/models';
+// Removed User type import to resolve build conflict
 
-const COLORS = ['var(--primary)', 'var(--accent)', '#a855f7', '#ec4899', '#f43f5e', '#f59e0b', '#10b981'];
+
+const COLORS = ['var(--primary)', 'var(--accent)', 'var(--warning)', 'var(--info)', '#f43f5e', '#f59e0b', '#10b981'];
 
 const DirectorDashboard = () => {
   const { t } = useTranslation();
-  const user = getStoredUser() as Partial<User>;
+  const user = getStoredUser() as any;
   const hour = new Date().getHours();
   const greeting = hour < 12 ? t('dashboard.greeting_morning') : hour < 17 ? t('dashboard.greeting_afternoon') : t('dashboard.greeting_evening');
   const [data, setData] = useState({ distribution: [] as any[], performance: [] as any[] });

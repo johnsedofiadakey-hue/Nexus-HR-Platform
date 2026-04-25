@@ -7,13 +7,14 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import { getStoredUser } from '../../utils/session';
-import { User } from '../../types/models';
 import ActionInbox from '../../components/dashboard/ActionInbox';
 import { useTranslation } from 'react-i18next';
+// Removed User type import to resolve build conflict
+
 
 const ManagerDashboard = () => {
   const { t } = useTranslation();
-  const user = getStoredUser() as Partial<User>;
+  const user = getStoredUser() as any;
   const [stats, setStats] = useState({ teamSize: 0, pendingReviews: 0, teamPerf: 88, openLeaves: 0 });
   const [loading, setLoading] = useState(true);
   const hour = new Date().getHours();
