@@ -341,12 +341,14 @@ export const updateSettings = async (
   broadcastToAll({ type: 'SETTINGS_UPDATED', organizationId });
 
   // Cloud Sync: Push branding metadata to Firestore for Zero-Flicker Identity Sync
-  try {
-    const { firestoreService } = await import('./firestore.service');
-    await firestoreService.syncBranding(organizationId, newSettings);
-  } catch (syncError) {
-    console.warn('[SettingsService] Cloud branding sync background failure:', syncError);
-  }
+  // We don't await this to avoid blocking the main settings update if Firebase is slow
+  import('./firestore.service').then(({ firestoreService }) => {
+    firestoreService.syncBranding(organizationId, newSettings).catch(err => {
+      console.warn('[SettingsService] Deferred cloud branding sync failure:', err);
+    });
+  }).catch(importErr => {
+    console.warn('[SettingsService] Could not import firestore service for deferred sync:', importErr);
+  });
 
   return newSettings;
 };

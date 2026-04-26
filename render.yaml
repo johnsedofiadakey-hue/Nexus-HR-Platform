@@ -15,7 +15,7 @@ services:
       npm install --no-audit --no-fund &&
       npx prisma generate &&
       npx tsc
-    startCommand: cd server && npx prisma db push && npx ts-node --transpile-only src/scripts/force_sync.ts && npx ts-node --transpile-only src/scripts/create_tenants.ts && node --max-old-space-size=4096 dist/app.js
+    startCommand: cd server && npx prisma db push && node dist/scripts/force_sync.js && node dist/scripts/create_tenants.js && node --max-old-space-size=448 dist/app.js
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL

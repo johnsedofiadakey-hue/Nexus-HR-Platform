@@ -125,12 +125,22 @@ Always refer to the user by name if appropriate and make them feel like they are
     const MAX_ITERATIONS = 5;
 
     // Iterate until AI stops calling functions or we hit limit
+    const loopStartTime = Date.now();
     while (calls && calls.length > 0 && iterationCount < MAX_ITERATIONS) {
       iterationCount++;
+      
+      // Safety: Total tool loop timeout (15s)
+      if (Date.now() - loopStartTime > 15000) {
+        console.warn('[Cortex Agent] Maximum tool execution time exceeded. Terminating loop.');
+        break;
+      }
+
       const toolResults = await Promise.all(
         calls.map(async (call) => {
+          const toolStart = Date.now();
           try {
             const data = await executeTool(call.name, call.args, user);
+            console.log(`[Cortex Agent] Tool ${call.name} completed in ${Date.now() - toolStart}ms`);
             return {
               functionResponse: {
                 name: call.name,
@@ -138,7 +148,7 @@ Always refer to the user by name if appropriate and make them feel like they are
               }
             };
           } catch (error: any) {
-            console.error(`[Cortex Tool Error] ${call.name}:`, error.message);
+            console.error(`[Cortex Tool Error] ${call.name} (${Date.now() - toolStart}ms):`, error.message);
             return {
               functionResponse: {
                 name: call.name,
