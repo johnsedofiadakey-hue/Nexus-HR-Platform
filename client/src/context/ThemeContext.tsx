@@ -207,6 +207,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ['text-muted', settingsToUse.textMuted],
       ['text-inverse', settingsToUse.textInverse || (getLuminosity(settingsToUse.primaryColor || '#000000') > 0.6 ? 'rgba(0,0,0,0.85)' : '#ffffff')],
       ['bg-sidebar', settingsToUse.sidebarBg],
+      ['growth', settingsToUse.secondaryColor || settingsToUse.primaryColor],
+      ['growth-light', hexToRgb(settingsToUse.secondaryColor || settingsToUse.primaryColor || '')],
       ['sidebarActive', settingsToUse.sidebarActive],
       ['sidebarText', settingsToUse.sidebarText],
       ['success', settingsToUse.successColor || '#10b981'],

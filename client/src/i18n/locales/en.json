@@ -1164,9 +1164,30 @@
     "status": "Status",
     "start_date": "Start Date"
   },
-  "cycle_management": {
+  "cycles": {
     "title": "Review Cycles",
-    "subtitle": "Manage performance review periods",
+    "description": "Manage performance review periods and organizational assessments.",
+    "add_new": "Add New Cycle",
+    "notice_title": "Cycle Governance Notice",
+    "notice_desc": "Review cycles determine the performance assessment window for all eligible employees.",
+    "system_reset_title": "Full System Reset",
+    "delete_warning": "Warning: This will permanently delete all records. Cannot be undone.",
+    "no_sessions": "No active review sessions found",
+    "deployment_success": "Appraisal packets deployed successfully.",
+    "initiate_confirm": "Start organisational review? This will generate appraisal forms for all eligible staff.",
+    "sync_confirm": "Synchronize participants? This will identify new staff and generate missing forms.",
+    "launch_reviews": "Launch Reviews",
+    "sync_participants": "Sync Participants",
+    "indicators": {
+      "real_time": "Real-time Progress Monitoring",
+      "status": "Phase Status"
+    },
+    "headers": {
+      "cycle_name": "Cycle Name",
+      "period": "Period",
+      "progress": "Progress",
+      "status": "Status"
+    },
     "create_cycle": "Add Cycle",
     "cycle_name": "Cycle Name",
     "start_date": "Start Date",
